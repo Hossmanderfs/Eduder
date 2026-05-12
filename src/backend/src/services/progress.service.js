@@ -1,6 +1,5 @@
 // src/services/progress.service.js
 const { v4: uuidv4 } = require('uuid');
-const { Op }         = require('sequelize');
 const {
   ProgresoLeccion,
   Leccion,
@@ -10,12 +9,10 @@ const {
   Notificacion,
 } = require('../models');
 
-/**
- * Actualiza (o crea) el progreso de un estudiante en una lección.
- * Params: id_leccion
- * Body:   { estado, puntaje }
- * El id_usuario viene del JWT.
- */
+// ── CU-03 | RF-09 | E12 - registrar() / actualizarEstado() ──────────────────
+// Crea o actualiza el registro de progreso de un estudiante en una lección.
+// Transición de estados unidireccional: NO_INICIADA → EN_PROGRESO → COMPLETADA.
+// Al completar, delega el cálculo de XP, streak y medallas a actualizarPerfil().
 async function updateProgress(id_leccion, body, id_usuario) {
   const { estado, puntaje } = body;
 
@@ -25,6 +22,8 @@ async function updateProgress(id_leccion, body, id_usuario) {
     err.status = 400;
     throw err;
   }
+
+  // RF-09: puntaje válido entre 0 y 100 (CHECK constraint del DDL)
   if (puntaje !== undefined && (puntaje < 0 || puntaje > 100)) {
     const err = new Error('puntaje debe estar entre 0 y 100');
     err.status = 400;
@@ -38,14 +37,13 @@ async function updateProgress(id_leccion, body, id_usuario) {
     throw err;
   }
 
-  // Buscar progreso existente
   let progreso = await ProgresoLeccion.findOne({ where: { id_usuario, id_leccion } });
 
   const ahora = new Date();
   const datos  = {};
 
-  if (estado)   datos.estado   = estado;
-  if (puntaje !== undefined) datos.puntaje = puntaje;
+  if (estado)               datos.estado   = estado;
+  if (puntaje !== undefined) datos.puntaje  = puntaje;
   if (estado === 'completada') datos.fecha_completado = ahora;
 
   if (progreso) {
@@ -60,7 +58,7 @@ async function updateProgress(id_leccion, body, id_usuario) {
     });
   }
 
-  // ── Actualizar perfil si se completó ─────────────────────────────────────
+  // RF-12: al completar, calcular XP y actualizar perfil del estudiante
   if (estado === 'completada' && datos.puntaje >= 0) {
     const xp_ganado = Math.round(leccion.xp_base * (datos.puntaje / 100));
     await actualizarPerfil(id_usuario, xp_ganado, leccion, ahora);
@@ -69,15 +67,21 @@ async function updateProgress(id_leccion, body, id_usuario) {
   return progreso;
 }
 
+// ── CU-03 | RF-12, RF-13 | E12 - sumarXP() / calcularStreak() ───────────────
+// Suma el XP ganado al perfil del estudiante y recalcula el streak.
+// Si la última actividad fue ayer → streak + 1.
+// Si fue hoy → streak sin cambio.
+// Si fue antes de ayer → streak reinicia a 1 (RF-13).
 async function actualizarPerfil(id_usuario, xp_ganado, leccion, ahora) {
   const perfil = await PerfilEstudiante.findOne({ where: { id_usuario } });
   if (!perfil) return;
 
-  const hoy            = ahora.toISOString().split('T')[0];
-  const ultimaAct      = perfil.ultima_actividad;
-  const esConsecutivo  = ultimaAct && diffDias(ultimaAct, hoy) === 1;
-  const mismodia       = ultimaAct && diffDias(ultimaAct, hoy) === 0;
+  const hoy           = ahora.toISOString().split('T')[0];
+  const ultimaAct     = perfil.ultima_actividad;
+  const esConsecutivo = ultimaAct && diffDias(ultimaAct, hoy) === 1;
+  const mismodia      = ultimaAct && diffDias(ultimaAct, hoy) === 0;
 
+  // RF-13: cálculo de racha de días consecutivos
   const nuevaRacha = mismodia
     ? perfil.streak_dias
     : esConsecutivo
@@ -85,19 +89,23 @@ async function actualizarPerfil(id_usuario, xp_ganado, leccion, ahora) {
     : 1;
 
   await perfil.update({
-    xp_total:        perfil.xp_total        + xp_ganado,
-    xp_semana_actual: perfil.xp_semana_actual + xp_ganado,
+    xp_total:         perfil.xp_total         + xp_ganado,
+    xp_semana_actual: perfil.xp_semana_actual  + xp_ganado,
     ultima_actividad: hoy,
     streak_dias:      nuevaRacha,
   });
 
-  // Evaluar y otorgar medallas
-  await evaluarMedallas(id_usuario, { ...perfil.dataValues, xp_total: perfil.xp_total + xp_ganado, streak_dias: nuevaRacha });
+  // RF-14, RF-15: evaluar medallas automáticamente al finalizar la lección
+  await evaluarMedallas(id_usuario, {
+    ...perfil.dataValues,
+    xp_total:    perfil.xp_total + xp_ganado,
+    streak_dias: nuevaRacha,
+  });
 }
 
-/**
- * Devuelve el resumen de progreso del usuario autenticado.
- */
+// ── CU-04 | RF-18 | E12 - obtenerResumen() ───────────────────────────────────
+// Devuelve el resumen completo del progreso del estudiante autenticado:
+// XP total, streak, XP semanal, conteo de lecciones y detalle por lección.
 async function getSummary(id_usuario) {
   const perfil = await PerfilEstudiante.findOne({ where: { id_usuario } });
 
@@ -106,15 +114,13 @@ async function getSummary(id_usuario) {
     include: [{ model: Leccion, as: 'leccion', attributes: ['id_leccion', 'titulo', 'id_nivel', 'xp_base'] }],
   });
 
-  const completadas   = progresos.filter(p => p.estado === 'completada').length;
-  const en_progreso   = progresos.filter(p => p.estado === 'en_progreso').length;
-  const xp_total      = perfil?.xp_total ?? 0;
-  const streak_dias   = perfil?.streak_dias ?? 0;
+  const completadas = progresos.filter(p => p.estado === 'completada').length;
+  const en_progreso = progresos.filter(p => p.estado === 'en_progreso').length;
 
   return {
-    xp_total,
-    streak_dias,
-    xp_semana_actual: perfil?.xp_semana_actual ?? 0,
+    xp_total:         perfil?.xp_total         ?? 0,
+    streak_dias:      perfil?.streak_dias       ?? 0,
+    xp_semana_actual: perfil?.xp_semana_actual  ?? 0,
     lecciones: {
       completadas,
       en_progreso,
@@ -124,10 +130,12 @@ async function getSummary(id_usuario) {
   };
 }
 
-// ── Medallas ──────────────────────────────────────────────────────────────────
-
+// ── CU-03 | RF-14, RF-15 | E12 - verificarCondicion() ───────────────────────
+// Evalúa cada medalla del catálogo contra el perfil actual del estudiante.
+// Las medallas se otorgan solo una vez por usuario (idempotente).
+// Crea una notificación de logro al otorgar una medalla.
 async function evaluarMedallas(id_usuario, perfil) {
-  const catalogo = await MedallaCatalogo.findAll();
+  const catalogo    = await MedallaCatalogo.findAll();
   const yaObtenidas = await MedallaUsuario.findAll({ where: { id_usuario }, attributes: ['id_medalla'] });
   const idsObtenidos = new Set(yaObtenidas.map(m => m.id_medalla));
 
@@ -142,7 +150,6 @@ async function evaluarMedallas(id_usuario, perfil) {
       case 'streak':
         cumple = perfil.streak_dias >= medalla.condicion_valor;
         break;
-      // nivel_completado y puntaje_perfecto se evalúan en contexto específico
       default:
         break;
     }
@@ -153,18 +160,18 @@ async function evaluarMedallas(id_usuario, perfil) {
         id_usuario,
         id_medalla: medalla.id_medalla,
       });
-      // Notificación de logro
+      // RF-16: notificación de logro al obtener medalla
       await Notificacion.create({
         id_notificacion: uuidv4(),
         id_usuario,
-        tipo: 'logro',
+        tipo:    'logro',
         mensaje: `🏅 ¡Obtuviste la medalla "${medalla.nombre}"!`,
       });
     }
   }
 }
 
-// ── Util ──────────────────────────────────────────────────────────────────────
+// ── util ──────────────────────────────────────────────────────────────────────
 function diffDias(fecha1, fecha2) {
   const d1 = new Date(fecha1);
   const d2 = new Date(fecha2);

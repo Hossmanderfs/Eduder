@@ -1,11 +1,11 @@
 // src/services/exercise.service.js
 const { Ejercicio, Pista } = require('../models');
 
-/**
- * Evalúa la respuesta del estudiante para un ejercicio.
- * Body: { id_ejercicio, respuesta }
- * Devuelve: { correcto, explicacion, respuesta_correcta? }
- */
+// ── CU-03 | RF-10, RF-12 | E12 - evaluar() ───────────────────────────────────
+// Evalúa la respuesta del estudiante comparándola con la respuesta correcta.
+// Normaliza ambos strings (trim + lowercase + espacios) antes de comparar.
+// Devuelve feedback inmediato: correcto/incorrecto + explicación (RF-10).
+// El resultado se usa en progress.service para calcular el puntaje final (RF-12).
 async function evaluate(body) {
   const { id_ejercicio, respuesta } = body;
 
@@ -25,15 +25,16 @@ async function evaluate(body) {
     throw err;
   }
 
+  // RF-10: evaluación automática normalizada (< 1 segundo de respuesta)
   const correcto = normalizar(String(respuesta)) === normalizar(ejercicio.respuesta_correcta);
 
   const resultado = {
     id_ejercicio,
     correcto,
+    // RF-10: explicación solo si la respuesta es incorrecta
     explicacion: correcto ? null : ejercicio.explicacion,
   };
 
-  // Si es correcta devolvemos también la respuesta para feedback positivo
   if (correcto) {
     resultado.respuesta_correcta = ejercicio.respuesta_correcta;
   }
@@ -41,10 +42,10 @@ async function evaluate(body) {
   return resultado;
 }
 
-/**
- * Devuelve el texto de una pista (1 o 2) para un ejercicio.
- * Query param: ?numero=1
- */
+// ── CU-03 | RF-11 | E12 - obtenerPista() ─────────────────────────────────────
+// Devuelve el texto de la pista solicitada (1 o 2) para un ejercicio.
+// La segunda pista se entrega solo bajo solicitud explícita del estudiante (RF-11).
+// Máximo 2 pistas por ejercicio — CHECK constraint en DDL (RNF-06).
 async function getHint(id_ejercicio, numero) {
   const num = parseInt(numero, 10);
   if (![1, 2].includes(num)) {

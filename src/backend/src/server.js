@@ -20,6 +20,7 @@ app.use('/progress',     require('./routes/progress.routes'));
 app.use('/profile',      require('./routes/profile.routes'));
 app.use('/gamification', require('./routes/gamification.routes'));
 app.use('/admin',        require('./routes/admin.routes'));
+app.use('/types',        require('./routes/tipo.routes'));   // FK → TIPO_LECCION (panel admin)
 
 // ── Health check ────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', project: 'EduDer' }));

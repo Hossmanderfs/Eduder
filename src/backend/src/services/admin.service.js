@@ -1,5 +1,5 @@
 // src/services/admin.service.js
-const { Op, fn, col, literal } = require('sequelize');
+const { fn, col } = require('sequelize');
 const {
   Usuario,
   PerfilEstudiante,
@@ -8,10 +8,9 @@ const {
   Nivel,
 } = require('../models');
 
-/**
- * Lista todos los usuarios con su perfil.
- * Soporta ?rol=estudiante|admin  y  ?estado=true|false
- */
+// ── CU-06 | RF-21 | E12 - Gestión de Usuarios (Administrador) ────────────────
+// Lista todos los usuarios con su perfil de estudiante.
+// Soporta filtros por rol (?rol=estudiante|admin) y estado (?estado=true|false).
 async function getUsers(query) {
   const where = {};
   if (query.rol)    where.id_rol = query.rol;
@@ -27,9 +26,27 @@ async function getUsers(query) {
   return usuarios;
 }
 
-/**
- * Actualiza campos de un usuario: estado, id_rol.
- */
+// ── CU-06 | RF-21 | E12 - Gestión de Usuarios (Administrador) ────────────────
+// Busca un usuario por correo institucional y devuelve nombre, estado,
+// nivel actual y fecha de registro (RF-21).
+async function getUserByEmail(correo) {
+  const usuario = await Usuario.findOne({
+    where: { correo_institucional: correo },
+    attributes: { exclude: ['contrasena_hash'] },
+    include: [{ model: PerfilEstudiante, as: 'perfil' }],
+  });
+  if (!usuario) {
+    const err = new Error('Usuario no encontrado');
+    err.status = 404;
+    throw err;
+  }
+  return usuario;
+}
+
+// ── CU-06 | RF-20 | E12 - Gestión de Usuarios (Administrador) ────────────────
+// Actualiza estado, rol, nombre o apellido de un usuario.
+// Al desactivar (estado=false), las sesiones JWT activas se invalidan
+// porque el middleware verifica estado en cada request (RF-20).
 async function updateUser(id, body) {
   const usuario = await Usuario.findByPk(id, { attributes: { exclude: ['contrasena_hash'] } });
   if (!usuario) {
@@ -39,9 +56,9 @@ async function updateUser(id, body) {
   }
 
   const camposPermitidos = {};
-  if (body.estado  !== undefined) camposPermitidos.estado  = body.estado;
-  if (body.id_rol  !== undefined) camposPermitidos.id_rol  = body.id_rol;
-  if (body.nombre  !== undefined) camposPermitidos.nombre  = body.nombre;
+  if (body.estado   !== undefined) camposPermitidos.estado   = body.estado;
+  if (body.id_rol   !== undefined) camposPermitidos.id_rol   = body.id_rol;
+  if (body.nombre   !== undefined) camposPermitidos.nombre   = body.nombre;
   if (body.apellido !== undefined) camposPermitidos.apellido = body.apellido;
 
   if (Object.keys(camposPermitidos).length === 0) {
@@ -54,9 +71,9 @@ async function updateUser(id, body) {
   return usuario;
 }
 
-/**
- * Métricas generales de la plataforma.
- */
+// ── CU-06 | RF-22 | E12 - Gestión de Usuarios (Administrador) ────────────────
+// Devuelve KPIs del sistema: usuarios activos, lecciones completadas,
+// promedio de XP, nuevos registros en los últimos 7 días (RF-22).
 async function getMetrics() {
   const [totalUsuarios, totalActivos, totalLecciones, totalNiveles] = await Promise.all([
     Usuario.count(),
@@ -68,15 +85,16 @@ async function getMetrics() {
   const completadas = await ProgresoLeccion.count({ where: { estado: 'completada' } });
   const enProgreso  = await ProgresoLeccion.count({ where: { estado: 'en_progreso' } });
 
-  // XP promedio entre estudiantes activos
+  // RF-22: XP promedio entre todos los estudiantes
   const xpResult = await PerfilEstudiante.findOne({
     attributes: [[fn('AVG', col('xp_total')), 'xp_promedio']],
     raw: true,
   });
   const xp_promedio = Math.round(parseFloat(xpResult?.xp_promedio) || 0);
 
-  // Registros últimos 7 días
+  // RF-22: nuevos registros última semana
   const hace7dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const { Op }    = require('sequelize');
   const nuevosUsuarios = await Usuario.count({
     where: { fecha_registro: { [Op.gte]: hace7dias } },
   });
@@ -84,9 +102,9 @@ async function getMetrics() {
   return {
     usuarios: { total: totalUsuarios, activos: totalActivos, nuevos_ultima_semana: nuevosUsuarios },
     contenido: { niveles: totalNiveles, lecciones: totalLecciones },
-    progreso: { completadas, en_progreso: enProgreso },
+    progreso:  { completadas, en_progreso: enProgreso },
     xp_promedio,
   };
 }
 
-module.exports = { getUsers, updateUser, getMetrics };
+module.exports = { getUsers, getUserByEmail, updateUser, getMetrics };
