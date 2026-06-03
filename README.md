@@ -37,6 +37,50 @@ proyecto-[nombre]-[apellido]/
 ```
 
 ---
+## Requisitos del readme para la última entrega
+## 1. ¿Qué módulo implementas?
+
+Módulo de **Aprendizaje Gamificado de Lógica Matemática**. Cubre el ciclo completo del estudiante: autenticación con correo institucional, navegación por niveles secuenciales, realización de lecciones con ejercicios interactivos, evaluación automática de respuestas, sistema de XP y streaks, medallas por logros y ranking semanal por nivel. Incluye también el módulo de administración (gestión de usuarios, niveles y lecciones, métricas del sistema).
+
+---
+
+## 2. ¿Qué tablas cubre tu módulo?
+
+| Tabla | Tipo | Descripción |
+|---|---|---|
+| `USUARIO` | Maestra | Estudiantes y administradores del sistema |
+| `ROL` | Maestra | Roles del sistema (estudiante, admin) |
+| `PERFIL_ESTUDIANTE` | Maestra | XP, streak y nivel actual por usuario |
+| `NIVEL` | Maestra | Niveles del camino de aprendizaje |
+| `TIPO_LECCION` | Maestra | Tipos de lección (teoría, ejercicio, mini-juego) |
+| `LECCION` | Transaccional | Lecciones por nivel con FK a NIVEL y TIPO_LECCION |
+| `CONTENIDO_LECCION` | Transaccional | Bloques de contenido teórico por lección |
+| `EJERCICIO` | Transaccional | Ejercicios por lección con respuesta correcta |
+| `PISTA` | Transaccional | Pistas bajo demanda por ejercicio (máx. 2) |
+| `PROGRESO_LECCION` | Transaccional | Estado y puntaje del estudiante por lección |
+| `MEDALLA_CATALOGO` | Maestra | Catálogo de medallas con condición de obtención |
+| `MEDALLA_USUARIO` | Transaccional | Medallas obtenidas por usuario |
+| `RANKING_SEMANAL` | Transaccional | XP semanal por usuario y nivel |
+| `NOTIFICACION` | Transaccional | Notificaciones de logro al obtener medallas |
+| `TOKEN_RECUPERACION` | Transaccional | Tokens de recuperación de contraseña (30 min) |
+
+---
+
+## 3. ¿Qué framework elegiste y por qué?
+
+**Backend:** Node.js con Express y Sequelize (ORM) sobre MySQL.
+
+Se eligió porque el sistema requiere responder evaluaciones en menos de 1 segundo (RNF-02) y soportar 5.000 usuarios concurrentes (RNF-04). El modelo asíncrono no bloqueante de Node.js es idóneo para cargas de I/O concurrentes como las que genera una app educativa. Sequelize mapea directamente los 15 modelos del diagrama de clases (E12) a la base de datos normalizada. Ver decisión técnica completa en [DECISIONES.md](./DECISIONES.md#decisión-01).
+
+**Frontend móvil:** React Native CLI.
+
+Permite compilar una sola base de código para Android e iOS (RNF-05), con acceso a APIs nativas como AsyncStorage para persistencia de sesión y notificaciones push. La comunidad activa y la compatibilidad con el ecosistema JavaScript del backend reducen la curva de aprendizaje del equipo.
+
+**Panel de administración:** HTML/CSS/JS vanilla (single-file).
+
+Consumido directamente por el administrador en el navegador sin requerir proceso de build, conectado al mismo backend mediante fetch + JWT.
+
+---
 
 ##  Alcance del MVP
 
@@ -85,13 +129,29 @@ npm run dev                 # corre en http://localhost:3000
 ```
 
 ### App Móvil (React Native)
+
 ```bash
 cd src/mobile
 npm install
-npm start                   # Metro bundler
+npm start           # Metro bundler — dejar corriendo
+
 # En otra terminal:
-npm run android             # o npm run ios
+npm run android     # emulador Android
+# o
+npm run ios         # simulador iOS (solo macOS)
 ```
+
+> La app se conecta a `http://10.0.2.2:3000` desde el emulador Android (equivale a `localhost` del PC). Para dispositivo físico, cambiar la URL en `src/mobile/src/services/api.js`.
+
+### Panel de Administración
+
+Abrir directamente en el navegador:
+```
+src/admin/index.html
+```
+Requiere que el backend esté corriendo. Ingresar con una cuenta de rol `admin`.
+
+---
 
 ### Estructura de `src/`
 ```
