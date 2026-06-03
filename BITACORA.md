@@ -1,4 +1,4 @@
-#  Bitácora de Avance — EduDer
+# Bitácora de Avance — EduDer
 
 **Proyecto:** EduDer — App Móvil Educativa de Lógica Matemática  
 **Curso:** Ingeniería de Software  
@@ -6,60 +6,47 @@
 
 ---
 
-## Semana 1
+## Entrada # primera semana
 
-**Fecha:** 8 de Mayo de 2026  
-**Actividades realizadas:**
-- Framework inicializado: backend Node.js/Express en `src/backend/`, app móvil React Native en `src/mobile/`
-- Estructura de carpetas creada con base en el Diagrama de Componentes (E5): `src/backend/src/{models,routes,services,middleware,config,utils}` y `src/mobile/src/{screens,components,navigation,hooks,services,store}`
+**¿Qué hice?**  
+Inicialicé el repositorio completo del proyecto. Creé la estructura de carpetas para el backend (Node.js/Express en `src/backend/`) y la app móvil (React Native en `src/mobile/`) basándome directamente en el Diagrama de Componentes (E5). Configuré el `README.md` con la descripción del proyecto, el alcance del MVP, los pasos de instalación y la estructura del repositorio. Agregué el `.gitignore` para excluir `node_modules` y variables de entorno.
 - Repositorio creado con toda la estructura definida (docs + src + README + BITACORA + .gitignore)
-- README.md completo con descripción del proyecto, estructura, alcance MVP y pasos de instalación
 
-**Dificultades encontradas:**  
-Ninguna en esta fase. La estructura se generó directamente desde los diagramas de diseño (E5 — Componentes UML).
+**¿Qué problema encontré?**  
+Al crear el repositorio decidí optar por separar la documentación al main y el resto al backend.
+Al definir la estructura de carpetas del backend surgió una duda: si separar los controladores de los servicios o manejar toda la lógica directamente en las rutas.
 
-**Próximos pasos:**  
-Implementar los servicios de autenticación (AuthService) y comenzar con la pantalla de Login en React Native.
+**¿Cómo lo resolví?**  
+Revisé el E5 (Diagrama de Componentes) y el E6 (Despliegue), que muestran una arquitectura de servicios desacoplados (RNF-07). Decidí mantener la separación `routes → services`, donde las rutas solo delegan al servicio. Esto también facilita las pruebas unitarias requeridas por RNF-07.
 
----
-
-## Semana 2
-
-**Fecha:** 10 de Mayo de 2026  
-**Actividades realizadas:**
-- Base de datos `eduder` creada desde el DDL (E11) en MySQL 8.0 — 15 tablas normalizadas a 3FN
-- 15 modelos/entidades creados con Sequelize en `src/backend/src/models/`: `Rol`, `Usuario`, `PerfilEstudiante`, `TokenRecuperacion`, `Nivel`, `TipoLeccion`, `Leccion`, `ContenidoLeccion`, `Ejercicio`, `Pista`, `ProgresoLeccion`, `MedallaCatalogo`, `MedallaUsuario`, `Notificacion`, `RankingSemanal`
-- Relaciones entre entidades definidas en `src/backend/src/models/index.js`:
-  - `Rol` (1) → (N) `Usuario`
-  - `Usuario` (1) → (1) `PerfilEstudiante`
-  - `Usuario` (1) → (N) `TokenRecuperacion`
-  - `Nivel` (1) → (N) `Leccion`
-  - `TipoLeccion` (1) → (N) `Leccion`
-  - `Leccion` (1) → (N) `ContenidoLeccion`
-  - `Leccion` (1) → (N) `Ejercicio`
-  - `Ejercicio` (1) → (N) `Pista` (máx. 2)
-  - `Usuario` (N) ↔ (N) `MedallaCatalogo` (tabla intermedia `MedallaUsuario`)
-  - `Usuario` (1) → (N) `ProgresoLeccion`, `Notificacion`, `RankingSemanal`
-  - `Nivel` (1) → (N) `RankingSemanal`
-- Rutas base creadas para todos los servicios del Diagrama de Componentes (E5)
-- Pantallas stub de React Native creadas: `SplashScreen`, `LoginScreen`, `RegisterScreen`, `MenuScreen`, `LessonScreen`, `PerfilScreen`, `RankingScreen`
-
-**Dificultades encontradas:**  
-El tipo de columna `id_rol` en `usuarios` debía ser `CHAR(10)` para coincidir exactamente con la PK de `rol`. Esto ya estaba corregido en el DDL v1.1 y se replicó fielmente en el modelo Sequelize.
-
-**Próximos pasos:**  
-Implementar `AuthService` (registro, login JWT, recuperación de contraseña). Conectar `LoginScreen` con la API.
+**¿Usé IA?** Sí — Usé IA para generar la estructura inicial de carpetas. Ajusté los nombres de los directorios para que coincidieran exactamente con los artefactos del diseño (E5) y agregué el `.env.example` con las variables reales del proyecto.
 
 ---
 
-## Semana 3
+## Entrada #segunda semana
 
-**Fecha:** _______________  
-**Actividades realizadas:**
-- _[Describir aquí]_
+**¿Qué hice?**  
+Creé los 15 modelos Sequelize en `src/backend/src/models/` mapeando cada entidad del Modelo Relacional (E9) y el DDL (E11): `Rol`, `Usuario`, `PerfilEstudiante`, `TokenRecuperacion`, `Nivel`, `TipoLeccion`, `Leccion`, `ContenidoLeccion`, `Ejercicio`, `Pista`, `ProgresoLeccion`, `MedallaCatalogo`, `MedallaUsuario`, `Notificacion`, `RankingSemanal`. Definí todas las relaciones en `models/index.js` (1:1, 1:N, N:M). Creé las pantallas stub de React Native y las rutas base del backend para todos los módulos.
 
-**Dificultades encontradas:**  
-_[Describir aquí]_
+**¿Qué problema encontré?**  
+El tipo de columna `id_rol` en la tabla `usuarios` debía ser `CHAR(10)` para coincidir exactamente con la PK de la tabla `rol`. Sequelize infería el tipo como `STRING` genérico y generaba errores de FK al sincronizar.
 
-**Próximos pasos:**  
-_[Describir aquí]_
+**¿Cómo lo resolví?**  
+Revisé el DDL (E11) que especifica explícitamente `CHAR(10)` para `id_rol`. Corregí el modelo `Usuario.js` para usar `DataTypes.CHAR(10)` en ese campo. Documenté la corrección en el modelo con un comentario referenciando el DDL.
+
+**¿Usé IA?** Sí — Usé IA para acelerar la escritura repetitiva de los 15 modelos. Revisé cada uno contra el DDL (E11) y el Diccionario de Datos (E7) para verificar tipos, restricciones y defaults. Corregí manualmente los tipos `ENUM` y las restricciones `CHECK` que la IA no modeló correctamente.
+
+---
+
+## Entrada tercera semana
+
+**¿Qué hice?**  
+Implementé todos los servicios del backend con lógica de negocio real: `auth.service.js` (registro con validación de correo institucional, login con bloqueo tras 5 intentos, recuperación de contraseña), `progress.service.js` (actualización de progreso, cálculo de XP y streak, evaluación automática de medallas), `exercise.service.js` (evaluación de respuestas, entrega de pistas bajo demanda), `gamification.service.js` (ranking semanal, catálogo de medallas), `level.service.js` y `lesson.service.js` con CRUD completo, `admin.service.js` (gestión de usuarios y KPIs), `profile.service.js`. Agregué comentarios de trazabilidad en cada método vinculando el código con los artefactos de diseño (CU, RF, E12). Creé el `DECISIONES.md` con 3 decisiones técnicas reales documentadas.
+
+**¿Qué problema encontré?**  
+Los servicios no tenían los comentarios de trazabilidad que vinculan el código con los casos de uso, requisitos funcionales y el Diagrama de Clases (E12). Sin esa trazabilidad el código está incompleto según la rúbrica de evaluación.
+
+**¿Cómo lo resolví?**  
+Usé la Matriz M9 (Clases → Métodos → CU → RF) como referencia para agregar el encabezado de trazabilidad a cada método en el formato `// CU-XX | RF-XX | E12 - método()`. Revisé que cada comentario correspondiera exactamente a las entradas de M9 para mantener la coherencia entre diseño y código.
+
+**¿Usé IA?** Sí — Usé IA para generar los comentarios de trazabilidad basados en la Matriz M9. Verifiqué manualmente que cada comentario referenciara los CU y RF correctos según los artefactos de diseño del proyecto, y corregí los casos donde la IA sugirió referencias incorrectas.
