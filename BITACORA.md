@@ -27,22 +27,6 @@ Revisé el E5 (Diagrama de Componentes) y el E6 (Despliegue), que muestran una a
 
 **¿Qué hice?**  
 Creé los 15 modelos Sequelize en `src/backend/src/models/` mapeando cada entidad del Modelo Relacional (E9) y el DDL (E11): `Rol`, `Usuario`, `PerfilEstudiante`, `TokenRecuperacion`, `Nivel`, `TipoLeccion`, `Leccion`, `ContenidoLeccion`, `Ejercicio`, `Pista`, `ProgresoLeccion`, `MedallaCatalogo`, `MedallaUsuario`, `Notificacion`, `RankingSemanal`. Definí todas las relaciones en `models/index.js` (1:1, 1:N, N:M). Creé las pantallas stub de React Native y las rutas base del backend para todos los módulos.
-- Base de datos `eduder` creada desde el DDL (E11) en MySQL 8.0 — 15 tablas normalizadas a 3FN
-- 15 modelos/entidades creados con Sequelize en `src/backend/src/models/`: `Rol`, `Usuario`, `PerfilEstudiante`, `TokenRecuperacion`, `Nivel`, `TipoLeccion`, `Leccion`, `ContenidoLeccion`, `Ejercicio`, `Pista`, `ProgresoLeccion`, `MedallaCatalogo`, `MedallaUsuario`, `Notificacion`, `RankingSemanal`
-- Relaciones entre entidades definidas en `src/backend/src/models/index.js`:
-  - `Rol` (1) → (N) `Usuario`
-  - `Usuario` (1) → (1) `PerfilEstudiante`
-  - `Usuario` (1) → (N) `TokenRecuperacion`
-  - `Nivel` (1) → (N) `Leccion`
-  - `TipoLeccion` (1) → (N) `Leccion`
-  - `Leccion` (1) → (N) `ContenidoLeccion`
-  - `Leccion` (1) → (N) `Ejercicio`
-  - `Ejercicio` (1) → (N) `Pista` (máx. 2)
-  - `Usuario` (N) ↔ (N) `MedallaCatalogo` (tabla intermedia `MedallaUsuario`)
-  - `Usuario` (1) → (N) `ProgresoLeccion`, `Notificacion`, `RankingSemanal`
-  - `Nivel` (1) → (N) `RankingSemanal`
-- Rutas base creadas para todos los servicios del Diagrama de Componentes (E5)
-- Pantallas stub de React Native creadas: `SplashScreen`, `LoginScreen`, `RegisterScreen`, `MenuScreen`, `LessonScreen`, `PerfilScreen`, `RankingScreen`
 
 **¿Qué problema encontré?**  
 El tipo de columna `id_rol` en la tabla `usuarios` debía ser `CHAR(10)` para coincidir exactamente con la PK de la tabla `rol`. Sequelize infería el tipo como `STRING` genérico y generaba errores de FK al sincronizar.

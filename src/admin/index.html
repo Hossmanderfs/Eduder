@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EduDer — Panel Admin</title>
+<style>
+  /* ── Reset & Variables ──────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --indigo:     #4F46E5;
+    --indigo-l:   #EEF2FF;
+    --indigo-d:   #3730A3;
+    --surface:    #FFFFFF;
+    --bg:         #F5F6FA;
+    --border:     #E5E7EB;
+    --text:       #111827;
+    --muted:      #6B7280;
+    --success:    #059669;
+    --success-l:  #ECFDF5;
+    --danger:     #DC2626;
+    --danger-l:   #FEF2F2;
+    --warning:    #D97706;
+    --warning-l:  #FFFBEB;
+    --sidebar-w:  240px;
+    --font:       'DM Sans', system-ui, sans-serif;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── Sidebar ────────────────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 10;
+  }
+  .sidebar-logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo .wordmark {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--indigo);
+    letter-spacing: -0.5px;
+  }
+  .sidebar-logo .badge {
+    font-size: 11px;
+    background: var(--indigo-l);
+    color: var(--indigo);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all .15s;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active {
+    color: var(--indigo);
+    background: var(--indigo-l);
+    border-left-color: var(--indigo);
+  }
+  .nav-icon { font-size: 18px; width: 20px; text-align: center; }
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .btn-logout {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: none;
+    font-size: 13px; font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    width: 100%;
+    transition: all .15s;
+  }
+  .btn-logout:hover { background: var(--danger-l); color: var(--danger); border-color: var(--danger); }
+
+  /* ── Main ───────────────────────────────────────────────── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .topbar-title { font-size: 16px; font-weight: 600; }
+  .topbar-user {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--muted);
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--indigo);
+    color: #fff;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .content { padding: 28px; flex: 1; }
+
+  /* ── Auth screen ────────────────────────────────────────── */
+  #screen-auth {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    width: 100vw;
+  }
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 32px;
+    width: 400px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.06);
+  }
+  .auth-card h1 { font-size: 26px; font-weight: 700; color: var(--indigo); margin-bottom: 4px; }
+  .auth-card p  { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+  /* ── Forms ──────────────────────────────────────────────── */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    transition: border .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--indigo);
+    background: var(--surface);
+  }
+
+  /* ── Buttons ────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary  { background: var(--indigo); color: #fff; }
+  .btn-primary:hover:not(:disabled)  { background: var(--indigo-d); }
+  .btn-outline  { background: transparent; border-color: var(--border); color: var(--text); }
+  .btn-outline:hover:not(:disabled)  { background: var(--bg); }
+  .btn-danger   { background: var(--danger-l); color: var(--danger); border-color: #FECACA; }
+  .btn-danger:hover:not(:disabled)   { background: #FEE2E2; }
+  .btn-success  { background: var(--success-l); color: var(--success); border-color: #A7F3D0; }
+  .btn-full { width: 100%; padding: 11px 16px; font-size: 14px; }
+  .btn-sm   { padding: 5px 10px; font-size: 12px; }
+
+  /* ── Toast ──────────────────────────────────────────────── */
+  .toast {
+    position: fixed; top: 20px; right: 20px; z-index: 999;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13px; font-weight: 500;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: all .25s;
+    pointer-events: none;
+    max-width: 320px;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.ok   { background: var(--success-l); color: var(--success); border: 1px solid #A7F3D0; }
+  .toast.err  { background: var(--danger-l);  color: var(--danger);  border: 1px solid #FECACA; }
+
+  /* ── Error banner ───────────────────────────────────────── */
+  .error-banner {
+    background: var(--danger-l);
+    color: var(--danger);
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .error-banner.show { display: block; }
+
+  /* ── Stats cards ────────────────────────────────────────── */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .stat-card .label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .stat-card .value { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1; }
+  .stat-card .sub   { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Section header ─────────────────────────────────────── */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-header h2 { font-size: 16px; font-weight: 600; }
+
+  /* ── Table ──────────────────────────────────────────────── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--bg); }
+  th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-green  { background: var(--success-l); color: var(--success); }
+  .badge-gray   { background: var(--bg);         color: var(--muted); border: 1px solid var(--border); }
+  .badge-indigo { background: var(--indigo-l);   color: var(--indigo); }
+
+  /* ── Modal ──────────────────────────────────────────────── */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.35);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 28px;
+    width: 460px;
+    max-width: 90vw;
+    box-shadow: 0 12px 40px rgba(0,0,0,.14);
+  }
+  .modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  /* ── Empty state ────────────────────────────────────────── */
+  .empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* ── Page sections ──────────────────────────────────────── */
+  .page { display: none; }
+  .page.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH SCREEN ═══════════════════════════════════════════════════════════ -->
+<div id="screen-auth">
+  <div class="auth-card">
+    <h1>EduDer</h1>
+    <p>Panel de administración — acceso restringido</p>
+    <div id="auth-error" class="error-banner"></div>
+    <div class="field">
+      <label>Correo institucional</label>
+      <input id="auth-email" type="email" placeholder="admin@uniremington.edu.co" />
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input id="auth-pass" type="password" placeholder="••••••••" />
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-login">Ingresar al panel</button>
+  </div>
+</div>
+
+<!-- ══ APP SHELL ══════════════════════════════════════════════════════════════ -->
+<div id="screen-app" style="display:none; width:100%;">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <span class="wordmark">EduDer</span>
+      <span class="badge">Admin</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" data-page="levels" onclick="showPage('levels')">
+        <span class="nav-icon">📚</span> Niveles
+      </div>
+      <div class="nav-item" data-page="lessons" onclick="showPage('lessons')">
+        <span class="nav-icon">📝</span> Lecciones
+      </div>
+      <div class="nav-item" data-page="users" onclick="showPage('users')">
+        <span class="nav-icon">👥</span> Usuarios
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">🚪 Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <!-- Main area -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+      <div class="topbar-user">
+        <div class="avatar" id="topbar-avatar">A</div>
+        <span id="topbar-name">Admin</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── Dashboard ─────────────────────────────────── -->
+      <div id="page-dashboard" class="page active">
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card"><div class="label">Usuarios</div><div class="value" id="stat-users">—</div><div class="sub">Total registrados</div></div>
+          <div class="stat-card"><div class="label">Activos</div><div class="value" id="stat-active">—</div><div class="sub">Cuentas activas</div></div>
+          <div class="stat-card"><div class="label">Lecciones</div><div class="value" id="stat-lessons">—</div><div class="sub">Completadas</div></div>
+          <div class="stat-card"><div class="label">XP Promedio</div><div class="value" id="stat-xp">—</div><div class="sub">Por estudiante</div></div>
+        </div>
+        <div class="table-wrap">
+          <div style="padding:16px 20px; border-bottom:1px solid var(--border); font-weight:600; font-size:14px;">Resumen del sistema</div>
+          <table>
+            <thead><tr><th>Métrica</th><th>Valor</th><th>Estado</th></tr></thead>
+            <tbody id="metrics-body"><tr><td colspan="3" class="empty">Cargando métricas...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Niveles (CRUD visual — tabla maestra) ──────── -->
+      <div id="page-levels" class="page">
+        <!-- CU-03 | RF-07, RF-08 | E12 — Nivel: createLevel / updateLevel / deleteLevel -->
+        <div class="section-header">
+          <h2>Gestión de Niveles</h2>
+          <button class="btn btn-primary" onclick="openLevelModal()">+ Nuevo nivel</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Orden</th>
+                <th>Umbral aprobación</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="levels-body">
+              <tr><td colspan="6" class="empty">Cargando niveles...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Usuarios ───────────────────────────────────── -->
+      <div id="page-users" class="page">
+        <!-- CU-06 | RF-20, RF-21 | E12 — Gestión de Usuarios (Administrador) -->
+        <div class="section-header">
+          <h2>Gestión de Usuarios</h2>
+          <div style="display:flex;gap:8px;">
+            <select id="filter-rol" onchange="loadUsers()" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface);">
+              <option value="">Todos los roles</option>
+              <option value="?rol=estudiante">Estudiantes</option>
+              <option value="?rol=admin">Admins</option>
+            </select>
+            <select id="filter-estado" onchange="loadUsers()" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface);">
+              <option value="">Todos los estados</option>
+              <option value="&estado=true">Activos</option>
+              <option value="&estado=false">Inactivos</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Registro</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="users-body">
+              <tr><td colspan="6" class="empty">Cargando usuarios...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+      <!-- ── Lecciones (CRUD visual — tabla transaccional) ──
+           CU-03 | RF-08 | E12 - cargarContenido() / createLesson / updateLesson / deleteLesson
+           FK visibles en formulario: id_nivel → NIVELES, tipo → TIPO_LECCION -->
+      <div id="page-lessons" class="page">
+        <div class="section-header">
+          <h2>Gestión de Lecciones</h2>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="filter-nivel-lec" onchange="loadLessonsPage()"
+              style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface);">
+              <option value="">Todos los niveles</option>
+            </select>
+            <button class="btn btn-primary" onclick="openLessonModal()">+ Nueva lección</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Nivel (FK)</th>
+                <th>Tipo (FK)</th>
+                <th>Orden</th>
+                <th>XP base</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="lessons-body">
+              <tr><td colspan="7" class="empty">Cargando lecciones...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /screen-app -->
+
+<!-- ══ MODAL NIVEL ════════════════════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-level">
+  <div class="modal">
+    <h3 id="modal-level-title">Nuevo nivel</h3>
+    <div class="error-banner" id="modal-error"></div>
+    <input type="hidden" id="level-id" />
+    <div class="field">
+      <label>Nombre del nivel *</label>
+      <input id="level-nombre" type="text" placeholder="Ej: Lógica proposicional" />
+    </div>
+    <div class="field">
+      <label>Descripción</label>
+      <input id="level-desc" type="text" placeholder="Descripción breve (opcional)" />
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field">
+        <label>Orden *</label>
+        <input id="level-orden" type="number" min="1" placeholder="1" />
+      </div>
+      <div class="field">
+        <label>Umbral aprobación (%)</label>
+        <input id="level-umbral" type="number" min="1" max="100" placeholder="70" />
+      </div>
+    </div>
+    <div class="field" id="field-estado" style="display:none;">
+      <label>Estado</label>
+      <select id="level-estado">
+        <option value="activo">Activo</option>
+        <option value="inactivo">Inactivo</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeLevelModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-level" onclick="saveLevel()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL LECCIÓN ═══════════════════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-lesson">
+  <div class="modal" style="width:500px;">
+    <h3 id="modal-lesson-title">Nueva lección</h3>
+    <div class="error-banner" id="modal-lesson-error"></div>
+    <input type="hidden" id="lesson-id" />
+
+    <div class="field">
+      <label>Título *</label>
+      <input id="lesson-titulo" type="text" placeholder="Ej: Introducción a la lógica proposicional" />
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field">
+        <!-- FK → NIVELES: se carga desde el backend al abrir el modal -->
+        <label>Nivel * <span style="font-size:10px;color:var(--muted);font-weight:400;">(FK → NIVELES)</span></label>
+        <select id="lesson-nivel">
+          <option value="">Selecciona un nivel</option>
+        </select>
+      </div>
+      <div class="field">
+        <!-- FK → TIPO_LECCION: se carga desde el backend al abrir el modal -->
+        <label>Tipo * <span style="font-size:10px;color:var(--muted);font-weight:400;">(FK → TIPO_LECCION)</span></label>
+        <select id="lesson-tipo">
+          <option value="">Selecciona un tipo</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field">
+        <label>Orden *</label>
+        <input id="lesson-orden" type="number" min="1" placeholder="1" />
+      </div>
+      <div class="field">
+        <label>XP base</label>
+        <input id="lesson-xp" type="number" min="0" placeholder="50" value="50" />
+      </div>
+    </div>
+
+    <div class="field" id="lesson-field-estado" style="display:none;">
+      <label>Estado</label>
+      <select id="lesson-estado">
+        <option value="activo">Activo</option>
+        <option value="inactivo">Inactivo</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeLessonModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-lesson" onclick="saveLesson()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CONFIRMAR ELIMINAR ═══════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-confirm">
+  <div class="modal" style="width:380px;">
+    <h3>¿Desactivar nivel?</h3>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:0;">
+      El nivel se marcará como <strong>inactivo</strong>. Sus lecciones y el progreso de los estudiantes se conservan.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger" id="btn-confirm-del">Desactivar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://localhost:3000';
+let _pendingDeleteId = null;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function getToken() { return localStorage.getItem('eduder_admin_token'); }
+
+async function api(path, opts = {}) {
+  const token = getToken();
+  const res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(opts.headers || {}),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { const e = new Error(data.message || `Error ${res.status}`); e.status = res.status; throw e; }
+  return data;
+}
+
+function toast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function clearErr(id) {
+  const el = document.getElementById(id);
+  el.textContent = '';
+  el.classList.remove('show');
+}
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+// CU-02 | RF-03, RF-04 | E12 - iniciarSesion(): JWT
+document.getElementById('btn-login').addEventListener('click', async () => {
+  clearErr('auth-error');
+  const correo_institucional = document.getElementById('auth-email').value.trim();
+  const contrasena           = document.getElementById('auth-pass').value;
+  if (!correo_institucional || !contrasena) {
+    return showErr('auth-error', 'Ingresa tu correo y contraseña.');
+  }
+  try {
+    document.getElementById('btn-login').disabled = true;
+    document.getElementById('btn-login').textContent = 'Ingresando...';
+    const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ correo_institucional, contrasena }) });
+    if (data.usuario.rol !== 'admin') {
+      showErr('auth-error', 'Este panel es solo para administradores.');
+      return;
+    }
+    localStorage.setItem('eduder_admin_token', data.token);
+    localStorage.setItem('eduder_admin_user', JSON.stringify(data.usuario));
+    bootApp(data.usuario);
+  } catch (err) {
+    showErr('auth-error', err.message);
+  } finally {
+    document.getElementById('btn-login').disabled = false;
+    document.getElementById('btn-login').textContent = 'Ingresar al panel';
+  }
+});
+
+document.getElementById('auth-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('btn-login').click();
+});
+
+function bootApp(usuario) {
+  document.getElementById('screen-auth').style.display = 'none';
+  document.getElementById('screen-app').style.display  = 'flex';
+  const ini = ((usuario.nombre || 'A')[0] + (usuario.apellido || '')[0]).toUpperCase();
+  document.getElementById('topbar-avatar').textContent = ini;
+  document.getElementById('topbar-name').textContent   = `${usuario.nombre} ${usuario.apellido}`;
+  showPage('dashboard');
+}
+
+function doLogout() {
+  localStorage.removeItem('eduder_admin_token');
+  localStorage.removeItem('eduder_admin_user');
+  document.getElementById('screen-auth').style.display = 'flex';
+  document.getElementById('screen-app').style.display  = 'none';
+  document.getElementById('auth-pass').value = '';
+  clearErr('auth-error');
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+const pageTitles = { dashboard: 'Dashboard', levels: 'Gestión de Niveles', lessons: 'Gestión de Lecciones', users: 'Gestión de Usuarios' };
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  document.querySelector(`[data-page="${name}"]`).classList.add('active');
+  document.getElementById('topbar-title').textContent = pageTitles[name];
+  if (name === 'dashboard') loadMetrics();
+  if (name === 'levels')    loadLevels();
+  if (name === 'lessons')   loadLessonsPage();
+  if (name === 'users')     loadUsers();
+}
+
+// ── Dashboard / Métricas ──────────────────────────────────────────────────────
+// CU-06 | RF-22 | E12 - getMetrics()
+async function loadMetrics() {
+  try {
+    const d = await api('/admin/metrics');
+    document.getElementById('stat-users').textContent   = d.usuarios?.total ?? '—';
+    document.getElementById('stat-active').textContent  = d.usuarios?.activos ?? '—';
+    document.getElementById('stat-lessons').textContent = d.progreso?.completadas ?? '—';
+    document.getElementById('stat-xp').textContent      = d.xp_promedio ?? '—';
+
+    const rows = [
+      ['Nuevos usuarios (7 días)', d.usuarios?.nuevos_ultima_semana ?? 0,  'badge-indigo'],
+      ['Niveles activos',          d.contenido?.niveles ?? 0,              'badge-green'],
+      ['Lecciones activas',        d.contenido?.lecciones ?? 0,            'badge-green'],
+      ['En progreso',              d.progreso?.en_progreso ?? 0,           'badge-indigo'],
+    ];
+    document.getElementById('metrics-body').innerHTML = rows.map(([label, val, cls]) =>
+      `<tr><td>${label}</td><td style="font-weight:600;">${val}</td><td><span class="badge ${cls}">${val > 0 ? 'Activo' : 'Vacío'}</span></td></tr>`
+    ).join('');
+  } catch (err) {
+    document.getElementById('metrics-body').innerHTML =
+      `<tr><td colspan="3" class="empty" style="color:var(--danger);">Error al cargar métricas: ${err.message}</td></tr>`;
+  }
+}
+
+// ── Niveles CRUD ──────────────────────────────────────────────────────────────
+// Admin | RF-07 | E12 — obtenerLecciones() / createLevel / updateLevel / deleteLevel
+async function loadLevels() {
+  document.getElementById('levels-body').innerHTML = '<tr><td colspan="6" class="empty">Cargando...</td></tr>';
+  try {
+    const niveles = await api('/levels');
+    if (!niveles.length) {
+      document.getElementById('levels-body').innerHTML = '<tr><td colspan="6" class="empty">No hay niveles registrados. Crea el primero.</td></tr>';
+      return;
+    }
+    document.getElementById('levels-body').innerHTML = niveles.map(n => `
+      <tr>
+        <td><span style="font-family:monospace;font-size:12px;color:var(--muted);">#${n.id_nivel}</span></td>
+        <td style="font-weight:500;">${n.nombre}</td>
+        <td><span class="badge badge-indigo">${n.orden}</span></td>
+        <td>${n.umbral_aprobacion ?? 70}%</td>
+        <td><span class="badge ${n.estado === 'activo' ? 'badge-green' : 'badge-gray'}">${n.estado}</span></td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-outline btn-sm" onclick='openLevelModal(${JSON.stringify(n)})'>Editar</button>
+            ${n.estado === 'activo'
+              ? `<button class="btn btn-danger btn-sm" onclick="confirmDelete(${n.id_nivel})">Desactivar</button>`
+              : '<span style="font-size:12px;color:var(--muted);">—</span>'}
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch (err) {
+    document.getElementById('levels-body').innerHTML =
+      `<tr><td colspan="6" class="empty" style="color:var(--danger);">${err.message}</td></tr>`;
+  }
+}
+
+function openLevelModal(nivel = null) {
+  clearErr('modal-error');
+  document.getElementById('modal-level-title').textContent = nivel ? 'Editar nivel' : 'Nuevo nivel';
+  document.getElementById('level-id').value      = nivel?.id_nivel  ?? '';
+  document.getElementById('level-nombre').value  = nivel?.nombre    ?? '';
+  document.getElementById('level-desc').value    = nivel?.descripcion ?? '';
+  document.getElementById('level-orden').value   = nivel?.orden      ?? '';
+  document.getElementById('level-umbral').value  = nivel?.umbral_aprobacion ?? 70;
+  document.getElementById('level-estado').value  = nivel?.estado     ?? 'activo';
+  document.getElementById('field-estado').style.display = nivel ? 'block' : 'none';
+  document.getElementById('modal-level').classList.add('open');
+  document.getElementById('level-nombre').focus();
+}
+
+function closeLevelModal() {
+  document.getElementById('modal-level').classList.remove('open');
+}
+
+// Admin | RF-07 | E12 - createLevel() / updateLevel()
+async function saveLevel() {
+  clearErr('modal-error');
+  const id      = document.getElementById('level-id').value;
+  const nombre  = document.getElementById('level-nombre').value.trim();
+  const desc    = document.getElementById('level-desc').value.trim();
+  const orden   = parseInt(document.getElementById('level-orden').value);
+  const umbral  = parseInt(document.getElementById('level-umbral').value) || 70;
+  const estado  = document.getElementById('level-estado').value;
+
+  if (!nombre) return showErr('modal-error', 'El nombre es obligatorio.');
+  if (!orden || orden < 1) return showErr('modal-error', 'El orden debe ser un número mayor a 0.');
+
+  const body = { nombre, descripcion: desc || null, orden, umbral_aprobacion: umbral, ...(id ? { estado } : {}) };
+  const btn  = document.getElementById('btn-save-level');
+
+  try {
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+    if (id) {
+      await api(`/levels/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+      toast('✅ Nivel actualizado correctamente');
+    } else {
+      await api('/levels', { method: 'POST', body: JSON.stringify(body) });
+      toast('✅ Nivel creado correctamente');
+    }
+    closeLevelModal();
+    loadLevels();
+  } catch (err) {
+    showErr('modal-error', err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar';
+  }
+}
+
+// Admin | RF-07 | E12 - deleteLevel() (soft delete)
+function confirmDelete(id) {
+  _pendingDeleteId = id;
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
+function closeConfirm() {
+  _pendingDeleteId = null;
+  document.getElementById('modal-confirm').classList.remove('open');
+}
+
+document.getElementById('btn-confirm-del').addEventListener('click', async () => {
+  if (!_pendingDeleteId) return;
+  try {
+    await api(`/levels/${_pendingDeleteId}`, { method: 'DELETE' });
+    toast('Nivel desactivado', 'ok');
+    closeConfirm();
+    loadLevels();
+  } catch (err) {
+    toast(err.message, 'err');
+    closeConfirm();
+  }
+});
+
+// ── Usuarios ──────────────────────────────────────────────────────────────────
+// CU-06 | RF-20, RF-21 | E12 - getUsers() / updateUser()
+async function loadUsers() {
+  document.getElementById('users-body').innerHTML = '<tr><td colspan="6" class="empty">Cargando...</td></tr>';
+  const rol    = document.getElementById('filter-rol').value;
+  const estado = document.getElementById('filter-estado').value;
+  const q = (rol + estado) || '';
+  try {
+    const users = await api(`/admin/users${q ? q.replace('&', rol ? '&' : '?') : ''}`);
+    if (!users.length) {
+      document.getElementById('users-body').innerHTML = '<tr><td colspan="6" class="empty">No se encontraron usuarios con esos filtros.</td></tr>';
+      return;
+    }
+    document.getElementById('users-body').innerHTML = users.map(u => `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="avatar" style="width:28px;height:28px;font-size:11px;flex-shrink:0;">${(u.nombre[0]+u.apellido[0]).toUpperCase()}</div>
+            <span style="font-weight:500;">${u.nombre} ${u.apellido}</span>
+          </div>
+        </td>
+        <td style="font-size:12px;color:var(--muted);">${u.correo_institucional}</td>
+        <td><span class="badge ${u.id_rol === 'admin' ? 'badge-indigo' : 'badge-gray'}">${u.id_rol}</span></td>
+        <td><span class="badge ${u.estado ? 'badge-green' : 'badge-gray'}">${u.estado ? 'Activo' : 'Inactivo'}</span></td>
+        <td style="font-size:12px;color:var(--muted);">${new Date(u.fecha_registro).toLocaleDateString('es-CO')}</td>
+        <td>
+          <button class="btn btn-outline btn-sm"
+            onclick="toggleUserEstado('${u.id_usuario}', ${u.estado})"
+          >${u.estado ? 'Desactivar' : 'Activar'}</button>
+        </td>
+      </tr>`).join('');
+  } catch (err) {
+    document.getElementById('users-body').innerHTML =
+      `<tr><td colspan="6" class="empty" style="color:var(--danger);">${err.message}</td></tr>`;
+  }
+}
+
+// RF-20 | E12 - updateUser() — activar / desactivar cuenta
+async function toggleUserEstado(id, estadoActual) {
+  try {
+    await api(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify({ estado: !estadoActual }) });
+    toast(estadoActual ? 'Usuario desactivado' : 'Usuario activado', 'ok');
+    loadUsers();
+  } catch (err) {
+    toast(err.message, 'err');
+  }
+}
+
+// ── Cerrar modales con Escape ─────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeLevelModal();
+    closeConfirm();
+  }
+});
+
+// Cerrar modal al click en fondo
+document.getElementById('modal-level').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-level')) closeLevelModal();
+});
+document.getElementById('modal-confirm').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-confirm')) closeConfirm();
+});
+
+// ── Auto-login si hay token ───────────────────────────────────────────────────
+(function init() {
+  const token = localStorage.getItem('eduder_admin_token');
+  const user  = localStorage.getItem('eduder_admin_user');
+  if (token && user) {
+    try { bootApp(JSON.parse(user)); } catch { doLogout(); }
+  }
+})();
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GESTIÓN DE LECCIONES — Tabla transaccional con FK visibles
+// CU-03 | RF-08 | E12 - cargarContenido() / createLesson / updateLesson / deleteLesson
+// Relaciones FK: id_nivel → NIVELES, tipo → TIPO_LECCION
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Cache de maestras para poblar los <select> del formulario
+let _niveles   = [];
+let _tipos     = [];
+
+// ── Cargar datos maestros para los selects (FK) ───────────────────────────────
+// RF-08: el formulario expone las FK como <select> cargados desde el backend.
+// Se cargan una vez y se cachean para no hacer requests repetidos.
+async function cargarMaestros() {
+  if (_niveles.length && _tipos.length) return;
+  try {
+    const [niveles, tipos] = await Promise.all([
+      api('/levels'),
+      api('/types').catch(() => []),   // fallback si el endpoint aún no existe
+    ]);
+    _niveles = niveles.filter(n => n.estado === 'activo');
+    _tipos   = tipos.length ? tipos : [
+      { id_tipo: 'teoria',      nombre_tipo: 'Teoría' },
+      { id_tipo: 'ejercicio',   nombre_tipo: 'Ejercicio' },
+      { id_tipo: 'minijuego',   nombre_tipo: 'Mini-juego' },
+    ];
+  } catch {
+    _niveles = [];
+    _tipos   = [
+      { id_tipo: 'teoria',    nombre_tipo: 'Teoría' },
+      { id_tipo: 'ejercicio', nombre_tipo: 'Ejercicio' },
+      { id_tipo: 'minijuego', nombre_tipo: 'Mini-juego' },
+    ];
+  }
+}
+
+function poblarSelect(selectId, items, campoId, campoNombre, valorActual = '') {
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = `<option value="">Selecciona...</option>` +
+    items.map(i => `<option value="${i[campoId]}" ${i[campoId] == valorActual ? 'selected' : ''}>${i[campoNombre]}</option>`).join('');
+}
+
+function poblarFiltroNivel() {
+  const sel = document.getElementById('filter-nivel-lec');
+  const actual = sel.value;
+  sel.innerHTML = '<option value="">Todos los niveles</option>' +
+    _niveles.map(n => `<option value="${n.id_nivel}" ${n.id_nivel == actual ? 'selected' : ''}>${n.nombre}</option>`).join('');
+}
+
+// ── Cargar y renderizar tabla de lecciones ────────────────────────────────────
+// Admin | RF-08 | E12 - getLessonsByLevel() / getLevels()
+async function loadLessonsPage() {
+  await cargarMaestros();
+  poblarFiltroNivel();
+
+  const idNivel = document.getElementById('filter-nivel-lec').value;
+  const endpoint = idNivel ? `/lessons/by-level/${idNivel}` : '/lessons/all';
+
+  document.getElementById('lessons-body').innerHTML =
+    '<tr><td colspan="7" class="empty">Cargando...</td></tr>';
+
+  try {
+    // Si no hay filtro, cargamos por cada nivel activo y concatenamos
+    let lecciones = [];
+    if (idNivel) {
+      lecciones = await api(`/lessons/by-level/${idNivel}`);
+    } else {
+      const porNivel = await Promise.all(
+        _niveles.map(n => api(`/lessons/by-level/${n.id_nivel}`).catch(() => []))
+      );
+      lecciones = porNivel.flat();
+    }
+
+    if (!lecciones.length) {
+      document.getElementById('lessons-body').innerHTML =
+        '<tr><td colspan="7" class="empty">No hay lecciones. Crea la primera.</td></tr>';
+      return;
+    }
+
+    // Mapa id_nivel → nombre para mostrar la FK en la tabla
+    const mapNivel = Object.fromEntries(_niveles.map(n => [n.id_nivel, n.nombre]));
+    const mapTipo  = Object.fromEntries(_tipos.map(t  => [t.id_tipo,  t.nombre_tipo]));
+
+    document.getElementById('lessons-body').innerHTML = lecciones.map(l => `
+      <tr>
+        <td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+            title="${l.titulo}">${l.titulo}</td>
+        <td>
+          <!-- FK → NIVELES visible en la tabla -->
+          <span class="badge badge-indigo">${mapNivel[l.id_nivel] ?? l.id_nivel}</span>
+        </td>
+        <td>
+          <!-- FK → TIPO_LECCION visible en la tabla -->
+          <span class="badge badge-gray">${mapTipo[l.tipo] ?? l.tipo}</span>
+        </td>
+        <td style="text-align:center;">${l.orden}</td>
+        <td style="text-align:center;font-weight:500;">${l.xp_base ?? 50}</td>
+        <td><span class="badge ${l.estado === 'activo' ? 'badge-green' : 'badge-gray'}">${l.estado}</span></td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-outline btn-sm" onclick='openLessonModal(${JSON.stringify(l)})'>Editar</button>
+            ${l.estado === 'activo'
+              ? `<button class="btn btn-danger btn-sm" onclick="deleteLessonConfirm('${l.id_leccion}')">Desactivar</button>`
+              : '<span style="font-size:12px;color:var(--muted);">—</span>'}
+          </div>
+        </td>
+      </tr>`).join('');
+
+  } catch (err) {
+    document.getElementById('lessons-body').innerHTML =
+      `<tr><td colspan="7" class="empty" style="color:var(--danger);">${err.message}</td></tr>`;
+  }
+}
+
+// ── Abrir modal (crear o editar) ──────────────────────────────────────────────
+// RF-08: las FK id_nivel y tipo se muestran como <select> con los datos reales
+// del backend, no como campos de texto libre. Esto hace la relación visible
+// y funcional desde la interfaz (requisito de la rúbrica).
+async function openLessonModal(leccion = null) {
+  await cargarMaestros();
+  clearErr('modal-lesson-error');
+
+  document.getElementById('modal-lesson-title').textContent = leccion ? 'Editar lección' : 'Nueva lección';
+  document.getElementById('lesson-id').value      = leccion?.id_leccion ?? '';
+  document.getElementById('lesson-titulo').value  = leccion?.titulo     ?? '';
+  document.getElementById('lesson-orden').value   = leccion?.orden      ?? '';
+  document.getElementById('lesson-xp').value      = leccion?.xp_base    ?? 50;
+  document.getElementById('lesson-estado').value  = leccion?.estado     ?? 'activo';
+  document.getElementById('lesson-field-estado').style.display = leccion ? 'block' : 'none';
+
+  // Poblar selects con FK → NIVELES y FK → TIPO_LECCION
+  poblarSelect('lesson-nivel', _niveles, 'id_nivel', 'nombre',     leccion?.id_nivel ?? '');
+  poblarSelect('lesson-tipo',  _tipos,   'id_tipo',  'nombre_tipo', leccion?.tipo     ?? '');
+
+  document.getElementById('modal-lesson').classList.add('open');
+  setTimeout(() => document.getElementById('lesson-titulo').focus(), 50);
+}
+
+function closeLessonModal() {
+  document.getElementById('modal-lesson').classList.remove('open');
+}
+
+// ── Guardar lección (crear o actualizar) ──────────────────────────────────────
+// Admin | RF-08 | E12 - createLesson() / updateLesson()
+// Valida que las FK (id_nivel, tipo) estén seleccionadas antes de enviar.
+async function saveLesson() {
+  clearErr('modal-lesson-error');
+
+  const id     = document.getElementById('lesson-id').value;
+  const titulo = document.getElementById('lesson-titulo').value.trim();
+  const nivel  = document.getElementById('lesson-nivel').value;
+  const tipo   = document.getElementById('lesson-tipo').value;
+  const orden  = parseInt(document.getElementById('lesson-orden').value);
+  const xp     = parseInt(document.getElementById('lesson-xp').value) || 50;
+  const estado = document.getElementById('lesson-estado').value;
+
+  // Validaciones — FK obligatorias
+  if (!titulo)         return showErr('modal-lesson-error', 'El título es obligatorio.');
+  if (!nivel)          return showErr('modal-lesson-error', 'Debes seleccionar un nivel (FK → NIVELES).');
+  if (!tipo)           return showErr('modal-lesson-error', 'Debes seleccionar un tipo (FK → TIPO_LECCION).');
+  if (!orden || orden < 1) return showErr('modal-lesson-error', 'El orden debe ser un número mayor a 0.');
+
+  const body = {
+    titulo,
+    id_nivel: nivel,   // FK → NIVELES
+    tipo,              // FK → TIPO_LECCION
+    orden,
+    xp_base: xp,
+    ...(id ? { estado } : {}),
+  };
+
+  const btn = document.getElementById('btn-save-lesson');
+  try {
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    if (id) {
+      await api(`/lessons/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+      toast('✅ Lección actualizada correctamente');
+    } else {
+      await api('/lessons', { method: 'POST', body: JSON.stringify(body) });
+      toast('✅ Lección creada correctamente');
+    }
+    closeLessonModal();
+    loadLessonsPage();
+  } catch (err) {
+    showErr('modal-lesson-error', err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar';
+  }
+}
+
+// ── Desactivar lección (soft delete) ─────────────────────────────────────────
+// Admin | RF-08 | E12 - deleteLesson()
+// Reutiliza el modal de confirmación genérico.
+function deleteLessonConfirm(id) {
+  _pendingDeleteId = '__lesson__' + id;
+  document.querySelector('#modal-confirm h3').textContent = '¿Desactivar lección?';
+  document.querySelector('#modal-confirm p').textContent  =
+    'La lección se marcará como inactiva. El progreso de los estudiantes se conserva.';
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
+// Parchar el handler de confirmación para manejar lecciones también
+const _origConfirmDel = document.getElementById('btn-confirm-del').onclick;
+document.getElementById('btn-confirm-del').addEventListener('click', async function handler() {
+  if (!_pendingDeleteId) return;
+
+  if (String(_pendingDeleteId).startsWith('__lesson__')) {
+    const lessonId = String(_pendingDeleteId).replace('__lesson__', '');
+    try {
+      await api(`/lessons/${lessonId}`, { method: 'DELETE' });
+      toast('Lección desactivada', 'ok');
+      closeConfirm();
+      loadLessonsPage();
+    } catch (err) {
+      toast(err.message, 'err');
+      closeConfirm();
+    }
+  }
+  // Si no es lección, el handler original de niveles sigue funcionando
+});
+
+// Cerrar modal lección con Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLessonModal();
+});
+document.getElementById('modal-lesson').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-lesson')) closeLessonModal();
+});
+
+</script>
+</body>
+</html>
