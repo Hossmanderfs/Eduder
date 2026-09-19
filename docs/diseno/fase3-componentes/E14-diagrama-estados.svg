@@ -1,0 +1,209 @@
+<svg viewBox="0 0 1200 1080" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#475569"/>
+    </marker>
+    <marker id="arr-r" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#C8102E"/>
+    </marker>
+    <marker id="arr-g" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+    <marker id="arr-b" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#003DA5"/>
+    </marker>
+    <filter id="sh">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00000015"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1080" fill="#F8FAFC"/>
+  <rect x="0" y="0" width="1200" height="56" fill="#003DA5"/>
+  <text x="600" y="35" text-anchor="middle" fill="white" font-size="18" font-weight="700" letter-spacing="1">E14 — Diagrama de Estados · EduDer</text>
+
+  <!-- ══════════════════════════════════════
+       MÁQUINA 1: Estado de Cuenta de Usuario
+       RF-03, RF-05, RF-06, RF-20
+  ══════════════════════════════════════ -->
+  <rect x="20" y="70" width="540" height="460" rx="10" fill="white" stroke="#C8102E" stroke-width="2"/>
+  <rect x="20" y="70" width="540" height="36" rx="10" fill="#C8102E"/>
+  <rect x="20" y="98" width="540" height="8" fill="#C8102E"/>
+  <text x="290" y="94" text-anchor="middle" fill="white" font-size="13" font-weight="700">Máquina 1 — Estado de Cuenta de Usuario (RF-03, RF-05, RF-06, RF-20)</text>
+
+  <!-- Estado inicial -->
+  <circle cx="100" cy="140" r="12" fill="#1E293B"/>
+  <line x1="100" y1="152" x2="100" y2="178" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Estado: ACTIVA -->
+  <rect x="44" y="178" width="112" height="44" rx="22" fill="white" stroke="#059669" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="100" y="200" text-anchor="middle" fill="#059669" font-size="12" font-weight="700">ACTIVA</text>
+  <text x="100" y="214" text-anchor="middle" fill="#6B7280" font-size="9">estado = true</text>
+
+  <!-- ACTIVA → BLOQUEADA_TEMP -->
+  <path d="M 156 200 C 250 200 260 280 240 290" fill="none" stroke="#C8102E" stroke-width="1.5" marker-end="url(#arr-r)"/>
+  <text x="240" y="245" text-anchor="middle" fill="#C8102E" font-size="9">intentos_login ≥ 5</text>
+  <text x="240" y="258" text-anchor="middle" fill="#C8102E" font-size="9">[RF-05]</text>
+
+  <!-- Estado: BLOQUEADA_TEMP -->
+  <rect x="170" y="278" width="150" height="44" rx="22" fill="white" stroke="#D97706" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="245" y="300" text-anchor="middle" fill="#D97706" font-size="12" font-weight="700">BLOQUEADA</text>
+  <text x="245" y="314" text-anchor="middle" fill="#6B7280" font-size="9">bloqueado_hasta = now+15m</text>
+
+  <!-- BLOQUEADA → ACTIVA (expiración) -->
+  <path d="M 170 300 C 100 300 80 260 90 228" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="60" y="275" text-anchor="middle" fill="#059669" font-size="9">expiró el</text>
+  <text x="60" y="288" text-anchor="middle" fill="#059669" font-size="9">bloqueo [RF-06]</text>
+
+  <!-- Estado: INACTIVA -->
+  <rect x="340" y="178" width="112" height="44" rx="22" fill="white" stroke="#94A3B8" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="396" y="200" text-anchor="middle" fill="#94A3B8" font-size="12" font-weight="700">INACTIVA</text>
+  <text x="396" y="214" text-anchor="middle" fill="#6B7280" font-size="9">estado = false</text>
+
+  <!-- ACTIVA → INACTIVA -->
+  <line x1="156" y1="196" x2="336" y2="196" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="246" y="188" text-anchor="middle" fill="#475569" font-size="9">admin desactiva [RF-20]</text>
+
+  <!-- INACTIVA → ACTIVA -->
+  <path d="M 340 214 C 280 240 200 240 156 214" fill="none" stroke="#003DA5" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-b)"/>
+  <text x="248" y="240" text-anchor="middle" fill="#003DA5" font-size="9">admin activa [RF-20]</text>
+
+  <!-- Notas de estado -->
+  <rect x="40" y="360" width="490" height="140" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="56" y="382" fill="#475569" font-size="10" font-weight="700">Transiciones:</text>
+  <text x="56" y="400" fill="#1E293B" font-size="10">• ACTIVA → BLOQUEADA: 5 intentos fallidos consecutivos → bloquear 15 min (RF-05)</text>
+  <text x="56" y="418" fill="#1E293B" font-size="10">• BLOQUEADA → ACTIVA: bloqueado_hasta &lt; now() → restaurar acceso (RF-06)</text>
+  <text x="56" y="436" fill="#1E293B" font-size="10">• ACTIVA ↔ INACTIVA: administrador cambia estado = true/false (RF-20)</text>
+  <text x="56" y="454" fill="#1E293B" font-size="10">• Login exitoso: intentos_login = 0, bloqueado_hasta = NULL (RF-03)</text>
+  <text x="56" y="472" fill="#C8102E" font-size="10" font-weight="600">• Regla de negocio activa en auth.service.js — no en comentarios</text>
+
+  <!-- ══════════════════════════════════════
+       MÁQUINA 2: Estado de Lección
+       RF-08, RF-09, RF-12
+  ══════════════════════════════════════ -->
+  <rect x="640" y="70" width="540" height="460" rx="10" fill="white" stroke="#003DA5" stroke-width="2"/>
+  <rect x="640" y="70" width="540" height="36" rx="10" fill="#003DA5"/>
+  <rect x="640" y="98" width="540" height="8" fill="#003DA5"/>
+  <text x="910" y="94" text-anchor="middle" fill="white" font-size="13" font-weight="700">Máquina 2 — Estado de Lección del Estudiante (RF-08, RF-09, RF-12)</text>
+
+  <!-- Estado inicial -->
+  <circle cx="760" cy="140" r="12" fill="#1E293B"/>
+  <line x1="760" y1="152" x2="760" y2="178" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Estado: NO_INICIADA -->
+  <rect x="680" y="178" width="160" height="44" rx="22" fill="white" stroke="#94A3B8" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="760" y="200" text-anchor="middle" fill="#94A3B8" font-size="12" font-weight="700">NO_INICIADA</text>
+  <text x="760" y="214" text-anchor="middle" fill="#6B7280" font-size="9">estado = 'no_iniciada'</text>
+
+  <!-- NO_INICIADA → EN_PROGRESO -->
+  <line x1="760" y1="222" x2="760" y2="270" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="800" y="250" fill="#475569" font-size="9">estudiante abre</text>
+  <text x="800" y="262" fill="#475569" font-size="9">la lección [RF-08]</text>
+
+  <!-- Estado: EN_PROGRESO -->
+  <rect x="670" y="270" width="180" height="44" rx="22" fill="white" stroke="#D97706" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="760" y="292" text-anchor="middle" fill="#D97706" font-size="12" font-weight="700">EN_PROGRESO</text>
+  <text x="760" y="306" text-anchor="middle" fill="#6B7280" font-size="9">estado = 'en_progreso'</text>
+
+  <!-- EN_PROGRESO → COMPLETADA -->
+  <line x1="760" y1="314" x2="760" y2="358" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="800" y="340" fill="#475569" font-size="9">completa todos los</text>
+  <text x="800" y="352" fill="#475569" font-size="9">ejercicios [RF-12]</text>
+
+  <!-- Estado: COMPLETADA -->
+  <rect x="670" y="358" width="180" height="44" rx="22" fill="white" stroke="#059669" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="760" y="380" text-anchor="middle" fill="#059669" font-size="12" font-weight="700">COMPLETADA</text>
+  <text x="760" y="394" text-anchor="middle" fill="#6B7280" font-size="9">estado = 'completada'</text>
+
+  <!-- Estado final -->
+  <circle cx="760" cy="434" r="12" fill="white" stroke="#059669" stroke-width="3"/>
+  <circle cx="760" cy="434" r="7" fill="#059669"/>
+  <line x1="760" y1="402" x2="760" y2="420" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+  <!-- Nota unidireccional -->
+  <rect x="660" y="450" width="490" height="60" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1"/>
+  <text x="676" y="472" fill="#065F46" font-size="10" font-weight="700">Transición unidireccional (RF-09):</text>
+  <text x="676" y="490" fill="#1E293B" font-size="10">NO_INICIADA → EN_PROGRESO → COMPLETADA — no hay retroceso.</text>
+  <text x="676" y="504" fill="#1E293B" font-size="10">Al completar: sumar XP + calcular streak + evaluar medallas automáticamente.</text>
+
+  <!-- ══════════════════════════════════════
+       MÁQUINA 3: Estado del Contenido (Nivel/Lección)
+       RF-07, RF-08
+  ══════════════════════════════════════ -->
+  <rect x="20" y="550" width="540" height="360" rx="10" fill="white" stroke="#003DA5" stroke-width="2"/>
+  <rect x="20" y="550" width="540" height="36" rx="10" fill="#003DA5"/>
+  <rect x="20" y="578" width="540" height="8" fill="#003DA5"/>
+  <text x="290" y="574" text-anchor="middle" fill="white" font-size="13" font-weight="700">Máquina 3 — Estado de Nivel / Lección (RF-07, RF-08)</text>
+
+  <circle cx="100" cy="620" r="12" fill="#1E293B"/>
+  <line x1="100" y1="632" x2="100" y2="658" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="34" y="658" width="132" height="44" rx="22" fill="white" stroke="#059669" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="100" y="680" text-anchor="middle" fill="#059669" font-size="12" font-weight="700">ACTIVO</text>
+  <text x="100" y="694" text-anchor="middle" fill="#6B7280" font-size="9">estado = 'activo'</text>
+
+  <line x1="166" y1="680" x2="310" y2="680" stroke="#C8102E" stroke-width="1.5" marker-end="url(#arr-r)"/>
+  <text x="238" y="672" text-anchor="middle" fill="#C8102E" font-size="9">admin desactiva</text>
+
+  <rect x="310" y="658" width="140" height="44" rx="22" fill="white" stroke="#94A3B8" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="380" y="680" text-anchor="middle" fill="#94A3B8" font-size="12" font-weight="700">INACTIVO</text>
+  <text x="380" y="694" text-anchor="middle" fill="#6B7280" font-size="9">estado = 'inactivo'</text>
+
+  <path d="M 310 694 C 240 720 180 720 166 694" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="238" y="720" text-anchor="middle" fill="#059669" font-size="9">admin activa</text>
+
+  <rect x="40" y="740" width="490" height="140" rx="8" fill="#EFF6FF" stroke="#003DA5" stroke-width="1"/>
+  <text x="56" y="762" fill="#1E40AF" font-size="10" font-weight="700">Regla de soft delete (DECISIONES.md — Decisión #03):</text>
+  <text x="56" y="780" fill="#1E293B" font-size="10">• Al desactivar un Nivel/Lección NO se elimina físicamente de la BD.</text>
+  <text x="56" y="798" fill="#1E293B" font-size="10">• ON DELETE RESTRICT en FK PROGRESO_LECCION → LECCIONES (E11-DDL).</text>
+  <text x="56" y="816" fill="#1E293B" font-size="10">• El historial de PROGRESO_LECCION del estudiante se conserva intacto.</text>
+  <text x="56" y="834" fill="#1E293B" font-size="10">• Solo los niveles/lecciones con estado='activo' se muestran en la app.</text>
+  <text x="56" y="858" fill="#C8102E" font-size="10" font-weight="600">• Implementado en level.service.js y lesson.service.js → deleteLevel/deleteLesson.</text>
+
+  <!-- ══════════════════════════════════════
+       MÁQUINA 4: Estado del Token de Recuperación
+       RF-19
+  ══════════════════════════════════════ -->
+  <rect x="640" y="550" width="540" height="360" rx="10" fill="white" stroke="#059669" stroke-width="2"/>
+  <rect x="640" y="550" width="540" height="36" rx="10" fill="#059669"/>
+  <rect x="640" y="578" width="540" height="8" fill="#059669"/>
+  <text x="910" y="574" text-anchor="middle" fill="white" font-size="13" font-weight="700">Máquina 4 — Estado del Token de Recuperación (RF-19)</text>
+
+  <circle cx="760" cy="620" r="12" fill="#1E293B"/>
+  <line x1="760" y1="632" x2="760" y2="658" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Estado: VIGENTE -->
+  <rect x="684" y="658" width="152" height="44" rx="22" fill="white" stroke="#059669" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="760" y="680" text-anchor="middle" fill="#059669" font-size="12" font-weight="700">VIGENTE</text>
+  <text x="760" y="694" text-anchor="middle" fill="#6B7280" font-size="9">usado=false, expira_en &gt; now()</text>
+
+  <!-- VIGENTE → EXPIRADO -->
+  <line x1="760" y1="702" x2="760" y2="750" stroke="#C8102E" stroke-width="1.5" marker-end="url(#arr-r)"/>
+  <text x="800" y="730" fill="#C8102E" font-size="9">expira_en &lt;= now()</text>
+
+  <!-- Estado: EXPIRADO -->
+  <rect x="680" y="750" width="160" height="44" rx="22" fill="white" stroke="#C8102E" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="760" y="772" text-anchor="middle" fill="#C8102E" font-size="12" font-weight="700">EXPIRADO</text>
+  <text x="760" y="786" text-anchor="middle" fill="#6B7280" font-size="9">expira_en &lt;= now()</text>
+
+  <!-- VIGENTE → USADO -->
+  <line x1="836" y1="680" x2="940" y2="680" stroke="#D97706" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="888" y="672" text-anchor="middle" fill="#D97706" font-size="9">usuario usa el enlace</text>
+
+  <!-- Estado: USADO -->
+  <rect x="930" y="658" width="130" height="44" rx="22" fill="white" stroke="#D97706" stroke-width="2.5" filter="url(#sh)"/>
+  <text x="995" y="680" text-anchor="middle" fill="#D97706" font-size="12" font-weight="700">USADO</text>
+  <text x="995" y="694" text-anchor="middle" fill="#6B7280" font-size="9">usado = true</text>
+
+  <!-- Estado final -->
+  <circle cx="760" cy="836" r="12" fill="white" stroke="#C8102E" stroke-width="3"/>
+  <circle cx="760" cy="836" r="7" fill="#C8102E"/>
+  <line x1="760" y1="794" x2="760" y2="822" stroke="#C8102E" stroke-width="1.5" marker-end="url(#arr-r)"/>
+
+  <rect x="660" y="850" width="490" height="42" rx="8" fill="#FEF2F2" stroke="#C8102E" stroke-width="1"/>
+  <text x="676" y="868" fill="#991B1B" font-size="10" font-weight="700">Regla RF-19: el token se invalida automáticamente al:</text>
+  <text x="676" y="884" fill="#1E293B" font-size="10">① ser usado para cambiar contraseña  ② expirar (30 min)  ③ generar uno nuevo (invalida anteriores)</text>
+
+  <!-- Footer -->
+  <rect x="0" y="1040" width="1200" height="40" fill="#003DA5"/>
+  <text x="600" y="1065" text-anchor="middle" fill="white" font-size="11">EduDer · Corporación Universitaria Remington · Ingeniería de Software 2025 · E14 - Diagrama de Estados</text>
+</svg>

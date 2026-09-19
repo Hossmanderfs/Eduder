@@ -1,0 +1,251 @@
+<svg viewBox="0 0 1200 1600" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#003DA5"/>
+    </marker>
+    <marker id="arr-r" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#C8102E" stroke="none"/>
+    </marker>
+    <marker id="arr-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="1600" fill="#F8FAFC"/>
+  <rect x="0" y="0" width="1200" height="56" fill="#003DA5"/>
+  <text x="600" y="35" text-anchor="middle" fill="white" font-size="18" font-weight="700" letter-spacing="1">E13 — Diagramas de Secuencia · EduDer</text>
+
+  <!-- ══════════════════════════════════════════════
+       DS-01: CU-02 Iniciar Sesión
+  ══════════════════════════════════════════════ -->
+  <rect x="20" y="70" width="1160" height="26" rx="4" fill="#C8102E"/>
+  <text x="600" y="88" text-anchor="middle" fill="white" font-size="13" font-weight="700">DS-01 · CU-02 Iniciar Sesión (RF-03, RF-04, RF-05, RF-06)</text>
+
+  <!-- Actores DS-01 -->
+  <rect x="60" y="106" width="100" height="30" rx="6" fill="#C8102E"/>
+  <text x="110" y="126" text-anchor="middle" fill="white" font-size="11" font-weight="600">:Estudiante</text>
+  <rect x="250" y="106" width="100" height="30" rx="6" fill="#1E40AF"/>
+  <text x="300" y="126" text-anchor="middle" fill="white" font-size="11" font-weight="600">:LoginScreen</text>
+  <rect x="460" y="106" width="100" height="30" rx="6" fill="#1E40AF"/>
+  <text x="510" y="126" text-anchor="middle" fill="white" font-size="11" font-weight="600">:AuthService</text>
+  <rect x="670" y="106" width="100" height="30" rx="6" fill="#475569"/>
+  <text x="720" y="126" text-anchor="middle" fill="white" font-size="11" font-weight="600">:BD MySQL</text>
+  <rect x="880" y="106" width="100" height="30" rx="6" fill="#475569"/>
+  <text x="930" y="126" text-anchor="middle" fill="white" font-size="11" font-weight="600">:JWT</text>
+
+  <!-- Líneas de vida DS-01 -->
+  <line x1="110" y1="136" x2="110" y2="440" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="300" y1="136" x2="300" y2="440" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="510" y1="136" x2="510" y2="440" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="720" y1="136" x2="720" y2="440" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="930" y1="136" x2="930" y2="440" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Mensajes DS-01 -->
+  <line x1="110" y1="160" x2="290" y2="160" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="200" y="155" text-anchor="middle" fill="#1E293B" font-size="10">1. ingresar(correo, contrasena)</text>
+
+  <line x1="300" y1="185" x2="500" y2="185" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="400" y="180" text-anchor="middle" fill="#1E293B" font-size="10">2. login(correo, contrasena)</text>
+
+  <line x1="510" y1="210" x2="710" y2="210" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="610" y="205" text-anchor="middle" fill="#1E293B" font-size="10">3. findOne(correo)</text>
+
+  <line x1="720" y1="235" x2="520" y2="235" stroke="#C8102E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-r)"/>
+  <text x="620" y="230" text-anchor="middle" fill="#C8102E" font-size="10">4. usuario || null</text>
+
+  <!-- Alt bloqueado -->
+  <rect x="480" y="248" width="280" height="50" rx="4" fill="none" stroke="#D97706" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="490" y="262" fill="#D97706" font-size="9" font-weight="600">[alt] bloqueado_hasta &gt; now()</text>
+  <text x="490" y="278" fill="#D97706" font-size="9">→ return 429 "Cuenta bloqueada N min"</text>
+  <text x="490" y="290" fill="#D97706" font-size="9">[else] continuar verificación</text>
+
+  <line x1="510" y1="310" x2="710" y2="310" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="610" y="305" text-anchor="middle" fill="#1E293B" font-size="10">5. bcrypt.compare(pass, hash)</text>
+
+  <!-- Alt credenciales -->
+  <rect x="480" y="323" width="280" height="50" rx="4" fill="none" stroke="#C8102E" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="490" y="337" fill="#C8102E" font-size="9" font-weight="600">[alt] invalida → intentos++ / bloquear si ≥5</text>
+  <text x="490" y="353" fill="#C8102E" font-size="9">→ return 401 "Credenciales incorrectas"</text>
+  <text x="490" y="365" fill="#C8102E" font-size="9">[else] limpiar intentos</text>
+
+  <line x1="510" y1="385" x2="920" y2="385" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="715" y="380" text-anchor="middle" fill="#1E293B" font-size="10">6. jwt.sign(payload, secret)</text>
+
+  <line x1="930" y1="405" x2="520" y2="405" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="725" y="400" text-anchor="middle" fill="#059669" font-size="10">7. token JWT</text>
+
+  <line x1="510" y1="425" x2="310" y2="425" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="410" y="420" text-anchor="middle" fill="#059669" font-size="10">8. {token, usuario}</text>
+
+  <line x1="300" y1="440" x2="120" y2="440" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="210" y="435" text-anchor="middle" fill="#059669" font-size="10">9. navegar a Main</text>
+
+  <!-- ══════════════════════════════════════════════
+       DS-02: CU-03 Completar Lección
+  ══════════════════════════════════════════════ -->
+  <rect x="20" y="460" width="1160" height="26" rx="4" fill="#003DA5"/>
+  <text x="600" y="478" text-anchor="middle" fill="white" font-size="13" font-weight="700">DS-02 · CU-03 Completar Lección (RF-08, RF-10, RF-11, RF-12, RF-13)</text>
+
+  <!-- Actores DS-02 -->
+  <rect x="60" y="496" width="100" height="30" rx="6" fill="#C8102E"/>
+  <text x="110" y="516" text-anchor="middle" fill="white" font-size="11" font-weight="600">:Estudiante</text>
+  <rect x="230" y="496" width="110" height="30" rx="6" fill="#1E40AF"/>
+  <text x="285" y="516" text-anchor="middle" fill="white" font-size="11" font-weight="600">:LessonScreen</text>
+  <rect x="430" y="496" width="110" height="30" rx="6" fill="#1E40AF"/>
+  <text x="485" y="516" text-anchor="middle" fill="white" font-size="11" font-weight="600">:ExerciseService</text>
+  <rect x="640" y="496" width="110" height="30" rx="6" fill="#1E40AF"/>
+  <text x="695" y="516" text-anchor="middle" fill="white" font-size="11" font-weight="600">:ProgressService</text>
+  <rect x="860" y="496" width="110" height="30" rx="6" fill="#475569"/>
+  <text x="915" y="516" text-anchor="middle" fill="white" font-size="11" font-weight="600">:BD MySQL</text>
+
+  <!-- Líneas de vida DS-02 -->
+  <line x1="110" y1="526" x2="110" y2="830" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="285" y1="526" x2="285" y2="830" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="485" y1="526" x2="485" y2="830" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="695" y1="526" x2="695" y2="830" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="915" y1="526" x2="915" y2="830" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Mensajes DS-02 -->
+  <line x1="110" y1="550" x2="275" y2="550" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="192" y="545" text-anchor="middle" fill="#1E293B" font-size="10">1. verLeccion(id)</text>
+
+  <line x1="285" y1="572" x2="905" y2="572" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="595" y="567" text-anchor="middle" fill="#1E293B" font-size="10">2. GET /lessons/:id/content</text>
+
+  <line x1="915" y1="592" x2="295" y2="592" stroke="#C8102E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-r)"/>
+  <text x="605" y="587" text-anchor="middle" fill="#C8102E" font-size="10">3. {contenidos, ejercicios}</text>
+
+  <line x1="110" y1="615" x2="275" y2="615" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="192" y="610" text-anchor="middle" fill="#1E293B" font-size="10">4. enviarRespuesta(texto)</text>
+
+  <line x1="285" y1="637" x2="475" y2="637" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="380" y="632" text-anchor="middle" fill="#1E293B" font-size="10">5. evaluate(id_ej, respuesta)</text>
+
+  <line x1="485" y1="660" x2="905" y2="660" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="695" y="655" text-anchor="middle" fill="#1E293B" font-size="10">6. findByPk(id_ejercicio)</text>
+
+  <line x1="915" y1="680" x2="495" y2="680" stroke="#C8102E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-r)"/>
+  <text x="705" y="675" text-anchor="middle" fill="#C8102E" font-size="10">7. ejercicio</text>
+
+  <!-- Alt pista -->
+  <rect x="255" y="693" width="250" height="44" rx="4" fill="none" stroke="#D97706" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="265" y="707" fill="#D97706" font-size="9" font-weight="600">[opt] estudiante pide pista</text>
+  <text x="265" y="723" fill="#D97706" font-size="9">→ GET /exercise/:id/hint/1</text>
+  <text x="265" y="735" fill="#D97706" font-size="9">← texto_pista</text>
+
+  <line x1="485" y1="750" x2="295" y2="750" stroke="#C8102E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-r)"/>
+  <text x="390" y="745" text-anchor="middle" fill="#C8102E" font-size="10">8. {correcto, explicacion}</text>
+
+  <line x1="110" y1="772" x2="275" y2="772" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="192" y="767" text-anchor="middle" fill="#1E293B" font-size="10">9. completarLeccion()</text>
+
+  <line x1="285" y1="792" x2="685" y2="792" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="485" y="787" text-anchor="middle" fill="#1E293B" font-size="10">10. updateProgress(id, completada, puntaje)</text>
+
+  <line x1="695" y1="812" x2="905" y2="812" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="800" y="807" text-anchor="middle" fill="#1E293B" font-size="10">11. sumarXP + calcularStreak + medallas</text>
+
+  <line x1="915" y1="830" x2="295" y2="830" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="605" y="825" text-anchor="middle" fill="#059669" font-size="10">12. {xp_ganado, streak_actualizado}</text>
+
+  <!-- ══════════════════════════════════════════════
+       DS-03: CU-04 Ver Ranking
+  ══════════════════════════════════════════════ -->
+  <rect x="20" y="856" width="1160" height="26" rx="4" fill="#D97706"/>
+  <text x="600" y="874" text-anchor="middle" fill="white" font-size="13" font-weight="700">DS-03 · CU-04 Ver Ranking Semanal (RF-17)</text>
+
+  <!-- Actores DS-03 -->
+  <rect x="60" y="892" width="100" height="30" rx="6" fill="#C8102E"/>
+  <text x="110" y="912" text-anchor="middle" fill="white" font-size="11" font-weight="600">:Estudiante</text>
+  <rect x="250" y="892" width="110" height="30" rx="6" fill="#1E40AF"/>
+  <text x="305" y="912" text-anchor="middle" fill="white" font-size="11" font-weight="600">:RankingScreen</text>
+  <rect x="460" y="892" width="130" height="30" rx="6" fill="#1E40AF"/>
+  <text x="525" y="912" text-anchor="middle" fill="white" font-size="11" font-weight="600">:GamificationService</text>
+  <rect x="700" y="892" width="100" height="30" rx="6" fill="#475569"/>
+  <text x="750" y="912" text-anchor="middle" fill="white" font-size="11" font-weight="600">:BD MySQL</text>
+
+  <!-- Líneas de vida DS-03 -->
+  <line x1="110" y1="922" x2="110" y2="1080" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="305" y1="922" x2="305" y2="1080" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="525" y1="922" x2="525" y2="1080" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="750" y1="922" x2="750" y2="1080" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Mensajes DS-03 -->
+  <line x1="110" y1="948" x2="295" y2="948" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="202" y="943" text-anchor="middle" fill="#1E293B" font-size="10">1. seleccionarNivel(id)</text>
+
+  <line x1="305" y1="970" x2="515" y2="970" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="410" y="965" text-anchor="middle" fill="#1E293B" font-size="10">2. getRanking(id_nivel)</text>
+
+  <line x1="525" y1="992" x2="740" y2="992" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="632" y="987" text-anchor="middle" fill="#1E293B" font-size="10">3. sincronizar xp_semana_actual</text>
+
+  <line x1="750" y1="1014" x2="535" y2="1014" stroke="#C8102E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-r)"/>
+  <text x="642" y="1009" text-anchor="middle" fill="#C8102E" font-size="10">4. registros actualizados</text>
+
+  <line x1="525" y1="1036" x2="740" y2="1036" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="632" y="1031" text-anchor="middle" fill="#1E293B" font-size="10">5. findAll ordenado por xp_semana DESC</text>
+
+  <line x1="750" y1="1058" x2="535" y2="1058" stroke="#C8102E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-r)"/>
+  <text x="642" y="1053" text-anchor="middle" fill="#C8102E" font-size="10">6. top 20 + posicion del usuario</text>
+
+  <line x1="525" y1="1078" x2="315" y2="1078" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="420" y="1073" text-anchor="middle" fill="#059669" font-size="10">7. {ranking, semana_inicio}</text>
+
+  <!-- ══════════════════════════════════════════════
+       DS-04: CU-05 Recuperar Contraseña
+  ══════════════════════════════════════════════ -->
+  <rect x="20" y="1106" width="1160" height="26" rx="4" fill="#059669"/>
+  <text x="600" y="1124" text-anchor="middle" fill="white" font-size="13" font-weight="700">DS-04 · CU-05 Recuperar Contraseña (RF-19)</text>
+
+  <!-- Actores DS-04 -->
+  <rect x="60" y="1142" width="100" height="30" rx="6" fill="#C8102E"/>
+  <text x="110" y="1162" text-anchor="middle" fill="white" font-size="11" font-weight="600">:Estudiante</text>
+  <rect x="240" y="1142" width="110" height="30" rx="6" fill="#1E40AF"/>
+  <text x="295" y="1162" text-anchor="middle" fill="white" font-size="11" font-weight="600">:RecoverScreen</text>
+  <rect x="450" y="1142" width="100" height="30" rx="6" fill="#1E40AF"/>
+  <text x="500" y="1162" text-anchor="middle" fill="white" font-size="11" font-weight="600">:AuthService</text>
+  <rect x="660" y="1142" width="100" height="30" rx="6" fill="#475569"/>
+  <text x="710" y="1162" text-anchor="middle" fill="white" font-size="11" font-weight="600">:BD MySQL</text>
+  <rect x="870" y="1142" width="100" height="30" rx="6" fill="#475569"/>
+  <text x="920" y="1162" text-anchor="middle" fill="white" font-size="11" font-weight="600">:SMTP</text>
+
+  <!-- Líneas de vida DS-04 -->
+  <line x1="110" y1="1172" x2="110" y2="1380" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="295" y1="1172" x2="295" y2="1380" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="500" y1="1172" x2="500" y2="1380" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="710" y1="1172" x2="710" y2="1380" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="920" y1="1172" x2="920" y2="1380" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Mensajes DS-04 -->
+  <line x1="110" y1="1196" x2="285" y2="1196" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="197" y="1191" text-anchor="middle" fill="#1E293B" font-size="10">1. ingresarCorreo(correo)</text>
+
+  <line x1="295" y1="1218" x2="490" y2="1218" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="392" y="1213" text-anchor="middle" fill="#1E293B" font-size="10">2. recover(correo)</text>
+
+  <line x1="500" y1="1240" x2="700" y2="1240" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="600" y="1235" text-anchor="middle" fill="#1E293B" font-size="10">3. findOne(correo)</text>
+
+  <line x1="710" y1="1262" x2="510" y2="1262" stroke="#C8102E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-r)"/>
+  <text x="610" y="1257" text-anchor="middle" fill="#C8102E" font-size="10">4. usuario || null</text>
+
+  <line x1="500" y1="1284" x2="700" y2="1284" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="600" y="1279" text-anchor="middle" fill="#1E293B" font-size="10">5. crear TokenRecuperacion (30 min)</text>
+
+  <line x1="500" y1="1306" x2="910" y2="1306" stroke="#003DA5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="705" y="1301" text-anchor="middle" fill="#1E293B" font-size="10">6. sendMail(link con token)</text>
+
+  <line x1="920" y1="1326" x2="510" y2="1326" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="715" y="1321" text-anchor="middle" fill="#059669" font-size="10">7. enviado OK</text>
+
+  <line x1="500" y1="1348" x2="305" y2="1348" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="402" y="1343" text-anchor="middle" fill="#059669" font-size="10">8. "Si el correo existe, recibirás enlace"</text>
+
+  <rect x="460" y="1360" width="260" height="30" rx="4" fill="#FEF3C7" stroke="#D97706" stroke-width="1"/>
+  <text x="590" y="1378" text-anchor="middle" fill="#92400E" font-size="9" font-weight="600">Nota RF-19: respuesta genérica — no revela si el correo existe</text>
+
+  <!-- Footer -->
+  <rect x="0" y="1560" width="1200" height="40" fill="#003DA5"/>
+  <text x="600" y="1585" text-anchor="middle" fill="white" font-size="11">EduDer · Corporación Universitaria Remington · Ingeniería de Software 2025 · E13 - Diagramas de Secuencia</text>
+</svg>
