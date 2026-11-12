@@ -18,7 +18,7 @@ const Leccion = sequelize.define('Leccion', {
     allowNull: false,
   },
   tipo: {
-    type: DataTypes.CHAR(36),
+    type: DataTypes.ENUM('teoria', 'ejercicio', 'mini_juego', 'caso_practico'),
     allowNull: false,
   },
   orden: {

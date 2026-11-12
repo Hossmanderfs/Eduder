@@ -14,7 +14,7 @@ router.get('/by-level/:id_nivel', verifyToken, requireAdmin, async (req, res) =>
 });
 
 // GET /lessons/all — Admin | RF-08 | E12 - getAllLessons()
-// Lista todas las lecciones con sus FK (Nivel, TipoLeccion) visibles.
+// Lista todas las lecciones con sus FK (Nivel) visibles.
 // Ruta colocada ANTES de /:id para evitar que "all" sea interpretado como un ID.
 router.get('/all', verifyToken, requireAdmin, async (req, res) => {
   try {

@@ -4,7 +4,9 @@
 -- Ingeniería de Software | Parcial 1
 -- Normalizado hasta 3FN | MySQL 8.0+
 -- ================================================
--- CORRECCIONES v1.1:
+-- v1.2 (alineado con el documento final): 13 tablas; rol y tipo son ENUM
+--   (se eliminan las tablas rol y tipo_leccion); estado ENUM('activo','inactivo').
+-- CORRECCIONES v1.1 (históricas):
 --   · usuarios.id_rol cambiado de VARCHAR(36) a CHAR(10)
 --     para que el tipo coincida exactamente con rol.id_rol CHAR(10)
 --     y la FK sea válida sin conversión implícita.
@@ -19,21 +21,8 @@ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE eduder;
 
 -- -------------------------------------------------------
--- TABLA: rol  (catálogo puro)
--- -------------------------------------------------------
-CREATE TABLE rol (
-    id_rol   CHAR(10)    NOT NULL,
-    tipo_rol VARCHAR(10) NOT NULL,
-    CONSTRAINT pk_rol PRIMARY KEY (id_rol)
-);
-
-INSERT INTO rol (id_rol, tipo_rol) VALUES
-    ('estudiante', 'estudiante'),
-    ('admin',      'admin');
-
--- -------------------------------------------------------
 -- TABLA: usuarios
--- FIX: id_rol CHAR(10) para coincidir con rol.id_rol CHAR(10)
+-- rol y estado como ENUM (sin tabla ROL)
 -- -------------------------------------------------------
 CREATE TABLE usuarios (
     id_usuario              CHAR(36)         NOT NULL,
@@ -41,15 +30,14 @@ CREATE TABLE usuarios (
     nombre                  VARCHAR(80)      NOT NULL,
     apellido                VARCHAR(80)      NOT NULL,
     contrasena_hash         VARCHAR(255)     NOT NULL,
-    id_rol                  CHAR(10)         NOT NULL DEFAULT 'estudiante',
-    estado                  BOOLEAN          NOT NULL DEFAULT TRUE,
+    rol                     ENUM('estudiante','admin') NOT NULL DEFAULT 'estudiante',
+    estado                  ENUM('activo','inactivo')  NOT NULL DEFAULT 'activo',
     fecha_registro          DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
     intentos_login          TINYINT UNSIGNED NOT NULL DEFAULT 0,
     bloqueado_hasta         DATETIME         NULL,
     CONSTRAINT pk_usuarios    PRIMARY KEY (id_usuario),
     CONSTRAINT uq_correo      UNIQUE (correo_institucional),
-    CONSTRAINT chk_correo     CHECK (correo_institucional LIKE '%@uniremington.edu.co'),
-    CONSTRAINT fk_usuario_rol FOREIGN KEY (id_rol) REFERENCES rol(id_rol)
+    CONSTRAINT chk_correo     CHECK (correo_institucional LIKE '%@uniremington.edu.co')
 );
 
 -- -------------------------------------------------------
@@ -104,37 +92,19 @@ INSERT INTO niveles (id_nivel, nombre, descripcion, orden, umbral_aprobacion, es
     (5, 'Razonamiento Aplicado',   'Lógica de predicados y programación lógica',     5, 70, 'activo');
 
 -- -------------------------------------------------------
--- TABLA: tipo_leccion (catálogo de tipos)
--- -------------------------------------------------------
-CREATE TABLE tipo_leccion (
-    id_tipo          CHAR(36)     NOT NULL,
-    nombre_tipo      CHAR(36)     NOT NULL,
-    descripcion_tipo VARCHAR(150) NOT NULL,
-    CONSTRAINT pk_tipo_leccion PRIMARY KEY (id_tipo)
-);
-
-INSERT INTO tipo_leccion (id_tipo, nombre_tipo, descripcion_tipo) VALUES
-    ('teoria',        'teoria',        'Contenido expositivo con texto, imágenes y video'),
-    ('ejercicio',     'ejercicio',     'Secuencia de preguntas interactivas evaluadas'),
-    ('mini_juego',    'mini_juego',    'Actividad lúdica de refuerzo al final de lección'),
-    ('caso_practico', 'caso_practico', 'Situación aplicada que integra varios conceptos');
-
--- -------------------------------------------------------
 -- TABLA: lecciones
 -- -------------------------------------------------------
 CREATE TABLE lecciones (
     id_leccion  CHAR(36)                  NOT NULL,
     id_nivel    TINYINT UNSIGNED          NOT NULL,
     titulo      VARCHAR(150)              NOT NULL,
-    tipo        CHAR(36)                  NOT NULL,
+    tipo        ENUM('teoria','ejercicio','mini_juego','caso_practico') NOT NULL,
     orden       TINYINT UNSIGNED          NOT NULL,
     xp_base     SMALLINT UNSIGNED         NOT NULL DEFAULT 50,
     estado      ENUM('activo','inactivo') NOT NULL DEFAULT 'activo',
     CONSTRAINT pk_lecciones     PRIMARY KEY (id_leccion),
     CONSTRAINT fk_leccion_nivel FOREIGN KEY (id_nivel)
-        REFERENCES niveles(id_nivel) ON DELETE RESTRICT,
-    CONSTRAINT fk_leccion_tipo  FOREIGN KEY (tipo)
-        REFERENCES tipo_leccion(id_tipo)
+        REFERENCES niveles(id_nivel) ON DELETE RESTRICT
 );
 
 -- -------------------------------------------------------
@@ -209,6 +179,7 @@ CREATE TABLE medallas_catalogo (
     condicion_tipo  ENUM('nivel_completado','puntaje_perfecto','streak','xp_acumulado') NOT NULL,
     condicion_valor INT UNSIGNED                                                        NOT NULL,
     icono_url       VARCHAR(255)                                                        NOT NULL,
+    estado          ENUM('activo','inactivo')                                           NOT NULL DEFAULT 'activo',
     CONSTRAINT pk_medallas_cat PRIMARY KEY (id_medalla)
 );
 
@@ -260,13 +231,13 @@ CREATE TABLE ranking_semanal (
 -- DATOS DE PRUEBA
 -- -------------------------------------------------------
 
-INSERT INTO usuarios (id_usuario, correo_institucional, nombre, apellido, contrasena_hash, id_rol, estado)
-VALUES ('admin-001', 'admin@uniremington.edu.co', 'Admin', 'Sistema', '$2b$10$hashejemplo', 'admin', TRUE);
+INSERT INTO usuarios (id_usuario, correo_institucional, nombre, apellido, contrasena_hash, rol, estado)
+VALUES ('admin-001', 'admin@uniremington.edu.co', 'Admin', 'Sistema', '$2b$10$hashejemplo', 'admin', 'activo');
 
-INSERT INTO usuarios (id_usuario, correo_institucional, nombre, apellido, contrasena_hash, id_rol, estado)
-VALUES ('est-001', 'juan.perez@uniremington.edu.co', 'Juan', 'Pérez', '$2b$10$hashejemplo', 'estudiante', TRUE);
+INSERT INTO usuarios (id_usuario, correo_institucional, nombre, apellido, contrasena_hash, rol, estado)
+VALUES ('est-001', 'juan.perez@uniremington.edu.co', 'Juan', 'Pérez', '$2b$10$hashejemplo', 'estudiante', 'activo');
 
 INSERT INTO perfil_estudiante (id_perfil, id_usuario, nivel_actual, xp_total, streak_dias, xp_semana_actual)
 VALUES ('perfil-001', 'est-001', 1, 0, 0, 0);
 
--- FIN DEL SCRIPT DDL (15 tablas, 3FN) — EduDer v1.1
+-- FIN DEL SCRIPT DDL (13 tablas, 3FN) — EduDer v1.2

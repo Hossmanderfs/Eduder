@@ -13,7 +13,7 @@ const {
 // La información de progreso por nivel se consulta en progress.service (RF-09).
 async function getSummary(id_usuario) {
   const usuario = await Usuario.findByPk(id_usuario, {
-    attributes: ['id_usuario', 'nombre', 'apellido', 'correo_institucional', 'id_rol', 'fecha_registro'],
+    attributes: ['id_usuario', 'nombre', 'apellido', 'correo_institucional', 'rol', 'fecha_registro'],
     include: [
       {
         // RF-18: nivel actual, XP total, streak de días consecutivos

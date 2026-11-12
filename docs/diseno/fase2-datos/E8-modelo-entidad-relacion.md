@@ -19,7 +19,7 @@ Notación Crow's Foot. Las líneas dobles indican participación obligatoria (m�
 | LECCIONES | 1:1 (obligatorio) | 0:N (opcional-muchos) | PROGRESO_LECCION | Una lección puede tener 0 o N registros de progreso. RF-09 |
 | EJERCICIOS | 1:1 (obligatorio) | 0:N (opcional-muchos) | PISTAS | Un ejercicio puede tener 0, 1 o 2 pistas. RF-11 |
 | MEDALLAS_CATALOGO | 1:1 (obligatorio) | 0:N (opcional-muchos) | MEDALLAS_USUARIO | Una medalla puede no estar obtenida (0) o estar en muchos perfiles. RF-14 |
-| LECCIONES | 1:1 (Obligatorio) | 1:N (Obligatorio-muchos) | TIPO_LECCION | Una lección es solo un tipo; un tipo puede pertenecer a muchas lecciones |
-| USUARIOS | 1:1 (Obligatorio) | 1:N (Obligatorio-Muchos) | ROL | Cada usuario tiene un rol; un rol puede pertenecer a muchos usuarios |
 
-> 📎 Ver diagrama visual MER en `imagenes/E8-MER.png`
+> `rol` y `tipo` de lección son atributos ENUM (no entidades): el modelo tiene 13 tablas.
+
+> 📎 Ver diagrama visual MER en `../imagenes/Modelo_Entidad_Relacion_MER.svg`

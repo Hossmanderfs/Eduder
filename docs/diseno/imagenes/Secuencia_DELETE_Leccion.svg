@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="628.2pt" height="553.72032pt" viewBox="0 0 628.2 553.72032" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:c2pa="http://c2pa.org/manifest">
+ <metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTpjMGU2MDNlYy0yYjIyLTQ2Y2UtODU3My04N2ZkYmU3Mzg4YzYAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaI9bsqXXFdLuoYlqDtnsWzQAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDoxYzFhODVkMi1iZjlkLTQzODItYmYyYS01NDA4YWM1NTc1YWVscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoUjZ4HMHjUOzuUd3m3LB7TwAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggReJZ3HMU8PeiUAmWUSGz/jh9vE1Vm8FXXuCYyuo9UzOkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaPNR6NuolTVq5rtazRpynyYAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIDpADmIBDe0NB2BYS+zVwStz6zZM9SjbYaQjFI19O3Z7ZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GQGBZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOmMwZTYwM2VjLTJiMjItNDZjZS04NTczLTg3ZmRiZTczODhjNi9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmE0NDJlNGM4LTc5MDMtNDM2NS04MDA4LTlkYjc3OWU4ZDNhZXJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCBF4lnccxTw96JQCZZRIbP+OH28TVWbwVde4JjK6j1TM6JjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggCVz9RKMxzUReAz9ojkty/s1xFgqKWlSDx5JwSKz5AzmiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggQLk8KbIleGaejvYL/Mdrh49/DVByNu8CXClTQoa1QNZ0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQO8b5sV8hDY112BC+JqefszO7K71yJEnrORoqyJRf5NWCo8/Uhvj4bFT87QKMZe7SNRN1RVg2u9IfxXsnty15TM=</c2pa:manifest>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-09T05:39:22.044055</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 553.72032 
+L 628.2 553.72032 
+L 628.2 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 12.990566 34.166016 
+L 105.639623 34.166016 
+Q 106.797736 34.166016 106.797736 33.41696 
+L 106.797736 10.94528 
+Q 106.797736 10.196224 105.639623 10.196224 
+L 12.990566 10.196224 
+Q 11.832453 10.196224 11.832453 10.94528 
+L 11.832453 33.41696 
+Q 11.832453 34.166016 12.990566 34.166016 
+z
+" clip-path="url(#pb80820c4d9)" style="fill: #bbd7f2; stroke: #1f4e79; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 140.383019 34.166016 
+L 233.032075 34.166016 
+Q 234.190189 34.166016 234.190189 33.41696 
+L 234.190189 10.94528 
+Q 234.190189 10.196224 233.032075 10.196224 
+L 140.383019 10.196224 
+Q 139.224906 10.196224 139.224906 10.94528 
+L 139.224906 33.41696 
+Q 139.224906 34.166016 140.383019 34.166016 
+z
+" clip-path="url(#pb80820c4d9)" style="fill: #bbd7f2; stroke: #1f4e79; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 267.775472 34.166016 
+L 360.424528 34.166016 
+Q 361.582642 34.166016 361.582642 33.41696 
+L 361.582642 10.94528 
+Q 361.582642 10.196224 360.424528 10.196224 
+L 267.775472 10.196224 
+Q 266.617358 10.196224 266.617358 10.94528 
+L 266.617358 33.41696 
+Q 266.617358 34.166016 267.775472 34.166016 
+z
+" clip-path="url(#pb80820c4d9)" style="fill: #bbd7f2; stroke: #1f4e79; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 395.167925 34.166016 
+L 487.816981 34.166016 
+Q 488.975094 34.166016 488.975094 33.41696 
+L 488.975094 10.94528 
+Q 488.975094 10.196224 487.816981 10.196224 
+L 395.167925 10.196224 
+Q 394.009811 10.196224 394.009811 10.94528 
+L 394.009811 33.41696 
+Q 394.009811 34.166016 395.167925 34.166016 
+z
+" clip-path="url(#pb80820c4d9)" style="fill: #bbd7f2; stroke: #1f4e79; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 522.560377 34.166016 
+L 615.209434 34.166016 
+Q 616.367547 34.166016 616.367547 33.41696 
+L 616.367547 10.94528 
+Q 616.367547 10.196224 615.209434 10.196224 
+L 522.560377 10.196224 
+Q 521.402264 10.196224 521.402264 10.94528 
+L 521.402264 33.41696 
+Q 521.402264 34.166016 522.560377 34.166016 
+z
+" clip-path="url(#pb80820c4d9)" style="fill: #bbd7f2; stroke: #1f4e79; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 24.571698 481.726976 
+L 609.418868 481.726976 
+L 609.418868 158.88384 
+L 24.571698 158.88384 
+L 24.571698 481.726976 
+z
+" clip-path="url(#pb80820c4d9)" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #d4a72c; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 59.315094 33.41696 
+L 59.315094 535.28448 
+" clip-path="url(#pb80820c4d9)" style="fill: none; stroke: #888888; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 186.707547 33.41696 
+L 186.707547 535.28448 
+" clip-path="url(#pb80820c4d9)" style="fill: none; stroke: #888888; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 314.1 33.41696 
+L 314.1 535.28448 
+" clip-path="url(#pb80820c4d9)" style="fill: none; stroke: #888888; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 441.492453 33.41696 
+L 441.492453 535.28448 
+" clip-path="url(#pb80820c4d9)" style="fill: none; stroke: #888888; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 568.884906 33.41696 
+L 568.884906 535.28448 
+" clip-path="url(#pb80820c4d9)" style="fill: none; stroke: #888888; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_6">
+    <path d="M 24.571698 270.493184 
+L 609.418868 270.493184 
+" clip-path="url(#pb80820c4d9)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #d4a72c"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; text-anchor: middle" x="59.315094" y="24.259557" transform="rotate(-0 59.315094 24.259557)">Administrador (UI)</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; text-anchor: middle" x="186.707547" y="24.259557" transform="rotate(-0 186.707547 24.259557)">Admin Panel</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; text-anchor: middle" x="314.1" y="24.259557" transform="rotate(-0 314.1 24.259557)">Admin Service</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; text-anchor: middle" x="441.492453" y="24.259245" transform="rotate(-0 441.492453 24.259245)">PROGRESO_LECCION</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; text-anchor: middle" x="568.884906" y="24.259245" transform="rotate(-0 568.884906 24.259245)">LECCIONES (BD)</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 61.317265 55.88864 
+Q 123.011748 55.88864 183.476394 55.88864 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 179.476394 53.88864 
+L 183.476394 55.88864 
+L 179.476394 57.88864 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="123.011321" y="51.323263" transform="rotate(-0 123.011321 51.323263)">1. Solicita eliminar lección</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 184.705377 79.109376 
+Q 123.010894 79.109376 62.546248 79.109376 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 66.546248 81.109376 
+L 62.546248 79.109376 
+L 66.546248 77.109376 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="123.011321" y="74.543999" transform="rotate(-0 123.011321 74.543999)">2. modal de confirmación</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 61.317265 102.330112 
+Q 123.011748 102.330112 183.476394 102.330112 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 179.476394 100.330112 
+L 183.476394 102.330112 
+L 179.476394 104.330112 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="123.011321" y="97.764735" transform="rotate(-0 123.011321 97.764735)">3. Confirma eliminación</text>
+   </g>
+   <g id="patch_11">
+    <path d="M 188.709717 125.550848 
+Q 250.404201 125.550848 310.868847 125.550848 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 306.868847 123.550848 
+L 310.868847 125.550848 
+L 306.868847 127.550848 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="250.403774" y="120.267627" transform="rotate(-0 250.403774 120.267627)">4. DELETE /admin/lecciones/{id}</text>
+   </g>
+   <g id="patch_12">
+    <path d="M 316.10217 148.771584 
+Q 377.796654 148.771584 438.2613 148.771584 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 434.2613 146.771584 
+L 438.2613 148.771584 
+L 434.2613 150.771584 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="377.796226" y="143.212269" transform="rotate(-0 377.796226 143.212269)">5. SELECT COUNT(*) WHERE id_leccion</text>
+   </g>
+   <g id="text_11">
+    <text style="font-style: italic; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #8a6d00" x="65.10566" y="167.544843" transform="rotate(-0 65.10566 167.544843)">[sin progreso asociado]</text>
+   </g>
+   <g id="patch_13">
+    <path d="M 316.10217 188.84608 
+Q 441.492605 188.84608 565.653203 188.84608 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 561.653203 186.84608 
+L 565.653203 188.84608 
+L 561.653203 190.84608 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="441.492453" y="183.286765" transform="rotate(-0 441.492453 183.286765)">6. DELETE FROM lecciones WHERE id_leccion</text>
+   </g>
+   <g id="patch_14">
+    <path d="M 566.882735 212.066816 
+Q 441.4923 212.066816 317.331703 212.066816 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 321.331703 214.066816 
+L 317.331703 212.066816 
+L 321.331703 210.066816 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="441.492453" y="207.282345" transform="rotate(-0 441.492453 207.282345)">7. OK</text>
+   </g>
+   <g id="patch_15">
+    <path d="M 312.09783 235.287552 
+Q 250.403346 235.287552 189.9387 235.287552 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 193.9387 237.287552 
+L 189.9387 235.287552 
+L 193.9387 233.287552 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="250.403774" y="230.503081" transform="rotate(-0 250.403774 230.503081)">8. 200 OK</text>
+   </g>
+   <g id="patch_16">
+    <path d="M 184.705377 258.508288 
+Q 123.010894 258.508288 62.546248 258.508288 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 66.546248 260.508288 
+L 62.546248 258.508288 
+L 66.546248 256.508288 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="123.011321" y="253.942911" transform="rotate(-0 123.011321 253.942911)">9. "Lección eliminada"</text>
+   </g>
+   <g id="text_16">
+    <text style="font-style: italic; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #8a6d00" x="65.10566" y="277.281547" transform="rotate(-0 65.10566 277.281547)">[con progreso asociado]</text>
+   </g>
+   <g id="patch_17">
+    <path d="M 312.09783 298.582784 
+Q 250.403346 298.582784 189.9387 298.582784 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 193.9387 300.582784 
+L 189.9387 298.582784 
+L 193.9387 296.582784 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="250.403774" y="293.865407" transform="rotate(-0 250.403774 293.865407)">10. 409 Conflict</text>
+   </g>
+   <g id="patch_18">
+    <path d="M 184.705377 321.80352 
+Q 123.010894 321.80352 62.546248 321.80352 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 66.546248 323.80352 
+L 62.546248 321.80352 
+L 66.546248 319.80352 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'" transform="translate(44.982477 307.989893)">11. "No se puede eliminar: hay progreso.</text>
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'" transform="translate(82.296696 316.546424)">¿Archivar la lección?"</text>
+   </g>
+   <g id="patch_19">
+    <path d="M 61.317265 353.6384 
+Q 123.011748 353.6384 183.476394 353.6384 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 179.476394 351.6384 
+L 183.476394 353.6384 
+L 179.476394 355.6384 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="123.011321" y="348.921023" transform="rotate(-0 123.011321 348.921023)">12. Confirma archivar</text>
+   </g>
+   <g id="patch_20">
+    <path d="M 188.709717 376.859136 
+Q 250.404201 376.859136 310.868847 376.859136 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 306.868847 374.859136 
+L 310.868847 376.859136 
+L 306.868847 378.859136 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="250.403774" y="371.575915" transform="rotate(-0 250.403774 371.575915)">13. PATCH /admin/lecciones/{id} (estado = inactivo)</text>
+   </g>
+   <g id="patch_21">
+    <path d="M 316.10217 400.079872 
+Q 441.492605 400.079872 565.653203 400.079872 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 561.653203 398.079872 
+L 565.653203 400.079872 
+L 561.653203 402.079872 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="441.492453" y="395.362495" transform="rotate(-0 441.492453 395.362495)">14. UPDATE lecciones SET estado = 'inactivo'</text>
+   </g>
+   <g id="patch_22">
+    <path d="M 566.882735 423.300608 
+Q 441.4923 423.300608 317.331703 423.300608 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 321.331703 425.300608 
+L 317.331703 423.300608 
+L 321.331703 421.300608 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="441.492453" y="418.516137" transform="rotate(-0 441.492453 418.516137)">15. OK</text>
+   </g>
+   <g id="patch_23">
+    <path d="M 312.09783 446.521344 
+Q 250.403346 446.521344 189.9387 446.521344 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 193.9387 448.521344 
+L 189.9387 446.521344 
+L 193.9387 444.521344 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="250.403774" y="441.736873" transform="rotate(-0 250.403774 441.736873)">16. 200 OK</text>
+   </g>
+   <g id="patch_24">
+    <path d="M 184.705377 469.74208 
+Q 123.010894 469.74208 62.546248 469.74208 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 66.546248 471.74208 
+L 62.546248 469.74208 
+L 66.546248 467.74208 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: middle" x="123.011321" y="464.729609" transform="rotate(-0 123.011321 464.729609)">17. "Lección archivada (RN-21)"</text>
+   </g>
+   <g id="text_25">
+    <text style="font-weight: 700; font-size: 7.6px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #8a6d00" x="27.466981" y="166.531292" transform="rotate(-0 27.466981 166.531292)">alt</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pb80820c4d9">
+   <rect x="7.2" y="7.2" width="613.8" height="539.32032"/>
+  </clipPath>
+ </defs>
+</svg>

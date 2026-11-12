@@ -10,11 +10,11 @@ const {
 
 // ── CU-06 | RF-21 | E12 - Gestión de Usuarios (Administrador) ────────────────
 // Lista todos los usuarios con su perfil de estudiante.
-// Soporta filtros por rol (?rol=estudiante|admin) y estado (?estado=true|false).
+// Soporta filtros por rol (?rol=estudiante|admin) y estado (?estado=activo|inactivo).
 async function getUsers(query) {
   const where = {};
-  if (query.rol)    where.id_rol = query.rol;
-  if (query.estado !== undefined) where.estado = query.estado === 'true';
+  if (query.rol)    where.rol = query.rol;
+  if (query.estado !== undefined) where.estado = query.estado;
 
   const usuarios = await Usuario.findAll({
     where,
@@ -45,7 +45,7 @@ async function getUserByEmail(correo) {
 
 // ── CU-06 | RF-20 | E12 - Gestión de Usuarios (Administrador) ────────────────
 // Actualiza estado, rol, nombre o apellido de un usuario.
-// Al desactivar (estado=false), las sesiones JWT activas se invalidan
+// Al desactivar (estado='inactivo'), las sesiones JWT activas se invalidan
 // porque el middleware verifica estado en cada request (RF-20).
 async function updateUser(id, body) {
   const usuario = await Usuario.findByPk(id, { attributes: { exclude: ['contrasena_hash'] } });
@@ -57,7 +57,7 @@ async function updateUser(id, body) {
 
   const camposPermitidos = {};
   if (body.estado   !== undefined) camposPermitidos.estado   = body.estado;
-  if (body.id_rol   !== undefined) camposPermitidos.id_rol   = body.id_rol;
+  if (body.rol   !== undefined) camposPermitidos.rol   = body.rol;
   if (body.nombre   !== undefined) camposPermitidos.nombre   = body.nombre;
   if (body.apellido !== undefined) camposPermitidos.apellido = body.apellido;
 
@@ -77,7 +77,7 @@ async function updateUser(id, body) {
 async function getMetrics() {
   const [totalUsuarios, totalActivos, totalLecciones, totalNiveles] = await Promise.all([
     Usuario.count(),
-    Usuario.count({ where: { estado: true } }),
+    Usuario.count({ where: { estado: 'activo' } }),
     Leccion.count({ where: { estado: 'activo' } }),
     Nivel.count({ where: { estado: 'activo' } }),
   ]);

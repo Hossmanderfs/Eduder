@@ -426,8 +426,8 @@
             </select>
             <select id="filter-estado" onchange="loadUsers()" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface);">
               <option value="">Todos los estados</option>
-              <option value="&estado=true">Activos</option>
-              <option value="&estado=false">Inactivos</option>
+              <option value="&estado=activo">Activos</option>
+              <option value="&estado=inactivo">Inactivos</option>
             </select>
           </div>
         </div>
@@ -862,13 +862,13 @@ async function loadUsers() {
           </div>
         </td>
         <td style="font-size:12px;color:var(--muted);">${u.correo_institucional}</td>
-        <td><span class="badge ${u.id_rol === 'admin' ? 'badge-indigo' : 'badge-gray'}">${u.id_rol}</span></td>
-        <td><span class="badge ${u.estado ? 'badge-green' : 'badge-gray'}">${u.estado ? 'Activo' : 'Inactivo'}</span></td>
+        <td><span class="badge ${u.rol === 'admin' ? 'badge-indigo' : 'badge-gray'}">${u.rol}</span></td>
+        <td><span class="badge ${u.estado === 'activo' ? 'badge-green' : 'badge-gray'}">${u.estado === 'activo' ? 'Activo' : 'Inactivo'}</span></td>
         <td style="font-size:12px;color:var(--muted);">${new Date(u.fecha_registro).toLocaleDateString('es-CO')}</td>
         <td>
           <button class="btn btn-outline btn-sm"
-            onclick="toggleUserEstado('${u.id_usuario}', ${u.estado})"
-          >${u.estado ? 'Desactivar' : 'Activar'}</button>
+            onclick="toggleUserEstado('${u.id_usuario}', '${u.estado}')"
+          >${u.estado === 'activo' ? 'Desactivar' : 'Activar'}</button>
         </td>
       </tr>`).join('');
   } catch (err) {
@@ -880,8 +880,8 @@ async function loadUsers() {
 // RF-20 | E12 - updateUser() — activar / desactivar cuenta
 async function toggleUserEstado(id, estadoActual) {
   try {
-    await api(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify({ estado: !estadoActual }) });
-    toast(estadoActual ? 'Usuario desactivado' : 'Usuario activado', 'ok');
+    await api(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify({ estado: estadoActual === 'activo' ? 'inactivo' : 'activo' }) });
+    toast(estadoActual === 'activo' ? 'Usuario desactivado' : 'Usuario activado', 'ok');
     loadUsers();
   } catch (err) {
     toast(err.message, 'err');
@@ -921,31 +921,25 @@ document.getElementById('modal-confirm').addEventListener('click', e => {
 
 // Cache de maestras para poblar los <select> del formulario
 let _niveles   = [];
-let _tipos     = [];
+// tipo de lección: ENUM fijo en BD (ver E7), no hay tabla TIPO_LECCION
+const TIPOS_LECCION = [
+  { id_tipo: 'teoria',        nombre_tipo: 'Teoría' },
+  { id_tipo: 'ejercicio',     nombre_tipo: 'Ejercicio' },
+  { id_tipo: 'mini_juego',    nombre_tipo: 'Mini-juego' },
+  { id_tipo: 'caso_practico', nombre_tipo: 'Caso práctico' },
+];
+let _tipos     = TIPOS_LECCION;
 
 // ── Cargar datos maestros para los selects (FK) ───────────────────────────────
 // RF-08: el formulario expone las FK como <select> cargados desde el backend.
 // Se cargan una vez y se cachean para no hacer requests repetidos.
 async function cargarMaestros() {
-  if (_niveles.length && _tipos.length) return;
+  if (_niveles.length) return;
   try {
-    const [niveles, tipos] = await Promise.all([
-      api('/levels'),
-      api('/types').catch(() => []),   // fallback si el endpoint aún no existe
-    ]);
+    const niveles = await api('/levels');
     _niveles = niveles.filter(n => n.estado === 'activo');
-    _tipos   = tipos.length ? tipos : [
-      { id_tipo: 'teoria',      nombre_tipo: 'Teoría' },
-      { id_tipo: 'ejercicio',   nombre_tipo: 'Ejercicio' },
-      { id_tipo: 'minijuego',   nombre_tipo: 'Mini-juego' },
-    ];
   } catch {
     _niveles = [];
-    _tipos   = [
-      { id_tipo: 'teoria',    nombre_tipo: 'Teoría' },
-      { id_tipo: 'ejercicio', nombre_tipo: 'Ejercicio' },
-      { id_tipo: 'minijuego', nombre_tipo: 'Mini-juego' },
-    ];
   }
 }
 

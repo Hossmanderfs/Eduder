@@ -29,6 +29,11 @@ const MedallaCatalogo = sequelize.define('MedallaCatalogo', {
     type: DataTypes.STRING(255),
     allowNull: false,
   },
+  estado: {
+    type: DataTypes.ENUM('activo', 'inactivo'),
+    allowNull: false,
+    defaultValue: 'activo',
+  },
 }, {
   tableName: 'medallas_catalogo',
   timestamps: false,

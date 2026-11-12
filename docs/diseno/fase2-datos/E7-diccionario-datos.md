@@ -10,19 +10,11 @@
 | nombre | VARCHAR(80) | NOT NULL | Nombre(s) del usuario |
 | apellido | VARCHAR(80) | NOT NULL | Apellido(s) del usuario |
 | contrasena_hash | VARCHAR(255) | NOT NULL | bcrypt costo ≥ 10 |
-| id_rol | VARCHAR(36) | FK → ROL(id_rol), NOT NULL | DEFAULT 'estudiante' |
-| estado | BOOLEAN | NOT NULL DEFAULT TRUE | TRUE=activo, FALSE=inactivo |
+| rol | ENUM | NOT NULL DEFAULT 'estudiante' | estudiante \| admin |
+| estado | ENUM | NOT NULL DEFAULT 'activo' | activo \| inactivo (BLOQUEADO_TEMP se deriva de bloqueado_hasta) |
 | fecha_registro | DATETIME | NOT NULL DEFAULT NOW() | Timestamp de creación |
 | intentos_login | TINYINT UNSIGNED | NOT NULL DEFAULT 0 | Reinicia a 0 en login exitoso |
 | bloqueado_hasta | DATETIME | NULL | NULL=cuenta activa |
-
-### ROL
-> Catálogo simple. La FK vive en USUARIOS.id_rol → ROL.id_rol. ROL no contiene ninguna FK.
-
-| Atributo | Tipo | Restricción | Descripción |
-|----------|------|-------------|-------------|
-| id_rol | CHAR(10) | PK, NOT NULL | Clave corta del rol ('estudiante', 'admin') |
-| tipo_rol | VARCHAR(10) | NOT NULL | Etiqueta visible: estudiante \| admin |
 
 ### PERFIL_ESTUDIANTE
 | Atributo | Tipo | Restricción | Descripción |
@@ -58,20 +50,13 @@
 | umbral_aprobacion | TINYINT UNSIGNED | NOT NULL DEFAULT 70 | % mínimo para desbloquear siguiente |
 | estado | BOOLEAN | NOT NULL DEFAULT TRUE | activo/inactivo |
 
-### TIPO_LECCION
-| Atributo | Tipo | Restricción | Descripción |
-|----------|------|-------------|-------------|
-| id_tipo | CHAR(36) | PK, NOT NULL | UUID v4 |
-| nombre_tipo | CHAR(36) | NOT NULL | teoria \| ejercicio \| mini_juego \| caso_practico |
-| descripcion_tipo | VARCHAR(150) | NOT NULL | Descripción funcional del tipo |
-
 ### LECCIONES
 | Atributo | Tipo | Restricción | Descripción |
 |----------|------|-------------|-------------|
 | id_leccion | CHAR(36) | PK, NOT NULL | UUID v4 |
 | id_nivel | TINYINT UNSIGNED | FK NIVELES, NOT NULL, ON DELETE RESTRICT | Nivel al que pertenece |
 | titulo | VARCHAR(150) | NOT NULL | Título visible al estudiante |
-| tipo | VARCHAR(36) | FK TIPO_LECCION, NOT NULL | Tipo de lección |
+| tipo | ENUM | NOT NULL | teoria \| ejercicio \| mini_juego \| caso_practico |
 | orden | TINYINT UNSIGNED | NOT NULL | Define desbloqueo secuencial |
 | xp_base | SMALLINT UNSIGNED | NOT NULL DEFAULT 50 | XP base × (puntaje/100) |
 | estado | ENUM | NOT NULL DEFAULT 'activo' | activo \| inactivo |
@@ -133,6 +118,7 @@
 | condicion_tipo | ENUM | NOT NULL | nivel_completado \| puntaje_perfecto \| streak \| xp_acumulado |
 | condicion_valor | INT UNSIGNED | NOT NULL | Umbral numérico |
 | icono_url | VARCHAR(255) | NOT NULL | Color si obtenida; gris si pendiente |
+| estado | ENUM | NOT NULL DEFAULT 'activo' | activo \| inactivo (archivado, RN-22) |
 
 ### MEDALLAS_USUARIO (tabla asociativa N:M)
 | Atributo | Tipo | Restricción | Descripción |

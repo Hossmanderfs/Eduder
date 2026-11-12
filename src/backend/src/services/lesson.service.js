@@ -1,6 +1,15 @@
 // src/services/lesson.service.js
 const { v4: uuidv4 } = require('uuid');
-const { Leccion, ContenidoLeccion, Ejercicio, Pista, Nivel, TipoLeccion } = require('../models');
+const { Leccion, ContenidoLeccion, Ejercicio, Pista, Nivel } = require('../models');
+
+const TIPOS_VALIDOS = ['teoria', 'ejercicio', 'mini_juego', 'caso_practico'];
+function validarTipo(tipo) {
+  if (!TIPOS_VALIDOS.includes(tipo)) {
+    const err = new Error(`tipo debe ser uno de: ${TIPOS_VALIDOS.join(', ')}`);
+    err.status = 400;
+    throw err;
+  }
+}
 
 // ── CU-03 | RF-08 | E12 - cargarContenido() ──────────────────────────────────
 // Devuelve los datos básicos de una lección junto con su nivel padre.
@@ -8,7 +17,6 @@ async function getLessonById(id) {
   const leccion = await Leccion.findByPk(id, {
     include: [
       { model: Nivel,       as: 'nivel',      attributes: ['id_nivel', 'nombre'] },
-      { model: TipoLeccion, as: 'tipoLeccion', attributes: ['id_tipo', 'nombre_tipo'] },
     ],
   });
   if (!leccion) {
@@ -59,7 +67,7 @@ async function getLessonContent(id) {
 
 // ── Admin | RF-08 | E12 - Leccion CRUD ───────────────────────────────────────
 // Crea una nueva lección asociada a un nivel y tipo de lección (FK visibles).
-// id_nivel y tipo (FK a TIPO_LECCION) son obligatorios — relaciones del MER.
+// id_nivel y tipo (ENUM) son obligatorios — ver E7.
 async function createLesson(body) {
   const { id_nivel, titulo, tipo, orden, xp_base } = body;
   if (!id_nivel || !titulo || !tipo || !orden) {
@@ -76,6 +84,7 @@ async function createLesson(body) {
     throw err;
   }
 
+  validarTipo(tipo);
   const leccion = await Leccion.create({
     id_leccion: uuidv4(),
     id_nivel,
@@ -97,6 +106,7 @@ async function updateLesson(id, body) {
     err.status = 404;
     throw err;
   }
+  if (body.tipo !== undefined) validarTipo(body.tipo);
   const campos = {};
   if (body.titulo    !== undefined) campos.titulo    = body.titulo;
   if (body.tipo      !== undefined) campos.tipo      = body.tipo;
@@ -129,7 +139,6 @@ async function getLessonsByLevel(id_nivel) {
     where: { id_nivel },
     order: [['orden', 'ASC']],
     include: [
-      { model: TipoLeccion, as: 'tipoLeccion', attributes: ['nombre_tipo'] },
     ],
   });
   return lecciones;
@@ -144,7 +153,6 @@ async function getAllLessons() {
     order: [['id_nivel', 'ASC'], ['orden', 'ASC']],
     include: [
       { model: Nivel,       as: 'nivel',       attributes: ['id_nivel', 'nombre'] },
-      { model: TipoLeccion, as: 'tipoLeccion', attributes: ['id_tipo', 'nombre_tipo'] },
     ],
   });
   return lecciones;

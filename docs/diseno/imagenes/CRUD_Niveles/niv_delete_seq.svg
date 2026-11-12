@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="561.24pt" height="597.872736pt" viewBox="0 0 561.24 597.872736" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:c2pa="http://c2pa.org/manifest">
+ <metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTpmMzk4OGE4ZC0wOWU2LTQyM2MtYTVkNy03MThmZTAzZmIwMjYAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaFOuCkqslG4nJU8de242NoIAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpkNjk5YTFiNy04YWQ5LTQ5OGItYjI1Ny0zMjU3ZTBhMDBlMjlscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNojJ6Nb74myiMPGH1b7QsfNwAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggAR3iZSypWPo0B+D/5FVGucb6Ha78dwjdSeayqm0xfpukZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaMGlfxACpvDqZlRiEnrDbkUAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIGMnMs0sY2EekLMwUDA/cSHuEr4W5zUof82yU8wLkAKfZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GQGFZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOmYzOTg4YThkLTA5ZTYtNDIzYy1hNWQ3LTcxOGZlMDNmYjAyNi9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmU4MDkxNDAwLTU2YjgtNDVjNS1hM2YxLTk1YzYyMjUwMWQ4ZXJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCABHeJlLKlY+jQH4P/kVUa5xvodrvx3CN1J5rKqbTF+m6JjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggD1+gKCLcM+rW24P1vDmylBLmqFwV/9mBFFPaWp4nH1KiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggAYhTJ0rcBD3wDmbfVYM24vja3EKkWt7gh0LM/qxzZO10Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQBujLCgF0/YC+tBodygv0/BfjNVVylGqjYGhes9nA8BgWM/tQFV3M9GtkyjLFdvJ1P35PX1kRcd1S25mgzWUsBA=</c2pa:manifest>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-10T23:17:24.051461</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 597.872736 
+L 561.24 597.872736 
+L 561.24 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 18.5925 34.585943 
+L 109.7325 34.585943 
+Q 110.87175 34.585943 110.87175 33.825223 
+L 110.87175 11.003603 
+Q 110.87175 10.242883 109.7325 10.242883 
+L 18.5925 10.242883 
+Q 17.45325 10.242883 17.45325 11.003603 
+L 17.45325 33.825223 
+Q 17.45325 34.585943 18.5925 34.585943 
+z
+" clip-path="url(#p49cc8727e1)" style="fill: #bbd7f2; stroke: #1f4e79; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 123.973125 34.585943 
+L 215.113125 34.585943 
+Q 216.252375 34.585943 216.252375 33.825223 
+L 216.252375 11.003603 
+Q 216.252375 10.242883 215.113125 10.242883 
+L 123.973125 10.242883 
+Q 122.833875 10.242883 122.833875 11.003603 
+L 122.833875 33.825223 
+Q 122.833875 34.585943 123.973125 34.585943 
+z
+" clip-path="url(#p49cc8727e1)" style="fill: #bbd7f2; stroke: #1f4e79; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 229.35375 34.585943 
+L 320.49375 34.585943 
+Q 321.633 34.585943 321.633 33.825223 
+L 321.633 11.003603 
+Q 321.633 10.242883 320.49375 10.242883 
+L 229.35375 10.242883 
+Q 228.2145 10.242883 228.2145 11.003603 
+L 228.2145 33.825223 
+Q 228.2145 34.585943 229.35375 34.585943 
+z
+" clip-path="url(#p49cc8727e1)" style="fill: #bbd7f2; stroke: #1f4e79; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 334.734375 34.585943 
+L 425.874375 34.585943 
+Q 427.013625 34.585943 427.013625 33.825223 
+L 427.013625 11.003603 
+Q 427.013625 10.242883 425.874375 10.242883 
+L 334.734375 10.242883 
+Q 333.595125 10.242883 333.595125 11.003603 
+L 333.595125 33.825223 
+Q 333.595125 34.585943 334.734375 34.585943 
+z
+" clip-path="url(#p49cc8727e1)" style="fill: #bbd7f2; stroke: #1f4e79; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 440.115 34.585943 
+L 531.255 34.585943 
+Q 532.39425 34.585943 532.39425 33.825223 
+L 532.39425 11.003603 
+Q 532.39425 10.242883 531.255 10.242883 
+L 440.115 10.242883 
+Q 438.97575 10.242883 438.97575 11.003603 
+L 438.97575 33.825223 
+Q 438.97575 34.585943 440.115 34.585943 
+z
+" clip-path="url(#p49cc8727e1)" style="fill: #bbd7f2; stroke: #1f4e79; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 24.28875 562.145712 
+L 542.6475 562.145712 
+L 542.6475 178.362146 
+L 24.28875 178.362146 
+L 24.28875 562.145712 
+z
+" clip-path="url(#p49cc8727e1)" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #d4a72c; stroke-width: 1.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 64.1625 33.825223 
+L 64.1625 581.163728 
+" clip-path="url(#p49cc8727e1)" style="fill: none; stroke: #888888; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 169.543125 33.825223 
+L 169.543125 581.163728 
+" clip-path="url(#p49cc8727e1)" style="fill: none; stroke: #888888; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 274.92375 33.825223 
+L 274.92375 581.163728 
+" clip-path="url(#p49cc8727e1)" style="fill: none; stroke: #888888; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 380.304375 33.825223 
+L 380.304375 581.163728 
+" clip-path="url(#p49cc8727e1)" style="fill: none; stroke: #888888; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 485.685 33.825223 
+L 485.685 581.163728 
+" clip-path="url(#p49cc8727e1)" style="fill: none; stroke: #888888; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_6">
+    <path d="M 24.28875 307.684655 
+L 542.6475 307.684655 
+" clip-path="url(#p49cc8727e1)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #d4a72c"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle" x="64.1625" y="24.752655" transform="rotate(-0 64.1625 24.752655)">Administrador (UI)</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle" x="169.543125" y="24.752655" transform="rotate(-0 169.543125 24.752655)">Admin Panel</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle" x="274.92375" y="24.752655" transform="rotate(-0 274.92375 24.752655)">Admin Service</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle" x="380.304375" y="24.752304" transform="rotate(-0 380.304375 24.752304)">LECCIONES (BD)</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle" x="485.685" y="24.752304" transform="rotate(-0 485.685 24.752304)">NIVELES (BD)</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 66.159612 58.548644 
+Q 116.852806 58.548644 166.316163 58.548644 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 162.316163 56.548644 
+L 166.316163 58.548644 
+L 162.316163 60.548644 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="116.852813" y="53.459838" transform="rotate(-0 116.852813 53.459838)">1. Solicita eliminar nivel</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 167.546013 85.173866 
+Q 116.852819 85.173866 67.389462 85.173866 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 71.389462 87.173866 
+L 67.389462 85.173866 
+L 71.389462 83.173866 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="116.852813" y="80.273061" transform="rotate(-0 116.852813 80.273061)">2. modal de confirmación</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 66.159612 111.799089 
+Q 116.852806 111.799089 166.316163 111.799089 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 162.316163 109.799089 
+L 166.316163 111.799089 
+L 162.316163 113.799089 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="116.852813" y="106.898284" transform="rotate(-0 116.852813 106.898284)">3. Confirma eliminación</text>
+   </g>
+   <g id="patch_11">
+    <path d="M 171.540237 138.424312 
+Q 222.233431 138.424312 271.696788 138.424312 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 267.696788 136.424312 
+L 271.696788 138.424312 
+L 267.696788 140.424312 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="222.233438" y="132.635647" transform="rotate(-0 222.233438 132.635647)">4. DELETE /admin/niveles/{id}</text>
+   </g>
+   <g id="patch_12">
+    <path d="M 276.920862 165.049534 
+Q 327.614056 165.049534 377.077413 165.049534 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 373.077413 163.049534 
+L 377.077413 165.049534 
+L 373.077413 167.049534 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="327.614063" y="158.919385" transform="rotate(-0 327.614063 158.919385)">5. SELECT COUNT(*) FROM lecciones WHERE id_nivel</text>
+   </g>
+   <g id="text_11">
+    <text style="font-style: italic; font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #8a6d00" x="64.1625" y="186.754031" transform="rotate(-0 64.1625 186.754031)">[sin lecciones asociadas]</text>
+   </g>
+   <g id="patch_13">
+    <path d="M 276.920862 212.594575 
+Q 380.304281 212.594575 482.457862 212.594575 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 478.457862 210.594575 
+L 482.457862 212.594575 
+L 478.457862 214.594575 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="380.304375" y="207.505769" transform="rotate(-0 380.304375 207.505769)">6. DELETE FROM niveles WHERE id</text>
+   </g>
+   <g id="patch_14">
+    <path d="M 483.687888 239.219797 
+Q 380.304469 239.219797 278.150888 239.219797 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 282.150888 241.219797 
+L 278.150888 239.219797 
+L 282.150888 237.219797 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="380.304375" y="234.048007" transform="rotate(-0 380.304375 234.048007)">7. OK</text>
+   </g>
+   <g id="patch_15">
+    <path d="M 272.926638 265.84502 
+Q 222.233444 265.84502 172.770087 265.84502 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 176.770087 267.84502 
+L 172.770087 265.84502 
+L 176.770087 263.84502 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="222.233438" y="260.67323" transform="rotate(-0 222.233438 260.67323)">8. 200 OK</text>
+   </g>
+   <g id="patch_16">
+    <path d="M 167.546013 292.470243 
+Q 116.852819 292.470243 67.389462 292.470243 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 71.389462 294.470243 
+L 67.389462 292.470243 
+L 71.389462 290.470243 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="116.852813" y="287.381437" transform="rotate(-0 116.852813 287.381437)">9. "Nivel eliminado"</text>
+   </g>
+   <g id="text_16">
+    <text style="font-style: italic; font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #8a6d00" x="64.1625" y="314.17474" transform="rotate(-0 64.1625 314.17474)">[con lecciones asociadas (RN-20)]</text>
+   </g>
+   <g id="patch_17">
+    <path d="M 272.926638 340.015283 
+Q 222.233444 340.015283 172.770087 340.015283 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 176.770087 342.015283 
+L 172.770087 340.015283 
+L 176.770087 338.015283 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="222.233438" y="334.926478" transform="rotate(-0 222.233438 334.926478)">10. 409 Conflict</text>
+   </g>
+   <g id="patch_18">
+    <path d="M 167.546013 387.179963 
+Q 116.852819 387.179963 67.389462 387.179963 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 71.389462 389.179963 
+L 67.389462 387.179963 
+L 71.389462 385.179963 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'" transform="translate(54.099734 360.500533)">11. "No se puede eliminar:</text>
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'" transform="translate(36.858078 371.751158)">el nivel tiene lecciones asociadas.</text>
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'" transform="translate(59.084672 381.235611)">¿Marcar como inactivo?"</text>
+   </g>
+   <g id="patch_19">
+    <path d="M 66.159612 413.805186 
+Q 116.852806 413.805186 166.316163 413.805186 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 162.316163 411.805186 
+L 166.316163 413.805186 
+L 162.316163 415.805186 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="116.852813" y="408.71638" transform="rotate(-0 116.852813 408.71638)">12. Confirma archivar</text>
+   </g>
+   <g id="patch_20">
+    <path d="M 171.540237 440.430408 
+Q 222.233431 440.430408 271.696788 440.430408 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 267.696788 438.430408 
+L 271.696788 440.430408 
+L 267.696788 442.430408 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="222.233438" y="434.641743" transform="rotate(-0 222.233438 434.641743)">13. PATCH /admin/niveles/{id} (estado = inactivo)</text>
+   </g>
+   <g id="patch_21">
+    <path d="M 276.920862 467.055631 
+Q 380.304281 467.055631 482.457862 467.055631 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 478.457862 465.055631 
+L 482.457862 467.055631 
+L 478.457862 469.055631 
+" style="fill: none; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="380.304375" y="461.966826" transform="rotate(-0 380.304375 461.966826)">14. UPDATE niveles SET estado = 'inactivo'</text>
+   </g>
+   <g id="patch_22">
+    <path d="M 483.687888 493.680854 
+Q 380.304469 493.680854 278.150888 493.680854 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 282.150888 495.680854 
+L 278.150888 493.680854 
+L 282.150888 491.680854 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="380.304375" y="488.509064" transform="rotate(-0 380.304375 488.509064)">15. OK</text>
+   </g>
+   <g id="patch_23">
+    <path d="M 272.926638 520.306076 
+Q 222.233444 520.306076 172.770087 520.306076 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 176.770087 522.306076 
+L 172.770087 520.306076 
+L 176.770087 518.306076 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="222.233438" y="515.134286" transform="rotate(-0 222.233438 515.134286)">16. 200 OK</text>
+   </g>
+   <g id="patch_24">
+    <path d="M 167.546013 546.931299 
+Q 116.852819 546.931299 67.389462 546.931299 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 71.389462 548.931299 
+L 67.389462 546.931299 
+L 71.389462 544.931299 
+" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #222222; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: middle" x="116.852813" y="541.289509" transform="rotate(-0 116.852813 541.289509)">17. "Nivel marcado como inactivo (RN-20)"</text>
+   </g>
+   <g id="text_25">
+    <text style="font-weight: 700; font-size: 9.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #8a6d00" x="27.136875" y="187.406478" transform="rotate(-0 27.136875 187.406478)">alt</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p49cc8727e1">
+   <rect x="7.2" y="7.2" width="546.84" height="583.472736"/>
+  </clipPath>
+ </defs>
+</svg>

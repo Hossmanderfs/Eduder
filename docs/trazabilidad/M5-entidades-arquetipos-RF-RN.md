@@ -7,7 +7,6 @@
 | perfil_estudiante | PerfilEstudiante | RF-15, RF-17, RF-18 | Relación 1:1 con usuarios; nivel_actual entre 1 y 5; streak_dias se reinicia si ultima_actividad > ayer |
 | tokens_recuperacion | TokenRecuperacion | RF-19 | Expira en 30 min; usado=TRUE lo invalida permanentemente; solo un token vigente por usuario |
 | niveles | Nivel | RF-07, RF-08 | umbral_aprobacion=70%; acceso secuencial; nivel 1 desbloqueado por defecto |
-| tipo_leccion | — (catálogo) | RF-08 | Valores: teoria, ejercicio, mini_juego, caso_practico |
 | lecciones | Leccion | RF-08, RF-09 | Orden secuencial por (id_nivel, orden); xp_base × (puntaje/100) = XP ganados |
 | contenido_leccion | ContenidoLeccion | RF-08 | tipo_bloque determina cómo se renderiza: texto, imagen, video, animacion |
 | ejercicios | Ejercicio | RF-10, RF-11, RF-12 | respuesta_correcta almacenada serializada; explicacion siempre presente |

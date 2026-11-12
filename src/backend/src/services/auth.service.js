@@ -15,7 +15,7 @@ const {
 
 function signToken(usuario) {
   return jwt.sign(
-    { id_usuario: usuario.id_usuario, correo: usuario.correo_institucional, rol: usuario.id_rol },
+    { id_usuario: usuario.id_usuario, correo: usuario.correo_institucional, rol: usuario.rol },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
@@ -27,7 +27,7 @@ function usuarioPublico(u) {
     correo_institucional: u.correo_institucional,
     nombre:               u.nombre,
     apellido:             u.apellido,
-    rol:                  u.id_rol,
+    rol:                  u.rol,
     estado:               u.estado,
     fecha_registro:       u.fecha_registro,
   };
@@ -69,7 +69,7 @@ async function register(body) {
     nombre,
     apellido,
     contrasena_hash,
-    id_rol: 'estudiante',
+    rol: 'estudiante',
   });
 
   // RF-02: crear PERFIL_ESTUDIANTE automáticamente con valores iniciales
@@ -109,7 +109,7 @@ async function login(body) {
   }
 
   // RF-20: cuenta desactivada por administrador
-  if (!usuario.estado) {
+  if (usuario.estado !== 'activo') {
     const err = new Error('Cuenta desactivada');
     err.status = 403;
     throw err;

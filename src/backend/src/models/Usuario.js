@@ -34,15 +34,15 @@ const Usuario = sequelize.define('Usuario', {
     type: DataTypes.STRING(255),
     allowNull: false,
   },
-  id_rol: {
-    type: DataTypes.CHAR(10),
+  rol: {
+    type: DataTypes.ENUM('estudiante', 'admin'),
     allowNull: false,
     defaultValue: 'estudiante',
   },
   estado: {
-    type: DataTypes.BOOLEAN,
+    type: DataTypes.ENUM('activo', 'inactivo'),
     allowNull: false,
-    defaultValue: true,
+    defaultValue: 'activo',
   },
   fecha_registro: {
     type: DataTypes.DATE,
