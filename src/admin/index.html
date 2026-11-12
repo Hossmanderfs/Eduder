@@ -1016,7 +1016,7 @@ async function loadUsers() {
         <td style="font-size:12px;color:var(--muted);">${new Date(u.fecha_registro).toLocaleDateString('es-CO')}</td>
         <td>
           <button class="btn btn-outline btn-sm"
-            onclick="toggleUserEstado('${u.id_usuario}', '${u.estado}')"
+            onclick="toggleUserEstado('${esc(u.id_usuario)}', '${esc(u.estado)}', '${esc(u.correo_institucional)}')"
           >${u.estado === 'activo' ? 'Desactivar' : 'Activar'}</button>
         </td>
       </tr>`).join('');
@@ -1027,14 +1027,22 @@ async function loadUsers() {
 }
 
 // RF-20 | E12 - updateUser() — activar / desactivar cuenta
-async function toggleUserEstado(id, estadoActual) {
-  try {
-    await api(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify({ estado: estadoActual === 'activo' ? 'inactivo' : 'activo' }) });
-    toast(estadoActual === 'activo' ? 'Usuario desactivado' : 'Usuario activado', 'ok');
+// RF-20: desactivar pide confirmación (la sesión del usuario se invalida en su próxima petición).
+// Activar no requiere confirmación.
+function toggleUserEstado(id, estadoActual, correo = '') {
+  const cambiar = async () => {
+    const nuevo = estadoActual === 'activo' ? 'inactivo' : 'activo';
+    await api(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify({ estado: nuevo }) });
+    toast(nuevo === 'inactivo' ? 'Usuario desactivado' : 'Usuario activado', 'ok');
     loadUsers();
-  } catch (err) {
-    toast(err.message, 'err');
+  };
+  if (estadoActual !== 'activo') {
+    cambiar().catch(err => toast(err.message, 'err'));
+    return;
   }
+  askConfirm('¿Desactivar usuario?',
+    `${correo ? correo + ': ' : ''}no podrá iniciar sesión y su sesión actual se cerrará. Podrás reactivarlo cuando quieras.`,
+    'Desactivar', cambiar);
 }
 
 // ── Cerrar modales con Escape ─────────────────────────────────────────────────
