@@ -1,204 +1,113 @@
-// src/screens/RankingScreen.js — EduDer
-// CU-04 | RF-17 | E12 - obtenerTop() / actualizar()
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View, Text, StyleSheet, FlatList, TouchableOpacity,
-  ActivityIndicator, RefreshControl, StatusBar,
-} from 'react-native';
+// src/screens/RankingScreen.js — WF-12 · Ranking semanal · RF-17 | GET /gamification/ranking/:nivel
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Pressable, ScrollView } from 'react-native';
 import api from '../services/api';
-import { COLORS } from '../theme/colors';
+import { useDashboard } from '../hooks/useDashboard';
+import { num, mensajeError } from '../utils/formato';
+import { Screen, AppBar, Txt, Avatar, Banner, Empty, Loading, ErrorState, Icon, Row } from '../ui';
+import { useTheme, RADIUS } from '../theme';
 
-export default function RankingScreen() {
-  const [niveles,    setNiveles]    = useState([]);
-  const [nivelSel,   setNivelSel]   = useState(null);
-  const [ranking,    setRanking]    = useState([]);
-  const [semana,     setSemana]     = useState('');
-  const [loading,    setLoading]    = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-
-  // Cargar niveles disponibles para el selector de tabs
-  useEffect(() => {
-    api.get('/levels')
-      .then(res => {
-        const activos = res.data.filter(n => n.estado === 'activo');
-        setNiveles(activos);
-        if (activos.length) setNivelSel(activos[0].id_nivel);
-      })
-      .catch(() => {});
-  }, []);
-
-  // RF-17: cargar ranking semanal cuando cambia el nivel seleccionado
-  const cargarRanking = useCallback(async (esRefresh = false) => {
-    if (!nivelSel) return;
-    esRefresh ? setRefreshing(true) : setLoading(true);
-    try {
-      const res = await api.get(`/gamification/ranking/${nivelSel}`);
-      setRanking(res.data.ranking ?? []);
-      setSemana(res.data.semana_inicio ?? '');
-    } catch {
-      setRanking([]);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [nivelSel]);
-
-  useEffect(() => { cargarRanking(); }, [cargarRanking]);
-
-  const medalla = (pos) => pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : null;
-
-  return (
-    <View style={styles.flex}>
-      <StatusBar backgroundColor={COLORS.azul} barStyle="light-content" />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Ranking semanal</Text>
-        {semana && <Text style={styles.headerSub}>Semana del {semana}</Text>}
-      </View>
-
-      {/* Tabs de niveles */}
-      {niveles.length > 0 && (
-        <View style={styles.tabs}>
-          <FlatList
-            data={niveles}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={n => String(n.id_nivel)}
-            contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingVertical: 10 }}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[styles.tab, nivelSel === item.id_nivel && styles.tabActivo]}
-                onPress={() => setNivelSel(item.id_nivel)}
-              >
-                <Text style={[styles.tabText, nivelSel === item.id_nivel && styles.tabTextActivo]}>
-                  {item.nombre}
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-      )}
-
-      {/* Lista */}
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.rojo} />
-        </View>
-      ) : (
-        <FlatList
-          data={ranking}
-          keyExtractor={(_, i) => String(i)}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={() => cargarRanking(true)} colors={[COLORS.rojo]} />
-          }
-          contentContainerStyle={{ padding: 16, gap: 8 }}
-          ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={{ fontSize: 36 }}>🏆</Text>
-              <Text style={{ color: COLORS.muted, marginTop: 10 }}>
-                Aún no hay participantes esta semana.
-              </Text>
-            </View>
-          }
-          renderItem={({ item }) => (
-            <View style={[
-              styles.rankItem,
-              item.es_yo && styles.rankItemYo,
-              item.posicion <= 3 && styles.rankItemTop,
-            ]}>
-              {/* Posición */}
-              <View style={[styles.posBox, item.posicion <= 3 && styles.posBoxTop]}>
-                {medalla(item.posicion)
-                  ? <Text style={{ fontSize: 20 }}>{medalla(item.posicion)}</Text>
-                  : <Text style={styles.posText}>{item.posicion}</Text>
-                }
-              </View>
-
-              {/* Avatar */}
-              <View style={[styles.rankAvatar, item.es_yo && { backgroundColor: COLORS.rojo }]}>
-                <Text style={styles.rankAvatarText}>
-                  {(item.nombre ?? 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
-                </Text>
-              </View>
-
-              {/* Nombre */}
-              <View style={styles.rankInfo}>
-                <Text style={styles.rankNombre}>
-                  {item.nombre}{item.es_yo ? ' (Tú)' : ''}
-                </Text>
-              </View>
-
-              {/* XP */}
-              <View style={styles.rankXPBox}>
-                <Text style={styles.rankXP}>{item.xp_semana}</Text>
-                <Text style={styles.rankXPLabel}>XP</Text>
-              </View>
-            </View>
-          )}
-        />
-      )}
-    </View>
-  );
+// Cuenta regresiva al próximo lunes 00:00 (reinicio del ranking, RF-17)
+function cuentaRegresiva() {
+  const ahora = new Date();
+  const prox = new Date(ahora);
+  prox.setHours(0, 0, 0, 0);
+  prox.setDate(prox.getDate() + ((8 - ahora.getDay()) % 7 || 7));
+  const s = Math.max(0, Math.floor((prox - ahora) / 1000));
+  const d = Math.floor(s / 86400); const h = Math.floor((s % 86400) / 3600); const m = Math.floor((s % 3600) / 60);
+  return `${d ? `${d} d ` : ''}${h} h ${m} min`;
 }
 
-const styles = StyleSheet.create({
-  flex:   { flex: 1, backgroundColor: COLORS.bg },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 40 },
+export default function RankingScreen({ navigation }) {
+  const { c } = useTheme();
+  const { data } = useDashboard();
+  const [nivel, setNivel] = useState(null);
+  const [filas, setFilas] = useState(null);
+  const [error, setError] = useState('');
+  const [cd, setCd] = useState(cuentaRegresiva());
+  const niveles = data?.state.niveles || [];
 
-  header: {
-    backgroundColor: COLORS.azul,
-    paddingTop: 48,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  headerTitle: { color: COLORS.blanco, fontSize: 22, fontWeight: '800' },
-  headerSub:   { color: 'rgba(255,255,255,0.65)', fontSize: 12, marginTop: 4 },
+  useEffect(() => { if (data && !nivel) setNivel(data.state.nivel_actual ? data.state.niveles[data.state.nivel_actual - 1]?.id_nivel : null); }, [data, nivel]);
+  useEffect(() => { const t = setInterval(() => setCd(cuentaRegresiva()), 30000); return () => clearInterval(t); }, []);
 
-  tabs: { backgroundColor: COLORS.superficie, borderBottomWidth: 1, borderBottomColor: COLORS.borde },
-  tab: {
-    paddingHorizontal: 14, paddingVertical: 7,
-    borderRadius: 20, backgroundColor: COLORS.bg,
-    borderWidth: 1, borderColor: COLORS.borde,
-  },
-  tabActivo:     { backgroundColor: COLORS.azul, borderColor: COLORS.azul },
-  tabText:       { fontSize: 13, fontWeight: '600', color: COLORS.muted },
-  tabTextActivo: { color: COLORS.blanco },
+  const cargar = useCallback(async () => {
+    if (!nivel) return;
+    setFilas(null); setError('');
+    try { const { data: r } = await api.get(`/gamification/ranking/${nivel}`); setFilas(r.ranking || []); }
+    catch (err) { setError(mensajeError(err, 'No se pudo cargar el ranking.')); }
+  }, [nivel]);
+  useEffect(() => { cargar(); }, [cargar]);
 
-  rankItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: COLORS.superficie,
-    borderRadius: 14, padding: 12,
-    borderWidth: 1, borderColor: COLORS.borde,
-  },
-  rankItemYo: {
-    borderColor: COLORS.rojo,
-    backgroundColor: COLORS.rojo_light,
-  },
-  rankItemTop: {
-    shadowColor: '#000', shadowOpacity: 0.06,
-    shadowRadius: 6, elevation: 2,
-  },
+  const nv = niveles.find((n) => n.id_nivel === nivel);
+  const top = (filas || []).filter((r) => r.posicion <= 3);
+  const resto = (filas || []).filter((r) => r.posicion > 3);
+  const yo = (filas || []).find((r) => r.es_yo);
+  const abrir = (r) => { if (!r.es_yo) navigation.navigate('PerfilPublico', { fila: r, nivel: nv ? { orden: nv.orden, nombre: nv.nombre } : null, total: filas.length }); };
 
-  posBox: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: COLORS.bg, justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1, borderColor: COLORS.borde,
-  },
-  posBoxTop:  { backgroundColor: COLORS.xp_light, borderColor: COLORS.xp },
-  posText:    { fontSize: 13, fontWeight: '700', color: COLORS.muted },
+  const Podio = ({ pos }) => {
+    const r = top.find((x) => x.posicion === pos);
+    const alto = pos === 1 ? 92 : pos === 2 ? 68 : 52;
+    if (!r) return <View style={{ flex: 1 }} />;
+    const partes = r.nombre.split(' ');
+    return (
+      <Pressable onPress={() => abrir(r)} disabled={r.es_yo} style={{ flex: 1, alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+        <Avatar nombre={partes[0]} apellido={partes.slice(1).join(' ')} size={pos === 1 ? 56 : 46} neutral={!r.es_yo} style={r.es_yo ? { backgroundColor: c.blue } : undefined} />
+        <Txt w="semibold" size={13} numberOfLines={1}>{r.es_yo ? 'Tú' : partes[0]}</Txt>
+        <Txt size={12} color={c.text3}>{num(r.xp_semana)} XP</Txt>
+        <View style={{ width: '100%', height: alto, borderTopLeftRadius: 10, borderTopRightRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: pos === 1 ? c.gold : r.es_yo ? c.blue : c.surface3 }}>
+          {pos === 1 ? <Icon name="crown" size={22} color={c.onGold} /> : <Txt w="bold" size={18} color={r.es_yo ? c.onBlue : c.text2}>{pos}</Txt>}
+        </View>
+      </Pressable>
+    );
+  };
 
-  rankAvatar: {
-    width: 38, height: 38, borderRadius: 19,
-    backgroundColor: COLORS.azul,
-    justifyContent: 'center', alignItems: 'center',
-  },
-  rankAvatarText: { color: COLORS.blanco, fontSize: 13, fontWeight: '700' },
-  rankInfo:       { flex: 1 },
-  rankNombre:     { fontSize: 14, fontWeight: '600', color: COLORS.texto },
+  return (
+    <Screen bar={<AppBar title="Ranking semanal" />} onRefresh={cargar}>
+      <View style={{ gap: 10 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }} accessibilityLabel="Elegir nivel">
+          {niveles.map((n) => {
+            const on = n.id_nivel === nivel;
+            return (
+              <Pressable key={n.id_nivel} onPress={() => setNivel(n.id_nivel)} accessibilityState={{ selected: on }}
+                style={{ minHeight: 40, paddingHorizontal: 16, justifyContent: 'center', borderRadius: 999, borderWidth: 1.5, borderColor: on ? c.blue : c.line, backgroundColor: on ? c.blue : c.surface }}>
+                <Txt w="medium" size={13} color={on ? c.onBlue : c.text2}>Nivel {n.orden}</Txt>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+        <Row style={{ gap: 6 }}>
+          <Icon name="clock" size={16} color={c.text3} />
+          <Txt size={12} color={c.text2}><Txt w="semibold" size={12}>Semana actual</Txt> · se reinicia el lunes en {cd}</Txt>
+        </Row>
+      </View>
 
-  rankXPBox:  { alignItems: 'flex-end' },
-  rankXP:     { fontSize: 16, fontWeight: '800', color: COLORS.azul },
-  rankXPLabel:{ fontSize: 10, color: COLORS.muted },
-});
+      {error ? <ErrorState message={error} onRetry={cargar} /> : !filas ? <Loading text="Cargando ranking…" /> : !filas.length ? (
+        <Empty icon="trophy" title="Aún no hay posiciones" text={`Nadie ha sumado XP en ${nv ? nv.nombre : 'este nivel'} esta semana. Completa una lección y sé el primero.`} />
+      ) : (
+        <>
+          <Txt size={12} color={c.text3}>{nv?.nombre} · {filas.length} {filas.length === 1 ? 'estudiante' : 'estudiantes'}</Txt>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 4 }}>
+            <Podio pos={2} /><Podio pos={1} /><Podio pos={3} />
+          </View>
+          {resto.length ? (
+            <View style={{ gap: 6 }}>
+              {resto.map((r) => {
+                const partes = r.nombre.split(' ');
+                return (
+                  <Pressable key={r.id_usuario || r.posicion} onPress={() => abrir(r)} disabled={r.es_yo}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 56, padding: 10, borderRadius: RADIUS.m, backgroundColor: r.es_yo ? c.blueSoft : c.surface, borderWidth: 1, borderColor: r.es_yo ? c.blue : c.line }}>
+                    <Txt w="semibold" style={{ width: 28, textAlign: 'center' }} color={c.text2}>{r.posicion}</Txt>
+                    <Avatar nombre={partes[0]} apellido={partes.slice(1).join(' ')} size={36} neutral={!r.es_yo} style={r.es_yo ? { backgroundColor: c.blue } : undefined} />
+                    <Txt w="medium" style={{ flex: 1 }} numberOfLines={1}>{r.es_yo ? 'Tú · ' : ''}{r.nombre}</Txt>
+                    <Txt w="semibold">{num(r.xp_semana)} XP</Txt>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
+          {!yo ? <Banner tone="info">Completa una lección de este nivel para aparecer en el ranking.</Banner> : null}
+        </>
+      )}
+    </Screen>
+  );
+}

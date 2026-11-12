@@ -1,74 +1,47 @@
-// src/screens/SplashScreen.js — EduDer
-// CU-02 | RF-03, RF-04 | E12 - iniciarSesion(): JWT
-import React, { useEffect } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, StatusBar } from 'react-native';
+// src/screens/SplashScreen.js — WF-00 · Bienvenida · CU-02 | RF-03, RF-04
+// Si hay sesión guardada entra directo; si no, muestra "Crear cuenta / Iniciar sesión".
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import { getStoredSession } from '../services/auth.service';
-import { COLORS } from '../theme/colors';
 import { irAMain } from '../utils/sesion';
+import { Screen, Logo, Txt, Btn } from '../ui';
+import { useTheme } from '../theme';
 
 export default function SplashScreen({ navigation }) {
+  const { c } = useTheme();
+  const [verificando, setVerificando] = useState(true);
+
   useEffect(() => {
-    async function checkSession() {
+    let vivo = true;
+    (async () => {
       try {
-        const session = await getStoredSession();
-        if (session) await irAMain(navigation); else navigation.replace('Login');
-      } catch {
-        navigation.replace('Login');
-      }
-    }
-    // Pequeño delay para que el splash se vea
-    const t = setTimeout(checkSession, 1000);
-    return () => clearTimeout(t);
-  }, []);
+        const s = await getStoredSession();
+        if (s) { await irAMain(navigation); return; }
+      } catch { /* sin sesión */ }
+      if (vivo) setVerificando(false);
+    })();
+    return () => { vivo = false; };
+  }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <StatusBar backgroundColor={COLORS.rojo} barStyle="light-content" />
-
-      {/* Logo Uniremington */}
-      <View style={styles.logoBox}>
-        <View style={styles.logoCircle}>
-          <Text style={styles.logoLetra}>E</Text>
-        </View>
-        <Text style={styles.logoNombre}>EduDer</Text>
-        <View style={styles.divider} />
-        <Text style={styles.logoUniver}>Uniremington</Text>
+    <Screen scroll={false} contentStyle={{ justifyContent: 'space-between', paddingVertical: 32 }}>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 }}>
+        <Logo size={72} />
+        <Txt w="bold" size={34} accessibilityRole="header">EduDer</Txt>
+        <Txt color={c.text2} style={{ textAlign: 'center', maxWidth: 300 }}>
+          Lógica matemática en lecciones cortas, con retos, rachas y medallas.
+        </Txt>
+        <Txt w="medium" size={22} color={c.blueText} style={{ letterSpacing: 6, marginTop: 8 }}>¬ ∧ ∨ → ↔</Txt>
+        <Txt size={12} color={c.text3}>Corporación Universitaria Remington</Txt>
       </View>
-
-      <Text style={styles.tagline}>Aprende lógica matemática{'\n'}de forma gamificada</Text>
-
-      <ActivityIndicator size="small" color="rgba(255,255,255,0.7)" style={{ marginTop: 40 }} />
-    </View>
+      <View style={{ gap: 12, minHeight: 124, justifyContent: 'center' }}>
+        {verificando ? <ActivityIndicator color={c.blue} /> : (
+          <>
+            <Btn title="Crear cuenta" size="lg" onPress={() => navigation.navigate('Register')} />
+            <Btn title="Iniciar sesión" size="lg" kind="secondary" onPress={() => navigation.navigate('Login')} />
+          </>
+        )}
+      </View>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.rojo,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  logoBox:     { alignItems: 'center', marginBottom: 24 },
-  logoCircle: {
-    width: 80, height: 80, borderRadius: 40,
-    backgroundColor: COLORS.blanco,
-    justifyContent: 'center', alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  logoLetra:   { fontSize: 40, fontWeight: '800', color: COLORS.rojo },
-  logoNombre:  { fontSize: 36, fontWeight: '800', color: COLORS.blanco, letterSpacing: 1 },
-  divider:     { width: 40, height: 2, backgroundColor: 'rgba(255,255,255,0.4)', marginVertical: 8 },
-  logoUniver:  { fontSize: 14, color: 'rgba(255,255,255,0.8)', letterSpacing: 2, textTransform: 'uppercase' },
-  tagline: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-});

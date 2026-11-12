@@ -1,297 +1,106 @@
-// src/screens/MenuScreen.js — EduDer
-// CU-03 | RF-07, RF-08 | E12 - obtenerLecciones() / estaDesbloqueado()
-// Pantalla principal: lista de niveles con progreso del estudiante.
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  ActivityIndicator, RefreshControl, StatusBar,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../services/api';
-import { COLORS } from '../theme/colors';
+// src/screens/MenuScreen.js — WF-01 · Menú principal · RF-07, RF-09, RF-12, RF-13 | CU-03, CU-04
+import React from 'react';
+import { View, ScrollView, Pressable } from 'react-native';
+import { useDashboard } from '../hooks/useDashboard';
+import { siguienteLeccion, TIPOS } from '../utils/progreso';
+import { num, dias } from '../utils/formato';
+import { Screen, Carne, CarneTop, IconBtn, Avatar, Txt, Btn, Bar, Stat, Card, SectionHead, Icon, Loading, ErrorState, Row } from '../ui';
+import { useTheme } from '../theme';
 
 export default function MenuScreen({ navigation }) {
-  const [niveles,    setNiveles]    = useState([]);
-  const [perfil,     setPerfil]     = useState(null);
-  const [noLeidas,   setNoLeidas]   = useState(0);
-  const [loading,    setLoading]    = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error,      setError]      = useState('');
+  const { c } = useTheme();
+  const { data, error, cargando, recargar } = useDashboard();
 
-  // RF-07: cargar niveles activos con sus lecciones al montar la pantalla
-  const cargar = useCallback(async (esRefresh = false) => {
-    esRefresh ? setRefreshing(true) : setLoading(true);
-    setError('');
-    try {
-      const [nivelesRes, perfilRes] = await Promise.all([
-        api.get('/levels'),
-        api.get('/profile/summary').catch(() => ({ data: null })),
-      ]);
-      setNiveles(nivelesRes.data);
-      setPerfil(perfilRes.data?.perfil ?? null);
-      setNoLeidas(perfilRes.data?.notificaciones?.length ?? 0);
-    } catch {
-      setError('No se pudieron cargar los niveles. Verifica tu conexión.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+  const u = data?.perfilData || {};
+  const p = data?.perfil || {};
+  const st = data?.state;
+  const sinLeer = (u.notificaciones || []).filter((n) => !n.leida).length;
+  const nivel = st ? st.niveles[st.nivel_actual - 1] : null;
+  const max = nivel ? nivel.lecciones.reduce((a, l) => a + l.xp_base, 0) : 0;
+  const ganado = nivel ? nivel.lecciones.reduce((a, l) => a + (l.estado === 'completada' ? Math.round((l.xp_base * (l.puntaje || 0)) / 100) : 0), 0) : 0;
+  const pct = max ? Math.min(100, Math.round((ganado / max) * 100)) : 0;
+  const sig = st ? siguienteLeccion(st) : null;
+  const tipo = sig ? TIPOS[sig.leccion.tipo] || TIPOS.ejercicio : null;
 
-  useEffect(() => { cargar(); }, [cargar]);
-
-  async function cerrarSesion() {
-    await AsyncStorage.removeItem('eduder_token');
-    await AsyncStorage.removeItem('eduder_user');
-    navigation.replace('Login');
-  }
-
-  if (loading) return (
-    <View style={styles.center}>
-      <ActivityIndicator size="large" color={COLORS.rojo} />
-      <Text style={styles.loadingText}>Cargando niveles...</Text>
-    </View>
+  const header = (
+    <Carne top={
+      <CarneTop titulo="Uniremington · EduDer">
+        <View accessibilityLabel={`Racha de ${dias(p.streak_dias || 0)}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,.16)' }}>
+          <Icon name="flame" size={18} color={c.gold} />
+          <Txt w="semibold" size={14} color="#fff">{p.streak_dias || 0}</Txt>
+        </View>
+        <IconBtn name="bell" label={sinLeer ? `Notificaciones, ${sinLeer} sin leer` : 'Notificaciones'} color="#fff" size={22} badge={sinLeer ? (sinLeer > 9 ? '9+' : String(sinLeer)) : undefined} onPress={() => navigation.navigate('Notificaciones')} />
+      </CarneTop>
+    }>
+      <Row style={{ gap: 12 }}>
+        <Avatar nombre={u.nombre} apellido={u.apellido} size={52} />
+        <View style={{ flex: 1 }}>
+          <Txt w="semibold" size={18} color="#fff" numberOfLines={1}>{u.nombre ? `${u.nombre} ${u.apellido}` : 'Cargando…'}</Txt>
+          <Txt size={13} color={c.onCarne2}>{nivel ? `Nivel ${st.nivel_actual} · ${nivel.nombre}` : ' '}</Txt>
+        </View>
+      </Row>
+      {nivel ? (
+        <View style={{ marginTop: 14, gap: 6 }}>
+          <Row style={{ justifyContent: 'space-between' }}>
+            <Txt size={12} color={c.onCarne2}>{st.nivel_actual < st.niveles.length ? `Hacia el nivel ${st.nivel_actual + 1}` : 'Último nivel'}</Txt>
+            <Txt w="medium" size={12} color="#fff">{ganado} / {max} XP · Total {num(p.xp_total)}</Txt>
+          </Row>
+          <View style={{ height: 10, borderRadius: 5, backgroundColor: 'rgba(255,255,255,.2)', overflow: 'hidden' }}>
+            <View style={{ width: `${pct}%`, height: '100%', borderRadius: 5, backgroundColor: c.gold }} />
+          </View>
+        </View>
+      ) : null}
+    </Carne>
   );
 
   return (
-    <View style={styles.flex}>
-      <StatusBar backgroundColor={COLORS.rojo} barStyle="light-content" />
-
-      {/* ── Header ───────────────────────────────────────── */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.headerSub}>¡Bienvenido a</Text>
-          <Text style={styles.headerTitle}>EduDer</Text>
-        </View>
-        <TouchableOpacity style={styles.campana} onPress={() => navigation.navigate('Notificaciones')} accessibilityLabel="Notificaciones">
-          <Text style={{ fontSize: 20 }}>🔔</Text>
-          {noLeidas > 0 && <View style={styles.campanaBadge}><Text style={styles.campanaBadgeText}>{noLeidas > 9 ? '9+' : noLeidas}</Text></View>}
-        </TouchableOpacity>
-        {/* Indicador de XP y streak */}
-        {perfil && (
-          <View style={styles.headerStats}>
-            <View style={styles.statChip}>
-              <Text style={styles.statEmoji}>⚡</Text>
-              <Text style={styles.statVal}>{perfil.xp_total ?? 0}</Text>
-              <Text style={styles.statLbl}>XP</Text>
+    <Screen header={header} onRefresh={recargar}>
+      {cargando && !data ? <Loading /> : error && !data ? <ErrorState message={error} onRetry={recargar} /> : st ? (
+        <>
+          {sig ? (
+            <View style={{ padding: 16, borderRadius: 18, backgroundColor: c.blueSoft, gap: 10 }}>
+              <Row style={{ gap: 6 }}>
+                <Icon name={tipo.icon} size={16} color={c.blueText} />
+                <Txt w="medium" size={13} color={c.blueText}>
+                  {sig.leccion.estado === 'en_progreso' ? 'Lección en progreso' : sig.leccion.estado === 'completada' ? 'Repaso' : 'Siguiente lección'} · Nivel {sig.nivel.orden}
+                </Txt>
+              </Row>
+              <Txt w="semibold" size={18} accessibilityRole="header">{sig.leccion.titulo}</Txt>
+              <Txt size={13} color={c.text2}>{tipo.label} · hasta {sig.leccion.xp_base} XP</Txt>
+              <Btn title="Continuar lección diaria" icon="player-play" size="lg" onPress={() => navigation.navigate('Teoria', { id_leccion: sig.leccion.id_leccion })} />
             </View>
-            <View style={[styles.statChip, { marginLeft: 8 }]}>
-              <Text style={styles.statEmoji}>🔥</Text>
-              <Text style={styles.statVal}>{perfil.streak_dias ?? 0}</Text>
-              <Text style={styles.statLbl}>días</Text>
-            </View>
+          ) : null}
+
+          <View style={{ gap: 10 }}>
+            <SectionHead title="Tus niveles" action="Ver todos" onAction={() => navigation.navigate('NivelesTab')} />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+              {st.niveles.map((n) => {
+                const bloq = n.estado === 'bloqueado';
+                const done = n.estado === 'completado';
+                const label = bloq ? 'Bloqueado' : done ? 'Completado' : `${n.porcentaje}% completado`;
+                return (
+                  <Pressable key={n.id_nivel} disabled={bloq} onPress={() => navigation.navigate('ListaLecciones', { id_nivel: n.id_nivel })}
+                    accessibilityLabel={`Nivel ${n.orden}, ${n.nombre}, ${label}`}
+                    style={{ width: 132, padding: 12, borderRadius: 14, gap: 6, backgroundColor: bloq ? c.surface2 : c.surface, borderWidth: 1, borderColor: c.line }}>
+                    <View style={{ width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: done ? c.okSoft : bloq ? c.surface3 : c.blueSoft }}>
+                      {bloq ? <Icon name="lock" size={18} color={c.text3} /> : done ? <Icon name="check" size={18} color={c.okText} /> : <Txt w="bold" color={c.blueText}>{n.orden}</Txt>}
+                    </View>
+                    <Txt w="semibold" size={13} color={bloq ? c.text3 : c.text} numberOfLines={2} style={{ minHeight: 36 }}>{n.nombre}</Txt>
+                    <Bar pct={n.porcentaje} tone={done ? 'ok' : 'blue'} />
+                    <Txt size={12} color={c.text3}>{label}</Txt>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
           </View>
-        )}
-      </View>
 
-      {/* ── Cuerpo ───────────────────────────────────────── */}
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => cargar(true)} colors={[COLORS.rojo]} />}
-      >
-        {error !== '' && (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorText}>⚠️  {error}</Text>
-          </View>
-        )}
-
-        <TouchableOpacity style={styles.btnMapa} onPress={() => navigation.navigate('MapaNiveles')} activeOpacity={0.85}>
-          <Text style={styles.btnMapaTitulo}>🗺️  Ir al mapa de niveles</Text>
-          <Text style={styles.btnMapaSub}>Sigue tu camino de aprendizaje desbloqueando lecciones</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.seccion}>Todos los niveles</Text>
-
-        {niveles.map((nivel, idx) => (
-          <NivelCard
-            key={nivel.id_nivel}
-            nivel={nivel}
-            index={idx}
-            navigation={navigation}
-          />
-        ))}
-
-        {niveles.length === 0 && !error && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📚</Text>
-            <Text style={styles.emptyText}>No hay niveles disponibles aún.</Text>
-          </View>
-        )}
-
-        <View style={{ height: 24 }} />
-      </ScrollView>
-    </View>
+          <Row style={{ gap: 10, alignItems: 'stretch' }}>
+            <Stat icon="bolt" tone="gold" value={num(p.xp_semana_actual || 0)} label="XP esta semana" />
+            <Stat icon="list-check" value={`${st.lecciones_completadas}/${st.lecciones_total}`} label="Lecciones" />
+            <Stat icon="award" tone="gold" value={(u.medallas || []).length} label="Medallas" />
+          </Row>
+        </>
+      ) : null}
+    </Screen>
   );
 }
-
-// ── Tarjeta de nivel ─────────────────────────────────────────────────────────
-// RF-07: muestra el nivel con sus lecciones. RF-08: al tocar una lección navega a LessonScreen.
-function NivelCard({ nivel, index, navigation }) {
-  const [abierto, setAbierto] = useState(index === 0);
-  const lecciones = nivel.lecciones ?? [];
-
-  return (
-    <View style={styles.card}>
-      {/* Encabezado del nivel */}
-      <TouchableOpacity style={styles.cardHeader} onPress={() => setAbierto(v => !v)} activeOpacity={0.8}>
-        <View style={styles.nivelNumero}>
-          <Text style={styles.nivelNumeroText}>{nivel.orden}</Text>
-        </View>
-        <View style={styles.cardHeaderInfo}>
-          <Text style={styles.cardTitle}>{nivel.nombre}</Text>
-          <Text style={styles.cardSub}>{lecciones.length} lección{lecciones.length !== 1 ? 'es' : ''}</Text>
-        </View>
-        <Text style={styles.chevron}>{abierto ? '▲' : '▼'}</Text>
-      </TouchableOpacity>
-
-      {/* Lista de lecciones */}
-      {abierto && (
-        <View style={styles.leccionesContainer}>
-          {lecciones.length === 0 ? (
-            <Text style={styles.sinLecciones}>Sin lecciones en este nivel.</Text>
-          ) : (
-            lecciones.map((lec, i) => (
-              <TouchableOpacity
-                key={lec.id_leccion}
-                style={styles.leccionItem}
-                onPress={() => navigation.navigate('MapaNiveles')}
-                activeOpacity={0.75}
-              >
-                <View style={styles.leccionIcono}>
-                  <Text style={styles.leccionIconoText}>
-                    {lec.tipo === 'teoria' ? '📖' : lec.tipo === 'ejercicio' ? '✏️' : '🎮'}
-                  </Text>
-                </View>
-                <View style={styles.leccionInfo}>
-                  <Text style={styles.leccionTitulo}>{lec.titulo}</Text>
-                  <Text style={styles.leccionXP}>+{lec.xp_base} XP</Text>
-                </View>
-                <Text style={styles.leccionFlecha}>›</Text>
-              </TouchableOpacity>
-            ))
-          )}
-        </View>
-      )}
-    </View>
-  );
-}
-
-// ── Estilos ──────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  flex:   { flex: 1, backgroundColor: COLORS.bg },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.bg },
-  loadingText: { marginTop: 12, color: COLORS.muted, fontSize: 14 },
-
-  // Header degradado rojo → azul
-  header: {
-    backgroundColor: COLORS.rojo,
-    paddingTop: 48,
-    paddingBottom: 24,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  headerSub:   { color: 'rgba(255,255,255,0.75)', fontSize: 13 },
-  headerTitle: { color: COLORS.blanco, fontSize: 28, fontWeight: '800', letterSpacing: -0.5 },
-  headerStats: { flexDirection: 'row' },
-  statChip: {
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 4,
-  },
-  statEmoji: { fontSize: 14 },
-  statVal:   { color: COLORS.blanco, fontWeight: '700', fontSize: 14 },
-  statLbl:   { color: 'rgba(255,255,255,0.75)', fontSize: 11 },
-
-  // Scroll
-  scroll:        { flex: 1 },
-  scrollContent: { padding: 16 },
-  seccion:       { fontSize: 13, fontWeight: '700', color: COLORS.muted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12, marginLeft: 4 },
-
-  // Error
-  errorBox: {
-    backgroundColor: COLORS.danger_light,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 14,
-    borderLeftWidth: 3,
-    borderLeftColor: COLORS.danger,
-  },
-  errorText: { color: COLORS.danger, fontSize: 13 },
-
-  // Card de nivel
-  card: {
-    backgroundColor: COLORS.superficie,
-    borderRadius: 14,
-    marginBottom: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    gap: 12,
-  },
-  nivelNumero: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.azul,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  nivelNumeroText: { color: COLORS.blanco, fontWeight: '800', fontSize: 15 },
-  cardHeaderInfo:  { flex: 1 },
-  cardTitle:       { fontSize: 15, fontWeight: '700', color: COLORS.texto },
-  cardSub:         { fontSize: 12, color: COLORS.muted, marginTop: 2 },
-  chevron:         { color: COLORS.muted, fontSize: 14 },
-
-  // Lecciones
-  leccionesContainer: { borderTopWidth: 1, borderTopColor: COLORS.borde },
-  sinLecciones:       { padding: 14, color: COLORS.muted, fontSize: 13, textAlign: 'center' },
-  leccionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borde,
-    gap: 10,
-  },
-  leccionIcono: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: COLORS.azul_light,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  leccionIconoText: { fontSize: 16 },
-  leccionInfo:     { flex: 1 },
-  leccionTitulo:   { fontSize: 14, fontWeight: '600', color: COLORS.texto },
-  leccionXP:       { fontSize: 11, color: COLORS.xp, fontWeight: '600', marginTop: 2 },
-  leccionFlecha:   { fontSize: 20, color: COLORS.muted },
-
-  campana: { marginRight: 10, padding: 6 },
-  campanaBadge: { position: 'absolute', top: 0, right: 0, minWidth: 16, height: 16, borderRadius: 8, backgroundColor: COLORS.xp, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 },
-  campanaBadgeText: { color: COLORS.blanco, fontSize: 10, fontWeight: '800' },
-  btnMapa: { backgroundColor: COLORS.azul, borderRadius: 14, padding: 16, marginBottom: 16 },
-  btnMapaTitulo: { color: COLORS.blanco, fontSize: 16, fontWeight: '800' },
-  btnMapaSub: { color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 4 },
-
-  // Empty
-  emptyState: { alignItems: 'center', paddingVertical: 40 },
-  emptyIcon:  { fontSize: 40, marginBottom: 10 },
-  emptyText:  { color: COLORS.muted, fontSize: 15 },
-});

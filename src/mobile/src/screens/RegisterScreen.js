@@ -1,283 +1,75 @@
-// src/screens/RegisterScreen.js — EduDer
-// CU-01 | RF-01, RF-02 | E12 - registrar()
+// src/screens/RegisterScreen.js — WF-04 · Registro · CU-01 | RF-01, RF-02 | HU-01
+// Validación en línea; el botón se activa solo cuando el formulario es válido.
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
+import { View } from 'react-native';
 import { register } from '../services/auth.service';
-import { COLORS } from '../theme/colors';
 import { irAMain } from '../utils/sesion';
-import { esCorreoInstitucional, TEXTO_DOMINIOS, DOMINIO_EJEMPLO } from '../config';
+import { esCorreoInstitucional, DOMINIO_EJEMPLO, TEXTO_DOMINIOS } from '../config';
+import { errorClave } from '../utils/validacion';
+import { Screen, AppBar, Logo, Txt, Field, Btn, Banner, LinkBtn, Row } from '../ui';
+import { useTheme } from '../theme';
 
 export default function RegisterScreen({ navigation }) {
-  const [form, setForm] = useState({
-    nombre: '',
-    apellido: '',
-    correo: '',
-    contrasena: '',
-    confirmar: '',
-  });
-  const [loading, setLoading]       = useState(false);
-  const [error, setError]           = useState('');
-  const [mostrarPass, setMostrarPass] = useState(false);
+  const { c } = useTheme();
+  const [f, setF] = useState({ nombre: '', apellido: '', correo: '', clave: '', clave2: '' });
+  const [tocado, setTocado] = useState({});
+  const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
+  const set = (k) => (v) => setF((p) => ({ ...p, [k]: v }));
+  const toca = (k) => () => setTocado((p) => ({ ...p, [k]: true }));
 
-  function update(campo, valor) {
-    setForm(prev => ({ ...prev, [campo]: valor }));
+  const reglas = {
+    nombre: (v) => (v.trim().length >= 2 ? '' : 'Escribe tu nombre.'),
+    apellido: (v) => (v.trim().length >= 2 ? '' : 'Escribe tu apellido.'),
+    correo: (v) => (!v.trim() ? 'Escribe tu correo institucional.' : esCorreoInstitucional(v) ? '' : `Debe terminar en ${TEXTO_DOMINIOS}`),
+    clave: errorClave,
+    clave2: (v) => (v && v === f.clave ? '' : 'Las contraseñas no coinciden.'),
+  };
+  const errs = Object.fromEntries(Object.keys(reglas).map((k) => [k, reglas[k](f[k])]));
+  const valido = Object.values(errs).every((e) => !e);
+  const ver = (k) => (tocado[k] ? errs[k] : '');
+  const okMsg = (k, t) => (tocado[k] && !errs[k] ? t : '');
+
+  async function enviar() {
     setError('');
-  }
-
-  // ── CU-01 | RF-01, RF-02 | E12 - registrar() ─────────────────────────────
-  // Valida los campos localmente y llama al servicio de registro.
-  // RF-01: el backend valida el dominio del correo institucional.
-  // RF-02: el backend crea el PERFIL_ESTUDIANTE automáticamente al registrar.
-  async function handleRegister() {
-    setError('');
-
-    if (!form.nombre.trim() || !form.apellido.trim()) {
-      setError('Nombre y apellido son obligatorios.');
-      return;
-    }
-    if (!esCorreoInstitucional(form.correo)) {
-      setError(`Debes usar tu correo institucional ${TEXTO_DOMINIOS}`);
-      return;
-    }
-    if (form.contrasena.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres.');
-      return;
-    }
-    if (form.contrasena !== form.confirmar) {
-      setError('Las contraseñas no coinciden.');
-      return;
-    }
-
-    setLoading(true);
+    if (!valido) { setTocado({ nombre: 1, apellido: 1, correo: 1, clave: 1, clave2: 1 }); return; }
+    setCargando(true);
     try {
-      await register({
-        nombre: form.nombre.trim(),
-        apellido: form.apellido.trim(),
-        correo_institucional: form.correo.trim().toLowerCase(),
-        contrasena: form.contrasena,
-      });
-      // RF-02: tras registro exitoso, ir al menú principal (perfil ya fue creado)
-      await irAMain(navigation);
+      await register({ nombre: f.nombre.trim(), apellido: f.apellido.trim(), correo_institucional: f.correo.trim().toLowerCase(), contrasena: f.clave });
+      await irAMain(navigation); // CU-01 paso 7: inicia sesión y lanza el tutorial
     } catch (err) {
-      const msg = err?.response?.data?.message || 'Error al registrarse. Intenta de nuevo.';
-      setError(msg);
+      if (!err?.response) setError('No se pudo conectar con el servidor. Verifica tu red.');
+      else setError(err.response.data?.message || 'No se pudo crear la cuenta.');
     } finally {
-      setLoading(false);
+      setCargando(false);
     }
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.logo}>EduDer</Text>
-          <Text style={styles.subtitle}>Crea tu cuenta con tu correo institucional</Text>
-        </View>
-
-        {/* Formulario */}
-        <View style={styles.form}>
-
-          {/* Nombre */}
-          <Text style={styles.label}>Nombre(s)</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ej: Juan Carlos"
-            placeholderTextColor="#9CA3AF"
-            value={form.nombre}
-            onChangeText={v => update('nombre', v)}
-            autoCapitalize="words"
-            returnKeyType="next"
-          />
-
-          {/* Apellido */}
-          <Text style={styles.label}>Apellido(s)</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ej: Gómez Pérez"
-            placeholderTextColor="#9CA3AF"
-            value={form.apellido}
-            onChangeText={v => update('apellido', v)}
-            autoCapitalize="words"
-            returnKeyType="next"
-          />
-
-          {/* Correo */}
-          <Text style={styles.label}>Correo institucional</Text>
-          <TextInput
-            style={styles.input}
-            placeholder={`usuario@${DOMINIO_EJEMPLO}`}
-            placeholderTextColor="#9CA3AF"
-            value={form.correo}
-            onChangeText={v => update('correo', v)}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            autoComplete="email"
-            returnKeyType="next"
-          />
-
-          {/* Contraseña */}
-          <Text style={styles.label}>Contraseña</Text>
-          <View style={styles.passRow}>
-            <TextInput
-              style={[styles.input, styles.passInput]}
-              placeholder="Mínimo 8 caracteres"
-              placeholderTextColor="#9CA3AF"
-              value={form.contrasena}
-              onChangeText={v => update('contrasena', v)}
-              secureTextEntry={!mostrarPass}
-              returnKeyType="next"
-            />
-            <TouchableOpacity
-              style={styles.eyeBtn}
-              onPress={() => setMostrarPass(v => !v)}
-            >
-              <Text style={styles.eyeIcon}>{mostrarPass ? '🙈' : '👁️'}</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Confirmar contraseña */}
-          <Text style={styles.label}>Confirmar contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Repite tu contraseña"
-            placeholderTextColor="#9CA3AF"
-            value={form.confirmar}
-            onChangeText={v => update('confirmar', v)}
-            secureTextEntry={!mostrarPass}
-            returnKeyType="done"
-            onSubmitEditing={handleRegister}
-          />
-
-          {/* Nota de correo institucional */}
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>
-              🔒  Solo se aceptan correos {TEXTO_DOMINIOS} (RF-01)
-            </Text>
-          </View>
-
-          {/* Error */}
-          {error !== '' && (
-            <View style={styles.errorBox}>
-              <Text style={styles.errorText}>⚠️  {error}</Text>
-            </View>
-          )}
-
-          {/* Botón */}
-          <TouchableOpacity
-            style={[styles.btnPrimary, loading && styles.btnDisabled]}
-            onPress={handleRegister}
-            disabled={loading}
-            accessibilityRole="button"
-            accessibilityLabel="Crear cuenta"
-          >
-            {loading
-              ? <ActivityIndicator color="#FFFFFF" />
-              : <Text style={styles.btnPrimaryText}>Crear cuenta</Text>
-            }
-          </TouchableOpacity>
-        </View>
-
-        {/* Footer: ir a login */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>¿Ya tienes cuenta?  </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.footerLink}>Inicia sesión</Text>
-          </TouchableOpacity>
-        </View>
-
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <Screen bar={<AppBar onBack={() => navigation.goBack()} title="" />}>
+      <View style={{ alignItems: 'center', gap: 8 }}>
+        <Logo size={52} />
+        <Txt w="semibold" size={24} accessibilityRole="header">Crear cuenta</Txt>
+        <Txt size={13} color={c.text2}>Usa tu correo institucional de Uniremington.</Txt>
+      </View>
+      {error ? <Banner tone="error">{error}</Banner> : null}
+      <View style={{ gap: 14 }}>
+        <Row style={{ alignItems: 'flex-start' }}>
+          <Field style={{ flex: 1 }} label="Nombre" value={f.nombre} onChangeText={set('nombre')} onBlur={toca('nombre')} error={ver('nombre')} autoComplete="given-name" />
+          <Field style={{ flex: 1 }} label="Apellido" value={f.apellido} onChangeText={set('apellido')} onBlur={toca('apellido')} error={ver('apellido')} autoComplete="family-name" />
+        </Row>
+        <Field label="Correo institucional" value={f.correo} onChangeText={set('correo')} onBlur={toca('correo')} error={ver('correo')} ok={okMsg('correo', 'Correo válido')}
+          placeholder={`nombre.apellido@${DOMINIO_EJEMPLO}`} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
+        <Field label="Contraseña" value={f.clave} onChangeText={set('clave')} onBlur={toca('clave')} secure autoCapitalize="none"
+          error={ver('clave')} ok={okMsg('clave', 'Contraseña segura')} help="Mínimo 8 caracteres, con al menos una letra y un número." />
+        <Field label="Confirmar contraseña" value={f.clave2} onChangeText={set('clave2')} onBlur={toca('clave2')} secure autoCapitalize="none"
+          error={ver('clave2')} ok={okMsg('clave2', 'Las contraseñas coinciden')} />
+        <Btn title="Registrarse" size="lg" onPress={enviar} loading={cargando} disabled={!valido} />
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+        <Txt size={13}>¿Ya tienes cuenta? </Txt>
+        <LinkBtn title="Iniciar sesión" onPress={() => navigation.replace('Login')} />
+      </View>
+    </Screen>
   );
 }
-
-// ── Estilos ───────────────────────────────────────────────────────────────────
-const PURPLE = COLORS.azul;
-const DANGER = COLORS.rojo;
-
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 40,
-  },
-  header: { alignItems: 'center', marginBottom: 32 },
-  logo: { fontSize: 40, fontWeight: '800', color: PURPLE, letterSpacing: 1 },
-  subtitle: { fontSize: 14, color: '#6B7280', marginTop: 6, textAlign: 'center' },
-
-  form: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 6, marginTop: 12 },
-  input: {
-    backgroundColor: '#F3F4F6',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#111827',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  passRow: { position: 'relative' },
-  passInput: { paddingRight: 48 },
-  eyeBtn: { position: 'absolute', right: 12, top: 0, bottom: 0, justifyContent: 'center' },
-  eyeIcon: { fontSize: 18 },
-
-  infoBox: {
-    backgroundColor: '#EEF2FF',
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 14,
-    borderLeftWidth: 3,
-    borderLeftColor: PURPLE,
-  },
-  infoText: { fontSize: 12, color: '#4338CA' },
-
-  errorBox: {
-    backgroundColor: '#FEF2F2',
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 14,
-    borderLeftWidth: 3,
-    borderLeftColor: DANGER,
-  },
-  errorText: { fontSize: 13, color: DANGER },
-
-  btnPrimary: {
-    backgroundColor: COLORS.rojo,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  btnDisabled: { opacity: 0.6 },
-  btnPrimaryText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
-
-  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 28 },
-  footerText: { fontSize: 14, color: '#6B7280' },
-  footerLink: { fontSize: 14, color: PURPLE, fontWeight: '700' },
-});

@@ -1,65 +1,57 @@
-// src/screens/ListaLeccionesScreen.js — EduDer
-// CU-03 | RF-08 | Lecciones de un nivel con su estado (completada / disponible / bloqueada) y tipo.
+// src/screens/ListaLeccionesScreen.js — WF-09 · Selección de lección · RF-08, RF-09
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, StatusBar } from 'react-native';
-import { COLORS } from '../theme/colors';
-import { ICONO_TIPO, NOMBRE_TIPO } from '../utils/progreso';
+import { View } from 'react-native';
+import { useDashboard } from '../hooks/useDashboard';
+import { TIPOS } from '../utils/progreso';
+import { Screen, AppBar, Card, Txt, Bar, Chip, ListRow, Empty, Btn, Loading, ErrorState, Row } from '../ui';
+import { useTheme } from '../theme';
+
+const ESTADO = {
+  no_iniciada: ['neutral', 'No iniciada'],
+  en_progreso: ['blue', 'En progreso'],
+  completada: ['ok', 'Completada'],
+};
 
 export default function ListaLeccionesScreen({ route, navigation }) {
-  const { nivel } = route.params;
-  const lecciones = nivel.lecciones ?? [];
-
-  function abrir(l) {
-    if (l.estado_ui === 'bloqueada') return;
-    navigation.navigate('Lesson', { id_leccion: l.id_leccion, titulo: l.titulo });
-  }
+  const { c } = useTheme();
+  const { id_nivel } = route.params ?? {};
+  const { data, error, cargando, recargar } = useDashboard();
+  const n = data?.state.niveles.find((x) => x.id_nivel === id_nivel);
 
   return (
-    <View style={styles.flex}>
-      <StatusBar backgroundColor={COLORS.azul} barStyle="light-content" />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}><Text style={styles.back}>←</Text></TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.sub}>Nivel {nivel.orden}</Text>
-          <Text style={styles.titulo} numberOfLines={1}>{nivel.nombre}</Text>
-        </View>
-      </View>
-      <FlatList
-        data={lecciones}
-        keyExtractor={(l) => l.id_leccion}
-        contentContainerStyle={{ padding: 16 }}
-        ListEmptyComponent={<Text style={styles.vacio}>Este nivel aún no tiene lecciones.</Text>}
-        renderItem={({ item: l }) => {
-          const bloq = l.estado_ui === 'bloqueada';
-          const hecha = l.estado_ui === 'completada';
-          return (
-            <TouchableOpacity style={[styles.item, bloq && { opacity: 0.5 }]} disabled={bloq} onPress={() => abrir(l)} activeOpacity={0.8}>
-              <View style={styles.icono}><Text style={{ fontSize: 18 }}>{bloq ? '🔒' : ICONO_TIPO[l.tipo] ?? '📘'}</Text></View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.nombre}>{l.titulo}</Text>
-                <Text style={styles.meta}>
-                  {NOMBRE_TIPO[l.tipo] ?? l.tipo} · +{l.xp_base} XP{hecha && l.puntaje != null ? ` · mejor puntaje ${l.puntaje}%` : ''}
-                </Text>
-              </View>
-              <Text style={[styles.estado, hecha && { color: COLORS.success }]}>{hecha ? '✓' : bloq ? '' : '›'}</Text>
-            </TouchableOpacity>
-          );
-        }}
-      />
-    </View>
+    <Screen bar={<AppBar onBack={() => navigation.goBack()} title={n ? `Nivel ${n.orden} · ${n.nombre}` : 'Lecciones'} />}>
+      {cargando && !data ? <Loading /> : error && !data ? <ErrorState message={error} onRetry={recargar} /> : !n ? (
+        <ErrorState message="Ese nivel no existe." />
+      ) : n.estado === 'bloqueado' ? (
+        <Empty icon="lock" title="Nivel bloqueado" text={`Completa el nivel anterior con ${n.umbral_aprobacion}% de promedio para desbloquearlo.`}>
+          <Btn title="Ver niveles" kind="secondary" block={false} onPress={() => navigation.goBack()} />
+        </Empty>
+      ) : (
+        <>
+          <Card>
+            <Txt size={13} color={c.text2}>{n.descripcion || ''}</Txt>
+            <Row style={{ gap: 8 }}><Bar pct={n.porcentaje} tone={n.aprobado ? 'ok' : 'blue'} style={{ flex: 1 }} /><Txt size={12} color={c.text3}>{n.completadas}/{n.total}</Txt></Row>
+            {n.promedio !== null ? (
+              <Txt size={12} color={c.text3}>Promedio del nivel: <Txt w="semibold" size={12} color={n.promedio >= n.umbral_aprobacion ? c.okText : c.errText}>{n.promedio}%</Txt> · se necesita {n.umbral_aprobacion}%</Txt>
+            ) : null}
+          </Card>
+          {n.lecciones.length === 0 ? <Empty icon="book" title="Sin lecciones" text="Este nivel aún no tiene lecciones publicadas." /> : (
+            <View style={{ gap: 10 }}>
+              {n.lecciones.map((l) => {
+                const t = TIPOS[l.tipo] || TIPOS.ejercicio;
+                const e = ESTADO[l.estado] || ESTADO.no_iniciada;
+                if (!l.desbloqueada) return <ListRow key={l.id_leccion} locked icon="lock" iconTone="neutral" title={l.titulo} sub="Completa la lección anterior" />;
+                const sub = `${t.label} · ${l.estado === 'completada' ? `${l.puntaje}% · ${Math.round((l.xp_base * l.puntaje) / 100)} XP ganados` : `+${l.xp_base} XP`}`;
+                return (
+                  <ListRow key={l.id_leccion} icon={l.estado === 'completada' ? 'check' : t.icon} iconTone={l.estado === 'completada' ? 'ok' : 'blue'}
+                    title={l.titulo} sub={sub} right={<Chip tone={e[0]} text={e[1]} />}
+                    onPress={() => navigation.navigate('Teoria', { id_leccion: l.id_leccion })} />
+                );
+              })}
+            </View>
+          )}
+        </>
+      )}
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: COLORS.bg },
-  header: { backgroundColor: COLORS.azul, paddingTop: 44, paddingBottom: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center' },
-  back: { color: COLORS.blanco, fontSize: 22, fontWeight: '700', paddingRight: 12 },
-  sub: { color: 'rgba(255,255,255,0.75)', fontSize: 12 },
-  titulo: { color: COLORS.blanco, fontSize: 18, fontWeight: '700' },
-  item: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.superficie, borderRadius: 12, padding: 12, marginBottom: 10, gap: 12 },
-  icono: { width: 40, height: 40, borderRadius: 12, backgroundColor: COLORS.azul_light, justifyContent: 'center', alignItems: 'center' },
-  nombre: { fontSize: 15, fontWeight: '600', color: COLORS.texto },
-  meta: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
-  estado: { fontSize: 20, color: COLORS.muted },
-  vacio: { textAlign: 'center', color: COLORS.muted, marginTop: 40 },
-});

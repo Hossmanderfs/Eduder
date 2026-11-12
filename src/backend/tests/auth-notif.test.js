@@ -12,6 +12,15 @@ const Notif = require('../src/services/notification.service');
 const { verifyToken } = require('../src/middleware/auth.middleware');
 const jwt = require('jsonwebtoken');
 
+describe('política de contraseña (RF-02)', () => {
+  test('rechaza claves sin número o sin letra al registrar', async () => {
+    for (const clave of ['sololetras', '12345678', 'Ab1']) {
+      await expect(Auth.register({ correo_institucional: 'a@miremington.edu.co', nombre: 'A', apellido: 'B', contrasena: clave }))
+        .rejects.toMatchObject({ status: 400 });
+    }
+  });
+});
+
 describe('resetPassword (RF-19)', () => {
   const user = () => ({ id_usuario: 'u1', update: jest.fn() });
   test('campos faltantes → 400', async () => {
@@ -24,13 +33,13 @@ describe('resetPassword (RF-19)', () => {
   test('token incorrecto → 400', async () => {
     M.Usuario.findOne.mockResolvedValue(user());
     M.TokenRecuperacion.findAll.mockResolvedValue([{ token_hash: await bcrypt.hash('bueno', 4), update: jest.fn() }]);
-    await expect(Auth.resetPassword({ correo_institucional: 'a@uniremington.edu.co', token: 'malo', nueva_contrasena: '12345678' }))
+    await expect(Auth.resetPassword({ correo_institucional: 'a@uniremington.edu.co', token: 'malo', nueva_contrasena: 'Clave1234' }))
       .rejects.toMatchObject({ status: 400 });
   });
   test('token correcto cambia la contraseña e invalida el token', async () => {
     const u = user(); const t = { token_hash: await bcrypt.hash('bueno', 4), update: jest.fn() };
     M.Usuario.findOne.mockResolvedValue(u); M.TokenRecuperacion.findAll.mockResolvedValue([t]);
-    await Auth.resetPassword({ correo_institucional: 'a@uniremington.edu.co', token: 'bueno', nueva_contrasena: '12345678' });
+    await Auth.resetPassword({ correo_institucional: 'a@uniremington.edu.co', token: 'bueno', nueva_contrasena: 'Clave1234' });
     expect(u.update).toHaveBeenCalled();
     expect(t.update).toHaveBeenCalledWith({ usado: true });
   });

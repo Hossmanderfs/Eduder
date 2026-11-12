@@ -1,86 +1,62 @@
-// src/screens/MedallasScreen.js — EduDer
-// CU-04 | RF-14, RF-18 | Catálogo de medallas: obtenidas a color con fecha; pendientes en gris.
-import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl, StatusBar } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+// src/screens/MedallasScreen.js — WF-13 · Medallas · RF-14, RF-15 | GET /gamification/medals
+import React, { useEffect, useState, useCallback } from 'react';
+import { View } from 'react-native';
 import api from '../services/api';
-import ErrorBanner from '../components/ErrorBanner';
-import { COLORS } from '../theme/colors';
+import { num, fechaLarga, mensajeError } from '../utils/formato';
+import { Screen, AppBar, Card, Txt, Bar, Icon, Loading, ErrorState, Row } from '../ui';
+import { useTheme } from '../theme';
 
-const CONDICION = {
-  nivel_completado: (v) => `Completa ${v} nivel(es)`,
-  puntaje_perfecto: (v) => `Saca 100% en ${v} lección(es)`,
-  streak: (v) => `Racha de ${v} día(s)`,
-  xp_acumulado: (v) => `Acumula ${v} XP`,
-};
-
-export default function MedallasScreen() {
-  const [medallas, setMedallas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
-
-  const cargar = useCallback(async (esRefresh = false) => {
-    esRefresh ? setRefreshing(true) : setLoading(true);
-    setError('');
-    try {
-      const res = await api.get('/gamification/medals');
-      setMedallas(res.data);
-    } catch {
-      setError('No se pudieron cargar las medallas.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useFocusEffect(useCallback(() => { cargar(); }, [cargar]));
-
-  const obtenidas = medallas.filter(m => m.obtenida).length;
-  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color={COLORS.rojo} /></View>;
-
-  return (
-    <View style={styles.flex}>
-      <StatusBar backgroundColor={COLORS.rojo} barStyle="light-content" />
-      <View style={styles.header}>
-        <Text style={styles.titulo}>Medallas</Text>
-        <Text style={styles.sub}>{obtenidas} de {medallas.length} obtenidas</Text>
-      </View>
-      <FlatList
-        data={medallas}
-        keyExtractor={(m) => m.id_medalla}
-        numColumns={2}
-        columnWrapperStyle={{ gap: 12 }}
-        contentContainerStyle={{ padding: 16, gap: 12 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => cargar(true)} colors={[COLORS.rojo]} />}
-        ListHeaderComponent={<ErrorBanner mensaje={error} />}
-        ListEmptyComponent={!error && <Text style={styles.vacio}>Aún no hay medallas en el catálogo.</Text>}
-        renderItem={({ item: m }) => (
-          <View style={[styles.card, !m.obtenida && styles.gris]}>
-            <Text style={[styles.icono, !m.obtenida && { opacity: 0.35 }]}>{m.obtenida ? '🏅' : '🔒'}</Text>
-            <Text style={styles.nombre}>{m.nombre}</Text>
-            <Text style={styles.desc} numberOfLines={3}>{m.descripcion || CONDICION[m.condicion_tipo]?.(m.condicion_valor) || ''}</Text>
-            <Text style={[styles.fecha, m.obtenida && { color: COLORS.success }]}>
-              {m.obtenida ? `Obtenida ${new Date(m.fecha_obtencion).toLocaleDateString('es-CO')}` : CONDICION[m.condicion_tipo]?.(m.condicion_valor)}
-            </Text>
-          </View>
-        )}
-      />
-    </View>
-  );
+const ICONO = { nivel_completado: 'shield-star', puntaje_perfecto: 'target', streak: 'flame', xp_acumulado: 'bolt' };
+function condicion(m) {
+  const v = m.condicion_valor;
+  switch (m.condicion_tipo) {
+    case 'nivel_completado': return `Aprueba el nivel ${v}`;
+    case 'puntaje_perfecto': return `Saca ${v}% en una lección`;
+    case 'streak': return `Racha de ${v} días`;
+    case 'xp_acumulado': return `Acumula ${num(v)} XP`;
+    default: return m.descripcion || '';
+  }
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: COLORS.bg },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.bg },
-  header: { backgroundColor: COLORS.rojo, paddingTop: 48, paddingBottom: 18, paddingHorizontal: 20 },
-  titulo: { color: COLORS.blanco, fontSize: 26, fontWeight: '800' },
-  sub: { color: 'rgba(255,255,255,0.8)', marginTop: 2 },
-  card: { flex: 1, backgroundColor: COLORS.superficie, borderRadius: 14, padding: 14, alignItems: 'center' },
-  gris: { backgroundColor: '#EEF0F3' },
-  icono: { fontSize: 40, marginBottom: 6 },
-  nombre: { fontWeight: '700', color: COLORS.texto, textAlign: 'center' },
-  desc: { fontSize: 12, color: COLORS.muted, textAlign: 'center', marginTop: 4 },
-  fecha: { fontSize: 11, color: COLORS.muted_light, marginTop: 8, textAlign: 'center' },
-  vacio: { textAlign: 'center', color: COLORS.muted, marginTop: 40 },
-});
+export default function MedallasScreen({ navigation }) {
+  const { c } = useTheme();
+  const [lista, setLista] = useState(null);
+  const [error, setError] = useState('');
+  const cargar = useCallback(async () => {
+    setError('');
+    try { const { data } = await api.get('/gamification/medals'); setLista(Array.isArray(data) ? data : []); }
+    catch (err) { setError(mensajeError(err, 'No se pudieron cargar las medallas.')); }
+  }, []);
+  useEffect(() => { cargar(); }, [cargar]);
+  const ganadas = (lista || []).filter((m) => m.obtenida).length;
+
+  return (
+    <Screen bar={<AppBar onBack={() => navigation.goBack()} title="Medallas" />} onRefresh={cargar}>
+      {error ? <ErrorState message={error} onRetry={cargar} /> : !lista ? <Loading /> : (
+        <>
+          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: c.goldSoft, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="award" size={26} color={c.goldText} />
+            </View>
+            <View style={{ flex: 1, gap: 6 }}>
+              <Txt><Txt w="semibold">{ganadas} de {lista.length}</Txt> medallas obtenidas</Txt>
+              <Bar pct={(ganadas / Math.max(1, lista.length)) * 100} tone="gold" height={8} />
+            </View>
+          </Card>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+            {lista.map((m) => (
+              <View key={m.id_medalla} accessibilityLabel={`${m.nombre}${m.obtenida ? `, obtenida el ${fechaLarga(m.fecha_obtencion)}` : `, pendiente: ${condicion(m)}`}`}
+                style={{ width: '48%', padding: 14, borderRadius: 16, alignItems: 'center', gap: 6, backgroundColor: m.obtenida ? c.goldSoft : c.surface2, borderWidth: 1, borderColor: m.obtenida ? c.gold : c.line }}>
+                <View style={{ width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center', backgroundColor: m.obtenida ? c.gold : c.surface3 }}>
+                  <Icon name={m.obtenida ? (ICONO[m.condicion_tipo] || 'award') : 'lock'} size={26} color={m.obtenida ? c.onGold : c.text3} />
+                </View>
+                <Txt w="semibold" size={14} style={{ textAlign: 'center' }}>{m.nombre}</Txt>
+                <Txt size={12} color={c.text3} style={{ textAlign: 'center' }}>{m.obtenida ? fechaLarga(m.fecha_obtencion) : condicion(m)}</Txt>
+              </View>
+            ))}
+          </View>
+        </>
+      )}
+    </Screen>
+  );
+}

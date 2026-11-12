@@ -1,258 +1,109 @@
-// src/screens/PerfilScreen.js — EduDer
-// CU-04 | RF-18 | E12 - obtenerResumen(): PerfilDTO
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  ActivityIndicator, RefreshControl, StatusBar,
-} from 'react-native';
+// src/screens/PerfilScreen.js — WF-03 · Perfil del estudiante · RF-18 | CU-04
+// GET /profile/summary · GET /profile/progress · GET /gamification/medals
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import api from '../services/api';
-import { COLORS } from '../theme/colors';
+import { useDashboard } from '../hooks/useDashboard';
+import { num, fecha } from '../utils/formato';
+import { Screen, Carne, CarneTop, IconBtn, Avatar, Txt, Chip, Btn, Bar, Stat, SectionHead, ListRow, Icon, Loading, ErrorState, Row } from '../ui';
+import { useTheme } from '../theme';
+
+const ICONO_MEDALLA = { nivel_completado: 'shield-star', puntaje_perfecto: 'target', streak: 'flame', xp_acumulado: 'bolt' };
 
 export default function PerfilScreen({ navigation }) {
-  const [perfil,     setPerfil]     = useState(null);
-  const [medallas,   setMedallas]   = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [usuario,    setUsuario]    = useState(null);
-
-  // RF-18: cargar perfil completo del estudiante autenticado
-  const cargar = useCallback(async (esRefresh = false) => {
-    esRefresh ? setRefreshing(true) : setLoading(true);
-    try {
-      const stored = await AsyncStorage.getItem('eduder_user');
-      if (stored) setUsuario(JSON.parse(stored));
-
-      const [perfilRes, medallasRes] = await Promise.all([
-        api.get('/profile/summary'),
-        api.get('/gamification/medals').catch(() => ({ data: [] })),
-      ]);
-      setPerfil(perfilRes.data?.perfil ?? null);
-      if (perfilRes.data?.nombre) setUsuario(perfilRes.data);
-      setMedallas(medallasRes.data ?? []);
-    } catch {
-      // Mostrar datos del cache si falla la red
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+  const { c, modo, alternar } = useTheme();
+  const { data, error, cargando, recargar } = useDashboard();
+  const [medallas, setMedallas] = useState([]);
+  const nav = useNavigation();
 
   useEffect(() => {
+    const cargar = () => api.get('/gamification/medals').then((r) => setMedallas(Array.isArray(r.data) ? r.data : [])).catch(() => {});
     cargar();
-    const unsub = navigation.addListener('focus', () => cargar(true));
-    return unsub;
-  }, [cargar, navigation]);
+    return nav.addListener('focus', cargar);
+  }, [nav]);
 
-  async function cerrarSesion() {
-    await AsyncStorage.removeItem('eduder_token');
-    await AsyncStorage.removeItem('eduder_user');
-    navigation.replace('Login');
+  function cerrarSesion() {
+    Alert.alert('¿Cerrar sesión?', undefined, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Cerrar sesión', style: 'destructive', onPress: async () => {
+        await AsyncStorage.multiRemove(['eduder_token', 'eduder_user']);
+        navigation.reset({ index: 0, routes: [{ name: 'Splash' }] });
+      } },
+    ]);
   }
 
-  if (loading) return (
-    <View style={styles.center}>
-      <ActivityIndicator size="large" color={COLORS.rojo} />
-    </View>
+  const u = data?.perfilData || {};
+  const p = data?.perfil || {};
+  const st = data?.state;
+  const ganadas = medallas.filter((m) => m.obtenida);
+  const preview = ganadas.concat(medallas.filter((m) => !m.obtenida)).slice(0, 4);
+
+  const header = (
+    <Carne top={
+      <CarneTop titulo="Uniremington · Carné EduDer">
+        <IconBtn name={modo === 'dark' ? 'sun' : 'moon'} color="#fff" size={22} label={modo === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'} onPress={alternar} />
+      </CarneTop>
+    }>
+      <Row style={{ gap: 14 }}>
+        <Avatar nombre={u.nombre} apellido={u.apellido} size={64} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Txt w="semibold" size={18} color="#fff" numberOfLines={1}>{u.nombre ? `${u.nombre} ${u.apellido}` : 'Cargando…'}</Txt>
+          <Txt size={13} color={c.onCarne2} numberOfLines={1}>{u.correo_institucional || ' '}</Txt>
+          {st ? <View style={{ marginTop: 4 }}><Chip icon="shield-star" text={`Nivel ${st.nivel_actual} · ${st.niveles[st.nivel_actual - 1]?.nombre || ''}`} style={{ backgroundColor: 'rgba(255,255,255,.16)' }} tone="blue" /></View> : null}
+        </View>
+      </Row>
+    </Carne>
   );
 
-  const medallasObtenidas = medallas.filter(m => m.obtenida);
-  const medallasPendientes = medallas.filter(m => !m.obtenida).slice(0, 3);
-  const iniciales = usuario
-    ? ((usuario.nombre?.[0] ?? '') + (usuario.apellido?.[0] ?? '')).toUpperCase()
-    : 'U';
-
   return (
-    <View style={styles.flex}>
-      <StatusBar backgroundColor={COLORS.azul} barStyle="light-content" />
+    <Screen header={header} onRefresh={recargar}>
+      {cargando && !data ? <Loading /> : error && !data ? <ErrorState message={error} onRetry={recargar} /> : st ? (
+        <>
+          <Row style={{ gap: 10, alignItems: 'stretch' }}>
+            <Stat icon="shield-star" value={`${st.nivel_actual} / ${st.niveles.length}`} label="Nivel actual" />
+            <Stat icon="bolt" tone="gold" value={num(p.xp_total || 0)} label="XP total" />
+            <Stat icon="flame" tone="gold" value={p.streak_dias || 0} label={(p.streak_dias || 0) === 1 ? 'Día de racha' : 'Días de racha'} />
+          </Row>
 
-      <ScrollView
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => cargar(true)} colors={[COLORS.rojo]} />}
-      >
-        {/* ── Header de perfil ────────────────────────── */}
-        <View style={styles.header}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{iniciales}</Text>
+          <View style={{ gap: 12 }}>
+            <SectionHead title="Mi progreso" />
+            <Txt size={12} color={c.text3} style={{ marginTop: -8 }}>{st.porcentaje_global}% del curso</Txt>
+            {st.niveles.map((n) => {
+              const bloq = n.estado === 'bloqueado';
+              return (
+                <View key={n.id_nivel} style={{ opacity: bloq ? 0.6 : 1, gap: 6 }}>
+                  <Row style={{ justifyContent: 'space-between' }}>
+                    <Txt size={13}>{bloq ? '🔒 ' : ''}Nivel {n.orden} · {n.nombre}</Txt>
+                    <Txt size={13} color={c.text2}>{n.porcentaje}%</Txt>
+                  </Row>
+                  <Bar pct={n.porcentaje} height={8} tone={n.aprobado ? 'ok' : n.porcentaje ? 'gold' : 'blue'} />
+                </View>
+              );
+            })}
           </View>
-          <Text style={styles.nombre}>
-            {usuario?.nombre ?? ''} {usuario?.apellido ?? ''}
-          </Text>
-          <Text style={styles.correo}>{usuario?.correo_institucional ?? ''}</Text>
-        </View>
 
-        {/* ── Estadísticas ─────────────────────────────── */}
-        <View style={styles.statsRow}>
-          <StatBox label="XP Total"   valor={perfil?.xp_total ?? 0}    emoji="⚡" color={COLORS.xp} />
-          <StatBox label="Racha"      valor={`${perfil?.streak_dias ?? 0}d`} emoji="🔥" color={COLORS.rojo} />
-          <StatBox label="Medallas"   valor={medallasObtenidas.length}  emoji="🏅" color={COLORS.azul} />
-        </View>
-
-        {/* ── Barra de XP semanal ──────────────────────── */}
-        {perfil?.xp_semana_actual !== undefined && (
-          <View style={styles.seccion}>
-            <Text style={styles.seccionTitulo}>XP esta semana</Text>
-            <View style={styles.xpBarContainer}>
-              <View style={styles.xpBarBg}>
-                <View style={[styles.xpBarFill, {
-                  width: `${Math.min((perfil.xp_semana_actual / 500) * 100, 100)}%`
-                }]} />
-              </View>
-              <Text style={styles.xpBarLabel}>{perfil.xp_semana_actual} / 500 XP</Text>
-            </View>
-          </View>
-        )}
-
-        {/* ── Medallas obtenidas ───────────────────────── */}
-        <View style={styles.seccion}>
-          <Text style={styles.seccionTitulo}>Mis medallas ({medallasObtenidas.length})</Text>
-          {medallasObtenidas.length === 0 ? (
-            <View style={styles.emptyCard}>
-              <Text style={styles.emptyIcon}>🎯</Text>
-              <Text style={styles.emptyText}>¡Completa lecciones para ganar medallas!</Text>
-            </View>
-          ) : (
-            <View style={styles.medallasGrid}>
-              {medallasObtenidas.map(m => (
-                <View key={m.id_medalla} style={styles.medallaChip}>
-                  <Text style={styles.medallaCicle}>{m.icono ?? '🏅'}</Text>
-                  <Text style={styles.medallaNombre}>{m.nombre}</Text>
+          <View style={{ gap: 10 }}>
+            <SectionHead title="Mis medallas" action={`Ver todas (${ganadas.length}/${medallas.length})`} onAction={() => navigation.navigate('Medallas')} />
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+              {preview.map((m) => (
+                <View key={m.id_medalla} style={{ width: '48%', padding: 12, borderRadius: 14, alignItems: 'center', gap: 4, backgroundColor: m.obtenida ? c.goldSoft : c.surface2, opacity: m.obtenida ? 1 : 0.7 }}>
+                  <Icon name={m.obtenida ? (ICONO_MEDALLA[m.condicion_tipo] || 'award') : 'lock'} size={26} color={m.obtenida ? c.goldText : c.text3} />
+                  <Txt w="semibold" size={13} style={{ textAlign: 'center' }}>{m.nombre}</Txt>
+                  <Txt size={11} color={c.text3} style={{ textAlign: 'center' }} numberOfLines={2}>{m.obtenida ? `Obtenida ${fecha(m.fecha_obtencion)}` : m.descripcion || ''}</Txt>
                 </View>
               ))}
             </View>
-          )}
-        </View>
-
-        {/* ── Próximas medallas ────────────────────────── */}
-        {medallasPendientes.length > 0 && (
-          <View style={styles.seccion}>
-            <Text style={styles.seccionTitulo}>Próximas medallas</Text>
-            {medallasPendientes.map(m => (
-              <View key={m.id_medalla} style={styles.pendienteItem}>
-                <Text style={styles.pendienteIcono}>🔒</Text>
-                <View style={styles.pendienteInfo}>
-                  <Text style={styles.pendienteNombre}>{m.nombre}</Text>
-                  <Text style={styles.pendienteMeta}>
-                    {m.condicion_tipo === 'xp_acumulado'
-                      ? `Alcanza ${m.condicion_valor} XP`
-                      : `${m.condicion_valor} días de racha`}
-                  </Text>
-                </View>
-              </View>
-            ))}
           </View>
-        )}
 
-        {/* ── Botón cerrar sesión ──────────────────────── */}
-        <View style={{ padding: 20 }}>
-          <TouchableOpacity style={styles.btnLogout} onPress={cerrarSesion}>
-            <Text style={styles.btnLogoutText}>Cerrar sesión</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </View>
+          <Btn title="Ver historial de lecciones" icon="history" size="lg" onPress={() => navigation.navigate('Historial')} />
+          <View style={{ gap: 10 }}>
+            <ListRow icon="bell" title="Notificaciones" right={<Icon name="chevron-right" size={18} color={c.text3} />} onPress={() => navigation.navigate('Notificaciones')} />
+            <ListRow icon="logout" iconTone="red" title="Cerrar sesión" onPress={cerrarSesion} />
+          </View>
+        </>
+      ) : null}
+    </Screen>
   );
 }
-
-function StatBox({ label, valor, emoji, color }) {
-  return (
-    <View style={[styles.statBox, { borderTopColor: color, borderTopWidth: 3 }]}>
-      <Text style={styles.statEmoji}>{emoji}</Text>
-      <Text style={[styles.statValor, { color }]}>{valor}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  flex:   { flex: 1, backgroundColor: COLORS.bg },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-
-  header: {
-    backgroundColor: COLORS.azul,
-    paddingTop: 50,
-    paddingBottom: 32,
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 72, height: 72, borderRadius: 36,
-    backgroundColor: COLORS.rojo,
-    justifyContent: 'center', alignItems: 'center',
-    marginBottom: 12,
-    borderWidth: 3, borderColor: 'rgba(255,255,255,0.3)',
-  },
-  avatarText: { color: COLORS.blanco, fontSize: 26, fontWeight: '800' },
-  nombre:     { color: COLORS.blanco, fontSize: 18, fontWeight: '700', marginBottom: 4 },
-  correo:     { color: 'rgba(255,255,255,0.7)', fontSize: 12 },
-
-  statsRow: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginTop: -20,
-    gap: 10,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: COLORS.superficie,
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  statEmoji: { fontSize: 20, marginBottom: 4 },
-  statValor: { fontSize: 20, fontWeight: '800' },
-  statLabel: { fontSize: 11, color: COLORS.muted, marginTop: 2 },
-
-  seccion: { marginHorizontal: 16, marginTop: 20 },
-  seccionTitulo: {
-    fontSize: 13, fontWeight: '700', color: COLORS.muted,
-    textTransform: 'uppercase', letterSpacing: 0.7, marginBottom: 10,
-  },
-
-  xpBarContainer: { gap: 6 },
-  xpBarBg: {
-    height: 10, backgroundColor: COLORS.borde,
-    borderRadius: 5, overflow: 'hidden',
-  },
-  xpBarFill: {
-    height: 10, backgroundColor: COLORS.xp, borderRadius: 5,
-  },
-  xpBarLabel: { fontSize: 12, color: COLORS.muted, textAlign: 'right' },
-
-  medallasGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  medallaChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: COLORS.azul_light,
-    borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6,
-  },
-  medallaCicle:  { fontSize: 16 },
-  medallaNombre: { fontSize: 12, fontWeight: '600', color: COLORS.azul },
-
-  pendienteItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: COLORS.superficie, borderRadius: 12,
-    padding: 14, marginBottom: 8,
-    borderWidth: 1, borderColor: COLORS.borde,
-  },
-  pendienteIcono:  { fontSize: 22 },
-  pendienteInfo:   { flex: 1 },
-  pendienteNombre: { fontSize: 14, fontWeight: '600', color: COLORS.texto },
-  pendienteMeta:   { fontSize: 12, color: COLORS.muted, marginTop: 2 },
-
-  emptyCard: {
-    backgroundColor: COLORS.superficie, borderRadius: 12,
-    padding: 24, alignItems: 'center', borderWidth: 1, borderColor: COLORS.borde,
-  },
-  emptyIcon: { fontSize: 32, marginBottom: 8 },
-  emptyText: { color: COLORS.muted, fontSize: 14, textAlign: 'center' },
-
-  btnLogout: {
-    backgroundColor: COLORS.rojo_light,
-    borderRadius: 12, paddingVertical: 14,
-    alignItems: 'center', borderWidth: 1,
-    borderColor: '#FECACA',
-  },
-  btnLogoutText: { color: COLORS.rojo, fontSize: 15, fontWeight: '700' },
-});

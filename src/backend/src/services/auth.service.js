@@ -18,7 +18,7 @@ function signToken(usuario) {
   return jwt.sign(
     { id_usuario: usuario.id_usuario, correo: usuario.correo_institucional, rol: usuario.rol },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
   );
 }
 
@@ -34,6 +34,17 @@ function usuarioPublico(u) {
   };
 }
 
+
+// RF-02 (WF-04): la contraseña debe tener mínimo 8 caracteres, con al menos una letra y un número.
+function validarContrasena(clave) {
+  const c = String(clave || '');
+  if (c.length < 8 || !/[A-Za-zñÑ]/.test(c) || !/\d/.test(c)) {
+    const err = new Error('La contraseña debe tener mínimo 8 caracteres, con al menos una letra y un número');
+    err.status = 400;
+    throw err;
+  }
+}
+
 // ── CU-01 | RF-01, RF-02 | E12 - registrar() ─────────────────────────────────
 // Valida correo institucional, encripta contraseña con bcrypt (costo 10)
 // y crea automáticamente el PERFIL_ESTUDIANTE con XP=0, streak=0, nivel=1.
@@ -45,6 +56,8 @@ async function register(body) {
     err.status = 400;
     throw err;
   }
+
+  validarContrasena(contrasena);
 
   // RF-01: validar dominio institucional
   if (!esCorreoInstitucional(correo_institucional)) {
@@ -226,11 +239,7 @@ async function resetPassword(body) {
     err.status = 400;
     throw err;
   }
-  if (String(nueva_contrasena).length < 8) {
-    const err = new Error('La contraseña debe tener al menos 8 caracteres');
-    err.status = 400;
-    throw err;
-  }
+  validarContrasena(nueva_contrasena);
   const usuario = await Usuario.findOne({ where: { correo_institucional } });
   if (!usuario) throw invalido();
 

@@ -1,7 +1,7 @@
 {
   "name": "EduDerApp",
   "version": "1.0.0",
-  "description": "EduDer \u2014 App M\u00f3vil Educativa (React Native)",
+  "description": "EduDer — App Móvil Educativa (React Native)",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
@@ -11,22 +11,26 @@
     "test": "jest"
   },
   "dependencies": {
+    "@expo-google-fonts/lexend": "^0.4.1",
+    "@expo/vector-icons": "^15.1.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.0.0",
     "@react-navigation/native": "^7.0.0",
+    "@react-navigation/native-stack": "^7.0.0",
     "axios": "^1.4.0",
     "expo": "~58.0.24",
+    "expo-constants": "~58.0.16",
+    "expo-font": "~58.0.12",
+    "expo-status-bar": "~58.0.5",
     "react": "19.3.0",
     "react-native": "0.88.1",
     "react-native-safe-area-context": "~5.11.1",
     "react-native-screens": "~4.30.1",
-    "@react-native-async-storage/async-storage": "2.2.0",
-    "expo-constants": "~58.0.16",
-    "@react-navigation/native-stack": "^7.0.0",
     "react-native-webview": "~14.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "jest": "^29.2.1",
-    "babel-preset-expo": "~58.0.0"
+    "babel-preset-expo": "~58.0.0",
+    "jest": "^29.2.1"
   }
 }
