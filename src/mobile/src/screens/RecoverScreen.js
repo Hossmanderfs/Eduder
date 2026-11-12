@@ -12,6 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import api from '../services/api';
+import { esCorreoInstitucional, TEXTO_DOMINIOS, DOMINIO_EJEMPLO } from '../config';
 
 export default function RecoverScreen({ navigation }) {
   const [correo, setCorreo]   = useState('');
@@ -22,8 +23,8 @@ export default function RecoverScreen({ navigation }) {
   // RF-19: envía solicitud de recuperación; el backend no revela si el correo existe
   async function handleRecover() {
     setError('');
-    if (!correo.includes('@uniremington.edu.co')) {
-      setError('Debes usar tu correo @uniremington.edu.co');
+    if (!esCorreoInstitucional(correo)) {
+      setError(`Debes usar tu correo ${TEXTO_DOMINIOS}`);
       return;
     }
     setLoading(true);
@@ -70,7 +71,7 @@ export default function RecoverScreen({ navigation }) {
         <Text style={styles.label}>Correo institucional</Text>
         <TextInput
           style={styles.input}
-          placeholder="usuario@uniremington.edu.co"
+          placeholder={`usuario@${DOMINIO_EJEMPLO}`}
           placeholderTextColor="#9CA3AF"
           value={correo}
           onChangeText={setCorreo}

@@ -5,6 +5,7 @@ import { View, Text, TextInput, StyleSheet, ScrollView, KeyboardAvoidingView, Pl
 import api from '../services/api';
 import BotonPrimario from '../components/BotonPrimario';
 import ErrorBanner from '../components/ErrorBanner';
+import { esCorreoInstitucional, TEXTO_DOMINIOS } from '../config';
 import { COLORS } from '../theme/colors';
 
 export default function ResetPasswordScreen({ route, navigation }) {
@@ -18,7 +19,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
 
   async function enviar() {
     setError('');
-    if (!correo.includes('@uniremington.edu.co')) return setError('Usa tu correo @uniremington.edu.co');
+    if (!esCorreoInstitucional(correo)) return setError(`Usa tu correo ${TEXTO_DOMINIOS}`);
     if (!token.trim()) return setError('Pega el código que recibiste por correo.');
     if (pass.length < 8) return setError('La contraseña debe tener al menos 8 caracteres.');
     if (pass !== pass2) return setError('Las contraseñas no coinciden.');

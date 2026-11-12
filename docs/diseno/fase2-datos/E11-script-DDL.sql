@@ -4,6 +4,7 @@
 -- Ingeniería de Software | Parcial 1
 -- Normalizado hasta 3FN | MySQL 8.0+
 -- ================================================
+-- Correo: estudiantes @miremington.edu.co; administración @uniremington.edu.co.
 -- v1.2 (alineado con el documento final): 13 tablas; rol y tipo son ENUM
 --   (se eliminan las tablas rol y tipo_leccion); estado ENUM('activo','inactivo').
 -- CORRECCIONES v1.1 (históricas):
@@ -37,7 +38,7 @@ CREATE TABLE usuarios (
     bloqueado_hasta         DATETIME         NULL,
     CONSTRAINT pk_usuarios    PRIMARY KEY (id_usuario),
     CONSTRAINT uq_correo      UNIQUE (correo_institucional),
-    CONSTRAINT chk_correo     CHECK (correo_institucional LIKE '%@uniremington.edu.co')
+    CONSTRAINT chk_correo     CHECK (correo_institucional REGEXP '@(miremington|uniremington)\\.edu\\.co$')
 );
 
 -- -------------------------------------------------------
@@ -235,7 +236,7 @@ INSERT INTO usuarios (id_usuario, correo_institucional, nombre, apellido, contra
 VALUES ('admin-001', 'admin@uniremington.edu.co', 'Admin', 'Sistema', '$2b$10$hashejemplo', 'admin', 'activo');
 
 INSERT INTO usuarios (id_usuario, correo_institucional, nombre, apellido, contrasena_hash, rol, estado)
-VALUES ('est-001', 'juan.perez@uniremington.edu.co', 'Juan', 'Pérez', '$2b$10$hashejemplo', 'estudiante', 'activo');
+VALUES ('est-001', 'juan.perez@miremington.edu.co', 'Juan', 'Pérez', '$2b$10$hashejemplo', 'estudiante', 'activo');
 
 INSERT INTO perfil_estudiante (id_perfil, id_usuario, nivel_actual, xp_total, streak_dias, xp_semana_actual)
 VALUES ('perfil-001', 'est-001', 1, 0, 0, 0);

@@ -43,7 +43,7 @@ proyecto-[nombre]-[apellido]/
 - 5 niveles de lógica matemática secuenciales
 - 8–12 lecciones por nivel con ejercicios interactivos
 - Sistema de gamificación: XP, streaks, medallas y ranking semanal
-- Autenticación restringida a `@uniremington.edu.co`
+- Autenticación restringida a correos institucionales: estudiantes `@miremington.edu.co` y administración `@uniremington.edu.co` (configurable con `DOMINIOS_PERMITIDOS`)
 - Roles: Estudiante y Administrador
 - Panel de administración web
 - Notificaciones push diarias

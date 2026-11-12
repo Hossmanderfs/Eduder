@@ -3,6 +3,7 @@ const bcrypt     = require('bcryptjs');
 const jwt        = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const crypto     = require('crypto');
+const { esCorreoInstitucional, DOMINIOS } = require('../config/dominios');
 const nodemailer = require('nodemailer');
 
 const {
@@ -46,9 +47,8 @@ async function register(body) {
   }
 
   // RF-01: validar dominio institucional
-  const regexCorreo = /^[^\s@]+@uniremington\.edu\.co$/i;
-  if (!regexCorreo.test(correo_institucional)) {
-    const err = new Error('El correo debe terminar en @uniremington.edu.co');
+  if (!esCorreoInstitucional(correo_institucional)) {
+    const err = new Error(`El correo debe ser institucional (${DOMINIOS.map(d => '@' + d).join(' o ')})`);
     err.status = 400;
     throw err;
   }

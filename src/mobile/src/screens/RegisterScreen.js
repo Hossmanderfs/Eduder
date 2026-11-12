@@ -15,6 +15,7 @@ import {
 import { register } from '../services/auth.service';
 import { COLORS } from '../theme/colors';
 import { irAMain } from '../utils/sesion';
+import { esCorreoInstitucional, TEXTO_DOMINIOS, DOMINIO_EJEMPLO } from '../config';
 
 export default function RegisterScreen({ navigation }) {
   const [form, setForm] = useState({
@@ -35,7 +36,7 @@ export default function RegisterScreen({ navigation }) {
 
   // ── CU-01 | RF-01, RF-02 | E12 - registrar() ─────────────────────────────
   // Valida los campos localmente y llama al servicio de registro.
-  // RF-01: el backend valida que el correo termine en @uniremington.edu.co.
+  // RF-01: el backend valida el dominio del correo institucional.
   // RF-02: el backend crea el PERFIL_ESTUDIANTE automáticamente al registrar.
   async function handleRegister() {
     setError('');
@@ -44,8 +45,8 @@ export default function RegisterScreen({ navigation }) {
       setError('Nombre y apellido son obligatorios.');
       return;
     }
-    if (!form.correo.includes('@uniremington.edu.co')) {
-      setError('Debes usar tu correo institucional @uniremington.edu.co');
+    if (!esCorreoInstitucional(form.correo)) {
+      setError(`Debes usar tu correo institucional ${TEXTO_DOMINIOS}`);
       return;
     }
     if (form.contrasena.length < 8) {
@@ -119,7 +120,7 @@ export default function RegisterScreen({ navigation }) {
           <Text style={styles.label}>Correo institucional</Text>
           <TextInput
             style={styles.input}
-            placeholder="usuario@uniremington.edu.co"
+            placeholder={`usuario@${DOMINIO_EJEMPLO}`}
             placeholderTextColor="#9CA3AF"
             value={form.correo}
             onChangeText={v => update('correo', v)}
@@ -165,7 +166,7 @@ export default function RegisterScreen({ navigation }) {
           {/* Nota de correo institucional */}
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              🔒  Solo se aceptan correos @uniremington.edu.co (RF-01)
+              🔒  Solo se aceptan correos {TEXTO_DOMINIOS} (RF-01)
             </Text>
           </View>
 

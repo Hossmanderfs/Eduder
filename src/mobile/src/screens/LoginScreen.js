@@ -16,6 +16,7 @@ import {
 import { login } from '../services/auth.service';
 import { COLORS } from '../theme/colors';
 import { irAMain } from '../utils/sesion';
+import { esCorreoInstitucional, TEXTO_DOMINIOS, DOMINIO_EJEMPLO } from '../config';
 
 export default function LoginScreen({ navigation }) {
   const [correo, setCorreo]       = useState('');
@@ -40,8 +41,8 @@ export default function LoginScreen({ navigation }) {
       setError('Ingresa tu contraseña.');
       return;
     }
-    if (!correo.includes('@uniremington.edu.co')) {
-      setError('Debes usar tu correo @uniremington.edu.co');
+    if (!esCorreoInstitucional(correo)) {
+      setError(`Debes usar tu correo ${TEXTO_DOMINIOS}`);
       return;
     }
 
@@ -79,7 +80,7 @@ export default function LoginScreen({ navigation }) {
           <Text style={styles.label}>Correo institucional</Text>
           <TextInput
             style={[styles.input, error && correo === '' && styles.inputError]}
-            placeholder="usuario@uniremington.edu.co"
+            placeholder={`usuario@${DOMINIO_EJEMPLO}`}
             placeholderTextColor="#9CA3AF"
             value={correo}
             onChangeText={setCorreo}

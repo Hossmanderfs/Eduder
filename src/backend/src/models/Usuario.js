@@ -1,6 +1,7 @@
 // src/models/Usuario.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const { esCorreoInstitucional, DOMINIOS } = require('../config/dominios');
 
 const Usuario = sequelize.define('Usuario', {
   id_usuario: {
@@ -16,8 +17,8 @@ const Usuario = sequelize.define('Usuario', {
     validate: {
       isEmail: true,
       isInstitucional(value) {
-        if (!value.endsWith('@uniremington.edu.co')) {
-          throw new Error('El correo debe ser institucional (@uniremington.edu.co)');
+        if (!esCorreoInstitucional(value)) {
+          throw new Error(`El correo debe ser institucional (${DOMINIOS.map(d => '@' + d).join(' o ')})`);
         }
       },
     },
