@@ -24,10 +24,11 @@ export default function PerfilScreen({ navigation }) {
       if (stored) setUsuario(JSON.parse(stored));
 
       const [perfilRes, medallasRes] = await Promise.all([
-        api.get('/profile'),
+        api.get('/profile/summary'),
         api.get('/gamification/medals').catch(() => ({ data: [] })),
       ]);
       setPerfil(perfilRes.data?.perfil ?? null);
+      if (perfilRes.data?.nombre) setUsuario(perfilRes.data);
       setMedallas(medallasRes.data ?? []);
     } catch {
       // Mostrar datos del cache si falla la red
@@ -37,7 +38,11 @@ export default function PerfilScreen({ navigation }) {
     }
   }, []);
 
-  useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => {
+    cargar();
+    const unsub = navigation.addListener('focus', () => cargar(true));
+    return unsub;
+  }, [cargar, navigation]);
 
   async function cerrarSesion() {
     await AsyncStorage.removeItem('eduder_token');

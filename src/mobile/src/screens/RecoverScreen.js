@@ -45,7 +45,10 @@ export default function RecoverScreen({ navigation }) {
         <Text style={styles.successMsg}>
           Si tu correo está registrado, recibirás un enlace válido por 30 minutos.
         </Text>
-        <TouchableOpacity style={styles.btnBack} onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity style={styles.btnBack} onPress={() => navigation.navigate('ResetPassword', { correo })}>
+          <Text style={styles.btnBackText}>Ya tengo mi código</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.btnBack, { marginTop: 10 }]} onPress={() => navigation.navigate('Login')}>
           <Text style={styles.btnBackText}>Volver al login</Text>
         </TouchableOpacity>
       </View>

@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { register } from '../services/auth.service';
 import { COLORS } from '../theme/colors';
+import { irAMain } from '../utils/sesion';
 
 export default function RegisterScreen({ navigation }) {
   const [form, setForm] = useState({
@@ -65,7 +66,7 @@ export default function RegisterScreen({ navigation }) {
         contrasena: form.contrasena,
       });
       // RF-02: tras registro exitoso, ir al menú principal (perfil ya fue creado)
-      navigation.replace('Main');
+      await irAMain(navigation);
     } catch (err) {
       const msg = err?.response?.data?.message || 'Error al registrarse. Intenta de nuevo.';
       setError(msg);

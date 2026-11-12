@@ -4,13 +4,14 @@ import React, { useEffect } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, StatusBar } from 'react-native';
 import { getStoredSession } from '../services/auth.service';
 import { COLORS } from '../theme/colors';
+import { irAMain } from '../utils/sesion';
 
 export default function SplashScreen({ navigation }) {
   useEffect(() => {
     async function checkSession() {
       try {
         const session = await getStoredSession();
-        navigation.replace(session ? 'Main' : 'Login');
+        if (session) await irAMain(navigation); else navigation.replace('Login');
       } catch {
         navigation.replace('Login');
       }

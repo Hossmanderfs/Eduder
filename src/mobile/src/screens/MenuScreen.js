@@ -13,6 +13,7 @@ import { COLORS } from '../theme/colors';
 export default function MenuScreen({ navigation }) {
   const [niveles,    setNiveles]    = useState([]);
   const [perfil,     setPerfil]     = useState(null);
+  const [noLeidas,   setNoLeidas]   = useState(0);
   const [loading,    setLoading]    = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error,      setError]      = useState('');
@@ -24,10 +25,11 @@ export default function MenuScreen({ navigation }) {
     try {
       const [nivelesRes, perfilRes] = await Promise.all([
         api.get('/levels'),
-        api.get('/profile').catch(() => ({ data: null })),
+        api.get('/profile/summary').catch(() => ({ data: null })),
       ]);
       setNiveles(nivelesRes.data);
       setPerfil(perfilRes.data?.perfil ?? null);
+      setNoLeidas(perfilRes.data?.notificaciones?.length ?? 0);
     } catch {
       setError('No se pudieron cargar los niveles. Verifica tu conexión.');
     } finally {
@@ -61,6 +63,10 @@ export default function MenuScreen({ navigation }) {
           <Text style={styles.headerSub}>¡Bienvenido a</Text>
           <Text style={styles.headerTitle}>EduDer</Text>
         </View>
+        <TouchableOpacity style={styles.campana} onPress={() => navigation.navigate('Notificaciones')} accessibilityLabel="Notificaciones">
+          <Text style={{ fontSize: 20 }}>🔔</Text>
+          {noLeidas > 0 && <View style={styles.campanaBadge}><Text style={styles.campanaBadgeText}>{noLeidas > 9 ? '9+' : noLeidas}</Text></View>}
+        </TouchableOpacity>
         {/* Indicador de XP y streak */}
         {perfil && (
           <View style={styles.headerStats}>
@@ -90,7 +96,12 @@ export default function MenuScreen({ navigation }) {
           </View>
         )}
 
-        <Text style={styles.seccion}>Camino de aprendizaje</Text>
+        <TouchableOpacity style={styles.btnMapa} onPress={() => navigation.navigate('MapaNiveles')} activeOpacity={0.85}>
+          <Text style={styles.btnMapaTitulo}>🗺️  Ir al mapa de niveles</Text>
+          <Text style={styles.btnMapaSub}>Sigue tu camino de aprendizaje desbloqueando lecciones</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.seccion}>Todos los niveles</Text>
 
         {niveles.map((nivel, idx) => (
           <NivelCard
@@ -144,7 +155,7 @@ function NivelCard({ nivel, index, navigation }) {
               <TouchableOpacity
                 key={lec.id_leccion}
                 style={styles.leccionItem}
-                onPress={() => navigation.navigate('Lesson', { id_leccion: lec.id_leccion, titulo: lec.titulo })}
+                onPress={() => navigation.navigate('MapaNiveles')}
                 activeOpacity={0.75}
               >
                 <View style={styles.leccionIcono}>
@@ -271,6 +282,13 @@ const styles = StyleSheet.create({
   leccionTitulo:   { fontSize: 14, fontWeight: '600', color: COLORS.texto },
   leccionXP:       { fontSize: 11, color: COLORS.xp, fontWeight: '600', marginTop: 2 },
   leccionFlecha:   { fontSize: 20, color: COLORS.muted },
+
+  campana: { marginRight: 10, padding: 6 },
+  campanaBadge: { position: 'absolute', top: 0, right: 0, minWidth: 16, height: 16, borderRadius: 8, backgroundColor: COLORS.xp, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 },
+  campanaBadgeText: { color: COLORS.blanco, fontSize: 10, fontWeight: '800' },
+  btnMapa: { backgroundColor: COLORS.azul, borderRadius: 14, padding: 16, marginBottom: 16 },
+  btnMapaTitulo: { color: COLORS.blanco, fontSize: 16, fontWeight: '800' },
+  btnMapaSub: { color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 4 },
 
   // Empty
   emptyState: { alignItems: 'center', paddingVertical: 40 },

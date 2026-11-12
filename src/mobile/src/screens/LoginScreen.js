@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { login } from '../services/auth.service';
 import { COLORS } from '../theme/colors';
+import { irAMain } from '../utils/sesion';
 
 export default function LoginScreen({ navigation }) {
   const [correo, setCorreo]       = useState('');
@@ -48,15 +49,8 @@ export default function LoginScreen({ navigation }) {
     try {
       // RF-03: autenticación con correo y contraseña
       await login({ correo_institucional: correo.trim().toLowerCase(), contrasena });
-      // RF-04: redirigir según rol — estudiante va a Main, admin al panel web (E15)
-      const usuario = data?.usuario;
-      if (usuario?.rol === 'admin') {
-        // El Panel Admin es una app web separada (E5 - Panel Admin React.js)
-        // En producción se abriría http://localhost:5173 o la URL del panel
-        navigation.replace('Main'); // fallback — admin también puede usar la app
-      } else {
-        navigation.replace('Main');
-      }
+      // RF-04: tras el login, Tutorial la primera vez y luego Main (el panel admin es la web aparte)
+      await irAMain(navigation);
     } catch (err) {
       const msg = err?.response?.data?.message || 'Error al iniciar sesión. Intenta de nuevo.';
       setError(msg);
