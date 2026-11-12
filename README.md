@@ -71,7 +71,7 @@ proyecto-[nombre]-[apellido]/
 ### Prerequisitos
 - Node.js 18+
 - MySQL 8.0+ (y `mysqldump` en el PATH si se usa el backup automático)
-- React Native CLI + Android Studio o Xcode
+- Expo Go en el celular (o Android Studio / Xcode para emulador)
 
 ### Backend (API REST)
 ```bash
@@ -91,15 +91,15 @@ reinicio semanal del ranking (lunes 00:00, RF-17), recordatorio de racha (18:00,
 Abrir `src/admin/index.html` en el navegador (o servirlo con cualquier servidor estático). Entra con una cuenta de rol `admin`
 (el DDL crea `admin@uniremington.edu.co`; ajusta su hash de contraseña). Permite gestionar usuarios, niveles, lecciones, ejercicios y medallas, ver KPIs por rango de fechas y exportarlos a CSV.
 
-### App Móvil (React Native)
+### App Móvil (React Native + Expo)
 ```bash
 cd src/mobile
-npm install
-# La URL del backend se configura en src/config.js (10.0.2.2 = localhost desde el emulador Android)
-npm start                   # Metro bundler
-# En otra terminal:
-npm run android             # o npm run ios
+npm install --legacy-peer-deps
+npm start                   # abre Metro y muestra un código QR
 ```
+- **Celular físico (recomendado):** instala *Expo Go* (Play Store / App Store), conecta el celular a la misma red Wi-Fi que el computador y escanea el QR. La app detecta sola la IP del computador para llegar al backend (puerto 3000); si no la detecta define `EXPO_PUBLIC_API_URL=http://IP_DEL_PC:3000`.
+- **Emulador Android:** con Android Studio instalado pulsa `a` en la terminal de Metro (usa `10.0.2.2` para el backend).
+- Si Windows pregunta por el firewall al iniciar el backend, permite el acceso en redes privadas.
 
 ### Estructura de `src/`
 ```

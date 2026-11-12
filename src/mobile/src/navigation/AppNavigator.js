@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { COLORS } from '../theme/colors';
 import api from '../services/api';
@@ -31,7 +31,7 @@ import RankingScreen        from '../screens/RankingScreen';
 import NotificacionesScreen from '../screens/NotificacionesScreen';
 import PerfilScreen         from '../screens/PerfilScreen';
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 const Tab   = createBottomTabNavigator();
 
 const ICONOS = { Menu: '🏠', Medallas: '🏅', Ranking: '🏆', Notificaciones: '🔔', Perfil: '👤' };
