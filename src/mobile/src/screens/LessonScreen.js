@@ -1,12 +1,25 @@
 // src/screens/LessonScreen.js — EduDer
 // CU-03 | RF-08, RF-10, RF-11, RF-12 | E12 - cargarContenido() / evaluar() / obtenerPista()
-import React, { useState, useEffect } from 'react';
+// Contenido → ejercicios con feedback inmediato → registro de progreso → Resumen.
+// Lecciones de tipo mini_juego se delegan a la pantalla MiniJuego.
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  ActivityIndicator, TextInput, StatusBar, Alert,
+  ActivityIndicator, TextInput, StatusBar, Image, Linking,
 } from 'react-native';
 import api from '../services/api';
+import FeedbackModal from '../components/FeedbackModal';
 import { COLORS } from '../theme/colors';
+
+// Si el enunciado trae opciones tipo "a) ...", "1. ..." las muestra como atajos de respuesta.
+function extraerOpciones(enunciado = '') {
+  const ops = [];
+  enunciado.split('\n').forEach((l) => {
+    const m = l.match(/^\s*(?:[A-Da-d]|[1-4])[).]\s+(.+)$/);
+    if (m) ops.push(m[1].trim());
+  });
+  return ops.length >= 2 ? ops : [];
+}
 
 export default function LessonScreen({ route, navigation }) {
   const { id_leccion, titulo } = route.params ?? {};
@@ -14,13 +27,14 @@ export default function LessonScreen({ route, navigation }) {
   const [leccion,    setLeccion]    = useState(null);
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState('');
-  // Estado del ejercicio activo
   const [ejIdx,      setEjIdx]      = useState(0);
   const [respuesta,  setRespuesta]  = useState('');
-  const [resultado,  setResultado]  = useState(null); // { correcto, explicacion }
-  const [pista,      setPista]      = useState(null);
+  const [resultado,  setResultado]  = useState(null); // { correcto, explicacion, respuesta_correcta }
+  const [pistas,     setPistas]     = useState([]);   // textos de pistas ya pedidas
   const [enviando,   setEnviando]   = useState(false);
-  const [fase,       setFase]       = useState('contenido'); // 'contenido' | 'ejercicios' | 'fin'
+  const [guardando,  setGuardando]  = useState(false);
+  const [fase,       setFase]       = useState('contenido'); // 'contenido' | 'ejercicios'
+  const aciertos = useRef(0);
 
   // RF-08: cargar contenido completo de la lección al montar
   useEffect(() => {
@@ -28,6 +42,9 @@ export default function LessonScreen({ route, navigation }) {
       try {
         const res = await api.get(`/lessons/${id_leccion}/content`);
         setLeccion(res.data);
+        if (res.data?.tipo === 'mini_juego' && (res.data.ejercicios?.length ?? 0) > 0) {
+          navigation.replace('MiniJuego', { id_leccion, titulo: res.data.titulo, leccion: res.data });
+        }
       } catch {
         setError('No se pudo cargar la lección.');
       } finally {
@@ -35,7 +52,7 @@ export default function LessonScreen({ route, navigation }) {
       }
     }
     cargar();
-  }, [id_leccion]);
+  }, [id_leccion, navigation]);
 
   // RF-10: evaluar respuesta del estudiante
   async function enviarRespuesta() {
@@ -43,47 +60,59 @@ export default function LessonScreen({ route, navigation }) {
     setEnviando(true);
     try {
       const ejercicio = leccion.ejercicios[ejIdx];
-      const res = await api.post('/exercise/evaluate', {
+      const res = await api.post('/exercise/answer', {
         id_ejercicio: ejercicio.id_ejercicio,
         respuesta: respuesta.trim(),
       });
+      if (res.data.correcto) aciertos.current += 1;
       setResultado(res.data);
     } catch {
-      setResultado({ correcto: false, explicacion: 'Error al evaluar. Intenta de nuevo.' });
+      setError('No se pudo evaluar la respuesta. Revisa tu conexión e intenta de nuevo.');
     } finally {
       setEnviando(false);
     }
   }
 
-  // RF-11: solicitar pista bajo demanda
-  async function pedirPista(numero) {
+  // RF-11: solicitar pista bajo demanda (1 y luego 2)
+  async function pedirPista() {
+    const numero = pistas.length + 1;
     try {
       const ejercicio = leccion.ejercicios[ejIdx];
-      const res = await api.get(`/exercise/${ejercicio.id_ejercicio}/hint/${numero}`);
-      setPista(res.data.texto_pista);
+      const res = await api.get(`/exercise/${ejercicio.id_ejercicio}/hint`, { params: { numero } });
+      setPistas(p => [...p, res.data.texto_pista]);
     } catch {
-      setPista('No hay más pistas para este ejercicio.');
+      setPistas(p => [...p, 'No hay más pistas para este ejercicio.']);
     }
   }
 
-  function siguienteEjercicio() {
+  async function siguienteEjercicio() {
     const total = leccion.ejercicios?.length ?? 0;
     setResultado(null);
     setRespuesta('');
-    setPista(null);
+    setPistas([]);
     if (ejIdx + 1 >= total) {
-      marcarCompletada();
-      setFase('fin');
+      await finalizar(total > 0 ? Math.round((aciertos.current / total) * 100) : 100);
     } else {
       setEjIdx(ejIdx + 1);
     }
   }
 
-  // RF-12: registrar lección como completada con el puntaje
-  async function marcarCompletada() {
+  // RF-12: registrar lección como completada con el puntaje real y mostrar el resumen
+  async function finalizar(puntaje) {
+    setGuardando(true);
     try {
-      await api.put(`/progress/${id_leccion}`, { estado: 'completada', puntaje: 100 });
-    } catch {}
+      const res = await api.put(`/progress/${id_leccion}`, { estado: 'completada', puntaje });
+      navigation.replace('Resumen', {
+        titulo: leccion?.titulo ?? titulo,
+        puntaje,
+        resumen: res.data?.resumen ?? { xp_ganado: 0, nuevas_medallas: [] },
+        id_leccion,
+      });
+    } catch {
+      setError('No se pudo guardar tu progreso. Intenta de nuevo.');
+    } finally {
+      setGuardando(false);
+    }
   }
 
   if (loading) return (
@@ -92,30 +121,17 @@ export default function LessonScreen({ route, navigation }) {
     </View>
   );
 
-  if (error) return (
+  if (!leccion) return (
     <View style={styles.center}>
-      <Text style={styles.errorText}>{error}</Text>
+      <Text style={styles.errorText}>{error || 'Lección no disponible.'}</Text>
       <TouchableOpacity style={styles.btnVolver} onPress={() => navigation.goBack()}>
         <Text style={styles.btnVolverText}>← Volver</Text>
       </TouchableOpacity>
     </View>
   );
 
-  // ── Pantalla de finalización ──────────────────────────────
-  if (fase === 'fin') return (
-    <View style={[styles.center, { backgroundColor: COLORS.bg }]}>
-      <StatusBar backgroundColor={COLORS.azul} barStyle="light-content" />
-      <Text style={{ fontSize: 64 }}>🎉</Text>
-      <Text style={styles.finTitulo}>¡Lección completada!</Text>
-      <Text style={styles.finSub}>+{leccion?.xp_base ?? 50} XP ganados</Text>
-      <TouchableOpacity style={styles.btnFin} onPress={() => navigation.goBack()}>
-        <Text style={styles.btnFinText}>Volver al menú</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  const ejercicios = leccion?.ejercicios ?? [];
-  const contenidos = leccion?.contenidos ?? [];
+  const ejercicios = leccion.ejercicios ?? [];
+  const contenidos = leccion.contenidos ?? [];
 
   // ── Fase de contenido ─────────────────────────────────────
   if (fase === 'contenido') return (
@@ -125,31 +141,27 @@ export default function LessonScreen({ route, navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backBtn}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitulo} numberOfLines={1}>{titulo}</Text>
+        <Text style={styles.headerTitulo} numberOfLines={1}>{leccion.titulo ?? titulo}</Text>
         <View style={styles.xpBadge}>
           <Text style={styles.xpText}>+{leccion.xp_base} XP</Text>
         </View>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16 }}>
-        {contenidos.map((bloque, i) => (
-          <View key={i} style={styles.bloqueContenido}>
-            {bloque.tipo_contenido === 'titulo' && (
-              <Text style={styles.bloqueTitle}>{bloque.contenido}</Text>
-            )}
-            {bloque.tipo_contenido === 'texto' && (
+        {contenidos.map((bloque) => (
+          <View key={bloque.id_bloque} style={styles.bloqueContenido}>
+            {bloque.tipo_bloque === 'texto' && (
               <Text style={styles.bloqueTexto}>{bloque.contenido}</Text>
             )}
-            {bloque.tipo_contenido === 'ejemplo' && (
-              <View style={styles.bloqueEjemplo}>
-                <Text style={styles.bloqueEjemploLabel}>Ejemplo</Text>
-                <Text style={styles.bloqueEjemploTexto}>{bloque.contenido}</Text>
-              </View>
+            {bloque.tipo_bloque === 'imagen' && (
+              <Image source={{ uri: bloque.contenido }} style={styles.imagen} resizeMode="contain" />
             )}
-            {bloque.tipo_contenido === 'nota' && (
-              <View style={styles.bloqueNota}>
-                <Text style={styles.bloqueNotaTexto}>💡 {bloque.contenido}</Text>
-              </View>
+            {(bloque.tipo_bloque === 'video' || bloque.tipo_bloque === 'animacion') && (
+              <TouchableOpacity style={styles.enlace} onPress={() => Linking.openURL(bloque.contenido).catch(() => {})}>
+                <Text style={styles.enlaceText}>
+                  {bloque.tipo_bloque === 'video' ? '▶️ Ver video' : '✨ Ver animación'}
+                </Text>
+              </TouchableOpacity>
             )}
           </View>
         ))}
@@ -159,7 +171,7 @@ export default function LessonScreen({ route, navigation }) {
             Esta lección no tiene contenido teórico.
           </Text>
         )}
-
+        {!!error && <Text style={styles.errorText}>{error}</Text>}
         <View style={{ height: 20 }} />
       </ScrollView>
 
@@ -169,8 +181,14 @@ export default function LessonScreen({ route, navigation }) {
             <Text style={styles.btnPrimarioText}>Ir a los ejercicios →</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.btnPrimario} onPress={() => { marcarCompletada(); setFase('fin'); }}>
-            <Text style={styles.btnPrimarioText}>Completar lección ✓</Text>
+          <TouchableOpacity
+            style={[styles.btnPrimario, guardando && styles.btnDisabled]}
+            disabled={guardando}
+            onPress={() => finalizar(100)}
+          >
+            {guardando
+              ? <ActivityIndicator color={COLORS.blanco} />
+              : <Text style={styles.btnPrimarioText}>Completar lección ✓</Text>}
           </TouchableOpacity>
         )}
       </View>
@@ -180,6 +198,8 @@ export default function LessonScreen({ route, navigation }) {
   // ── Fase de ejercicios ────────────────────────────────────
   const ejercicio = ejercicios[ejIdx];
   const totalEj   = ejercicios.length;
+  const opciones  = ejercicio.tipo_interaccion === 'seleccion_multiple' ? extraerOpciones(ejercicio.enunciado) : [];
+  const maxPistas = ejercicio.pistas?.length ?? 0;
 
   return (
     <View style={styles.flex}>
@@ -194,80 +214,70 @@ export default function LessonScreen({ route, navigation }) {
         </View>
       </View>
 
-      {/* Barra de progreso */}
       <View style={styles.progressBar}>
-        <View style={[styles.progressFill, { width: `${((ejIdx) / totalEj) * 100}%` }]} />
+        <View style={[styles.progressFill, { width: `${(ejIdx / totalEj) * 100}%` }]} />
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 20 }}>
-        {/* Enunciado */}
+      <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 20 }} keyboardShouldPersistTaps="handled">
         <View style={styles.enunciadoBox}>
           <Text style={styles.enunciadoLabel}>Pregunta</Text>
           <Text style={styles.enunciadoText}>{ejercicio.enunciado}</Text>
         </View>
 
-        {/* Pista */}
-        {pista && (
-          <View style={styles.pistaBox}>
-            <Text style={styles.pistaText}>💡 {pista}</Text>
+        {pistas.map((p, i) => (
+          <View key={i} style={styles.pistaBox}>
+            <Text style={styles.pistaText}>💡 Pista {i + 1}: {p}</Text>
           </View>
+        ))}
+
+        {opciones.map((op) => (
+          <TouchableOpacity
+            key={op}
+            style={[styles.opcion, respuesta === op && styles.opcionSel]}
+            onPress={() => setRespuesta(op)}
+          >
+            <Text style={styles.opcionText}>{op}</Text>
+          </TouchableOpacity>
+        ))}
+
+        <TextInput
+          style={[styles.inputRespuesta, { marginTop: 12 }]}
+          placeholder="Escribe tu respuesta aquí..."
+          placeholderTextColor={COLORS.muted_light}
+          value={respuesta}
+          onChangeText={setRespuesta}
+          multiline
+        />
+
+        {pistas.length < Math.min(maxPistas, 2) && (
+          <TouchableOpacity style={styles.btnPista} onPress={pedirPista}>
+            <Text style={styles.btnPistaText}>💡 Ver pista {pistas.length + 1}</Text>
+          </TouchableOpacity>
         )}
-
-        {/* Resultado */}
-        {resultado && (
-          <View style={[styles.resultadoBox, resultado.correcto ? styles.resultadoCorrecto : styles.resultadoIncorrecto]}>
-            <Text style={styles.resultadoIcon}>{resultado.correcto ? '✅' : '❌'}</Text>
-            <Text style={styles.resultadoTexto}>
-              {resultado.correcto ? '¡Correcto!' : `Incorrecto. ${resultado.explicacion ?? ''}`}
-            </Text>
-          </View>
-        )}
-
-        {/* Input de respuesta */}
-        {!resultado && (
-          <>
-            <TextInput
-              style={styles.inputRespuesta}
-              placeholder="Escribe tu respuesta aquí..."
-              placeholderTextColor={COLORS.muted_light}
-              value={respuesta}
-              onChangeText={setRespuesta}
-              multiline
-              returnKeyType="done"
-            />
-
-            {/* Pistas disponibles */}
-            {(ejercicio.pistas?.length ?? 0) > 0 && !pista && (
-              <TouchableOpacity style={styles.btnPista} onPress={() => pedirPista(1)}>
-                <Text style={styles.btnPistaText}>💡 Ver pista</Text>
-              </TouchableOpacity>
-            )}
-          </>
-        )}
-
+        {!!error && <Text style={styles.errorText}>{error}</Text>}
         <View style={{ height: 20 }} />
       </ScrollView>
 
       <View style={styles.footer}>
-        {resultado ? (
-          <TouchableOpacity style={styles.btnPrimario} onPress={siguienteEjercicio}>
-            <Text style={styles.btnPrimarioText}>
-              {ejIdx + 1 >= totalEj ? 'Finalizar lección ✓' : 'Siguiente ejercicio →'}
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={[styles.btnPrimario, (!respuesta.trim() || enviando) && styles.btnDisabled]}
-            onPress={enviarRespuesta}
-            disabled={!respuesta.trim() || enviando}
-          >
-            {enviando
-              ? <ActivityIndicator color={COLORS.blanco} />
-              : <Text style={styles.btnPrimarioText}>Verificar respuesta</Text>
-            }
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={[styles.btnPrimario, (!respuesta.trim() || enviando) && styles.btnDisabled]}
+          onPress={() => { setError(''); enviarRespuesta(); }}
+          disabled={!respuesta.trim() || enviando}
+        >
+          {enviando
+            ? <ActivityIndicator color={COLORS.blanco} />
+            : <Text style={styles.btnPrimarioText}>Verificar respuesta</Text>}
+        </TouchableOpacity>
       </View>
+
+      <FeedbackModal
+        visible={!!resultado}
+        correcto={!!resultado?.correcto}
+        explicacion={resultado?.explicacion}
+        respuestaCorrecta={resultado?.respuesta_correcta}
+        textoBoton={ejIdx + 1 >= totalEj ? 'Finalizar lección ✓' : 'Siguiente ejercicio →'}
+        onContinuar={siguienteEjercicio}
+      />
     </View>
   );
 }
@@ -396,4 +406,11 @@ const styles = StyleSheet.create({
   btnVolver:      { marginTop: 16 },
   btnVolverText:  { color: COLORS.azul, fontSize: 15, fontWeight: '600' },
   errorText:      { color: COLORS.danger, fontSize: 15, textAlign: 'center', marginBottom: 8 },
+
+  opcion: { backgroundColor: COLORS.superficie, borderRadius: 10, borderWidth: 1, borderColor: COLORS.borde, padding: 12, marginTop: 8 },
+  opcionSel: { borderColor: COLORS.azul, backgroundColor: COLORS.azul_light },
+  opcionText: { fontSize: 14, color: COLORS.texto },
+  imagen: { width: '100%', height: 200, borderRadius: 10, backgroundColor: COLORS.borde },
+  enlace: { backgroundColor: COLORS.azul_light, borderRadius: 10, padding: 12 },
+  enlaceText: { color: COLORS.azul, fontWeight: '700', fontSize: 14 },
 });
