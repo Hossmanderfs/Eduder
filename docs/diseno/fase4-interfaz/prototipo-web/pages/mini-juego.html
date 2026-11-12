@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>Mini-juego — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- Mini-juego — Mapa de navegación, pantalla 12 (sin wireframe propio en 8.4.2)
+     Ronda contrarreloj de verdadero/falso; cuenta para el puntaje de la lección (RF-12). -->
+<div class="app">
+  <header class="appbar">
+    <button type="button" class="icon-btn" id="exit" aria-label="Salir de la lección"><i data-icon="x" data-size="24"></i></button>
+    <h1>Mini-juego</h1>
+    <span class="timer" id="timer" aria-live="off"><i data-icon="hourglass" data-size="18"></i><span id="secs">--</span></span>
+  </header>
+
+  <main class="app-main" id="main"></main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  var S = ui.lessonSession.get();
+  if (!S || !S.minijuego) { ui.go(S ? 'pages/wf11-resumen.html' : 'pages/wf08-niveles.html'); return; }
+  if (S.completada || S.mg) { ui.go('pages/wf11-resumen.html'); return; }
+
+  var items = S.minijuego.items, segundos = S.minijuego.segundos || 45;
+  var i = 0, aciertos = 0, left = segundos, timerId = null, locked = false;
+  var main = ui.$('#main');
+
+  ui.$('#exit').addEventListener('click', function () {
+    ui.confirm({ title: '¿Salir de la lección?', message: 'Perderás el avance del mini-juego. La lección queda "en progreso".', confirmText: 'Salir', cancelText: 'Seguir jugando' })
+      .then(function (ok) { if (ok) { clearInterval(timerId); ui.lessonSession.clear(); ui.go('pages/wf09-lecciones.html?nivel=' + S.id_nivel); } });
+  });
+
+  function intro() {
+    main.innerHTML =
+      '<div class="empty" style="gap:14px">' +
+      '<span class="row-icon gold" style="width:72px;height:72px;border-radius:20px">' + ui.icon('device-gamepad-2', { size: 38 }) + '</span>' +
+      '<h2>Verdadero o falso relámpago</h2>' +
+      '<p>' + items.length + ' afirmaciones · ' + segundos + ' segundos. Cada acierto suma a tu puntaje de la lección.</p>' +
+      '<button type="button" class="btn btn-primary btn-lg btn-block" id="go">' + ui.icon('player-play', { size: 20 }) + 'Empezar</button></div>';
+    ui.$('#secs').textContent = segundos;
+    ui.$('#go').addEventListener('click', start);
+    ui.$('#go').focus();
+  }
+
+  function start() {
+    timerId = setInterval(function () {
+      left -= 1;
+      ui.$('#secs').textContent = Math.max(0, left);
+      ui.$('#timer').classList.toggle('is-low', left <= 10);
+      if (left === 10) ui.$('#timer').setAttribute('aria-live', 'polite');
+      if (left <= 0) finish(true);
+    }, 1000);
+    show();
+  }
+
+  function show() {
+    var it = items[i];
+    main.innerHTML =
+      '<p class="ex-count">Afirmación ' + (i + 1) + ' de ' + items.length + ' · Aciertos: <strong class="num">' + aciertos + '</strong></p>' +
+      '<div class="mini-bar" style="height:8px"><span style="width:' + (i / items.length * 100) + '%"></span></div>' +
+      '<div class="mg-card" id="card" aria-live="polite">' + ui.esc(it.texto) + '</div>' +
+      '<div class="tf"><button type="button" class="btn btn-secondary" data-v="true">' + ui.icon('check', { size: 22 }) + 'Verdadero</button>' +
+      '<button type="button" class="btn btn-secondary" data-v="false">' + ui.icon('x', { size: 22 }) + 'Falso</button></div>' +
+      '<p class="tiny" style="text-align:center">Atajos: V = verdadero · F = falso</p>';
+    locked = false;
+    ui.$$('[data-v]').forEach(function (b) { b.addEventListener('click', function () { answer(b.dataset.v === 'true'); }); });
+  }
+
+  function answer(v) {
+    if (locked) return;
+    locked = true;
+    var ok = v === items[i].valor;
+    if (ok) aciertos++;
+    var card = ui.$('#card');
+    card.classList.add(ok ? 'flash-ok' : 'flash-err');
+    card.innerHTML = '<span>' + (ok ? '¡Bien!' : 'Era ' + (items[i].valor ? 'verdadero' : 'falso')) + '</span>';
+    setTimeout(function () { i++; if (i >= items.length) finish(false); else show(); }, ok ? 450 : 900);
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (!timerId || locked || i >= items.length) return;
+    if (e.key === 'v' || e.key === 'V') answer(true);
+    if (e.key === 'f' || e.key === 'F') answer(false);
+  });
+
+  function finish(porTiempo) {
+    if (!timerId && S.mg) return;
+    clearInterval(timerId); timerId = null; locked = true;
+    S.mg = { aciertos: aciertos, total: items.length, por_tiempo: porTiempo };
+    ui.lessonSession.set(S);
+    main.innerHTML =
+      '<div class="empty" style="gap:14px">' +
+      '<span class="row-icon ' + (aciertos / items.length >= 0.7 ? 'ok' : 'gold') + '" style="width:72px;height:72px;border-radius:20px">' + ui.icon(porTiempo ? 'clock' : 'flag', { size: 38 }) + '</span>' +
+      '<h2>' + (porTiempo ? '¡Se acabó el tiempo!' : '¡Mini-juego terminado!') + '</h2>' +
+      '<p style="font-size:18px"><strong class="num">' + aciertos + ' de ' + items.length + '</strong> aciertos</p>' +
+      '<a class="btn btn-primary btn-lg btn-block" href="wf11-resumen.html">Ver resumen de la lección' + ui.icon('chevron-right', { size: 20 }) + '</a></div>';
+  }
+
+  ui.requireAuth('estudiante').then(intro);
+})();
+</script>
+</body>
+</html>

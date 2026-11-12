@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-02 · Ejercicio — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-02 · Pantalla de Ejercicio — RF-10, RF-11 · CU-03 · DS-02
+     POST /exercise/answer · GET /exercise/:id/hint?numero= -->
+<div class="app">
+  <header class="ex-top">
+    <button type="button" class="icon-btn" id="exit" aria-label="Salir de la lección"><i data-icon="x" data-size="24"></i></button>
+    <div class="ex-progress">
+      <div class="mini-bar" role="progressbar" aria-label="Progreso de la lección" aria-valuemin="0" id="pbar"><span style="width:0"></span></div>
+      <span class="ex-count" id="count"></span>
+    </div>
+  </header>
+
+  <main class="app-main" id="main" style="gap:18px"></main>
+
+  <div class="bottom-bar">
+    <button type="button" class="btn btn-primary btn-lg btn-block" id="send" disabled>Enviar respuesta</button>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui, cfg = E.config;
+  var S = ui.lessonSession.get();
+  if (!S) { ui.go('pages/wf08-niveles.html'); return; }
+  if (S.completada) { ui.go('pages/wf11-resumen.html'); return; }
+  if (S.idx >= S.ejercicios.length) { ui.go(S.minijuego && !S.mg ? 'pages/mini-juego.html' : 'pages/wf11-resumen.html'); return; }
+
+  var ej = S.ejercicios[S.idx];
+  var res = S.resultados[ej.id_ejercicio] || (S.resultados[ej.id_ejercicio] = { intentos: 0, primer_intento: null, correcto: false, pistas: [] });
+  var main = ui.$('#main'), send = ui.$('#send');
+  var getAnswer = function () { return null; };
+
+  // ── barra superior ──────────────────────────────────────────────────────
+  var total = S.ejercicios.length;
+  ui.$('#count').textContent = 'Ejercicio ' + (S.idx + 1) + ' de ' + total + ' · ' + S.titulo;
+  var pbar = ui.$('#pbar');
+  pbar.setAttribute('aria-valuemax', total); pbar.setAttribute('aria-valuenow', S.idx + 1);
+  requestAnimationFrame(function () { ui.$('#pbar span').style.width = ((S.idx) / total * 100) + '%'; });
+
+  ui.$('#exit').addEventListener('click', function () {
+    ui.confirm({ title: '¿Salir de la lección?', message: 'Tu avance queda guardado como "en progreso" y podrás retomarla después.', confirmText: 'Salir', cancelText: 'Seguir aquí' })
+      .then(function (ok) { if (ok) { ui.lessonSession.clear(); ui.go('pages/wf09-lecciones.html?nivel=' + S.id_nivel); } });
+  });
+
+  function setReady(ok) { send.disabled = !ok; }
+
+  // ── encabezado del ejercicio ────────────────────────────────────────────
+  var KIND = { seleccion_multiple: ['list-check', 'Elige una respuesta'], completar: ['puzzle', 'Completa el espacio'], arrastrar: ['grip-vertical', 'Ordena las piezas'] };
+  var kind = KIND[ej.tipo_interaccion] || KIND.seleccion_multiple;
+  var isBlank = ej.tipo_interaccion === 'completar' && ej.enunciado.indexOf('___') >= 0;
+
+  main.innerHTML =
+    '<p class="ex-kind">' + ui.icon(kind[0], { size: 16 }) + kind[1] + (res.intentos ? ' · Intento ' + (res.intentos + 1) : '') + '</p>' +
+    (isBlank ? '' : '<h1 class="ex-statement" id="statement">' + ui.esc(ej.enunciado) + '</h1>') +
+    '<div id="answer"></div>' +
+    '<div id="hints" class="stack" aria-live="polite"></div>' +
+    '<button type="button" class="btn btn-ghost hint-btn" id="hint-btn">' + ui.icon('bulb', { size: 18 }) + '<span></span></button>';
+  var area = ui.$('#answer');
+
+  // ── selección múltiple ──────────────────────────────────────────────────
+  function renderOptions(opts) {
+    var sel = -1;
+    area.innerHTML = '<div class="options" role="radiogroup" aria-labelledby="statement">' + opts.map(function (o, i) {
+      return '<button type="button" class="option" role="radio" aria-checked="false" tabindex="' + (i === 0 ? 0 : -1) + '" data-i="' + i + '">' +
+        '<span class="opt-key" aria-hidden="true">' + String.fromCharCode(65 + i) + '</span><span>' + ui.esc(o) + '</span></button>';
+    }).join('') + '</div>';
+    var btns = ui.$$('.option', area);
+    function pick(i, focus) {
+      sel = i;
+      btns.forEach(function (b, k) { b.setAttribute('aria-checked', k === i ? 'true' : 'false'); b.tabIndex = k === i ? 0 : -1; });
+      if (focus) btns[i].focus();
+      setReady(true);
+    }
+    btns.forEach(function (b, i) {
+      b.addEventListener('click', function () { pick(i, false); });
+      b.addEventListener('keydown', function (e) {
+        var k = e.key;
+        if (k === 'ArrowDown' || k === 'ArrowRight') { e.preventDefault(); pick((i + 1) % btns.length, true); }
+        if (k === 'ArrowUp' || k === 'ArrowLeft') { e.preventDefault(); pick((i - 1 + btns.length) % btns.length, true); }
+      });
+    });
+    getAnswer = function () { return sel >= 0 ? opts[sel] : null; };
+  }
+
+  // ── completar ───────────────────────────────────────────────────────────
+  function renderBlank() {
+    var parts = ej.enunciado.split('___');
+    var value = null;
+    var head = '<h1 class="blank-sentence" id="statement">' + ui.esc(parts[0]) + '<span class="blank is-empty" id="blank" aria-label="espacio en blanco">____</span>' + ui.esc(parts.slice(1).join('___')) + '</h1>';
+    if (ej.opciones && ej.opciones.length) {
+      area.innerHTML = head + '<div class="word-bank" role="group" aria-label="Palabras para completar" style="margin-top:20px">' + ej.opciones.map(function (o, i) {
+        return '<button type="button" class="word" aria-pressed="false" data-i="' + i + '">' + ui.esc(o) + '</button>';
+      }).join('') + '</div>';
+      var words = ui.$$('.word', area), blank = ui.$('#blank');
+      words.forEach(function (w, i) {
+        w.addEventListener('click', function () {
+          var off = value === ej.opciones[i];
+          value = off ? null : ej.opciones[i];
+          words.forEach(function (x, k) { x.setAttribute('aria-pressed', !off && k === i ? 'true' : 'false'); });
+          blank.textContent = value || '____';
+          blank.classList.toggle('is-empty', !value);
+          blank.setAttribute('aria-label', value ? 'espacio: ' + value : 'espacio en blanco');
+          setReady(!!value);
+        });
+      });
+      getAnswer = function () { return value; };
+    } else {
+      area.innerHTML = head + '<div class="field" style="margin-top:16px"><label for="free">Tu respuesta</label><input class="input" id="free" autocomplete="off"></div>';
+      var inp = ui.$('#free', area), blank2 = ui.$('#blank');
+      inp.addEventListener('input', function () {
+        var v = inp.value.trim();
+        blank2.textContent = v || '____'; blank2.classList.toggle('is-empty', !v); setReady(!!v);
+      });
+      inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !send.disabled) send.click(); });
+      getAnswer = function () { return inp.value.trim() || null; };
+    }
+  }
+
+  // ── arrastrar (ordenar piezas) ──────────────────────────────────────────
+  function renderDrag(piezas) {
+    var n = piezas.length;
+    var placed = new Array(n).fill(null);         // índice de pieza en cada espacio
+    var inline = piezas.every(function (p) { return String(p).length <= 4; });
+    area.innerHTML =
+      '<p class="small muted" id="drag-help">Arrastra cada pieza a su lugar, o tócala para colocarla en el siguiente espacio libre. Toca una pieza colocada para devolverla.</p>' +
+      '<ol class="slots' + (inline ? ' inline' : '') + '" id="slots" aria-label="Orden de tu respuesta" style="list-style:none;margin:12px 0 0;padding:0"></ol>' +
+      '<p class="tiny" style="margin-top:14px">Piezas disponibles</p>' +
+      '<div class="pieces" id="bank" role="group" aria-label="Piezas disponibles" style="margin-top:6px"></div>';
+    var slotsEl = ui.$('#slots'), bankEl = ui.$('#bank');
+
+    function pieceHtml(i, where) {
+      return '<button type="button" class="piece" data-piece="' + i + '" data-where="' + where + '" aria-describedby="drag-help">' +
+        ui.icon('grip-vertical', { size: 16 }) + '<span>' + ui.esc(piezas[i]) + '</span></button>';
+    }
+    function render() {
+      slotsEl.innerHTML = placed.map(function (p, s) {
+        return '<li class="slot' + (p !== null ? ' is-filled' : '') + '" data-slot="' + s + '" aria-label="Posición ' + (s + 1) + (p !== null ? ': ' + ui.esc(piezas[p]) : ', vacía') + '">' +
+          '<span class="slot-n" aria-hidden="true">' + (s + 1) + '</span>' + (p !== null ? pieceHtml(p, 'slot') : '') + '</li>';
+      }).join('');
+      var libres = [];
+      for (var i = 0; i < n; i++) if (placed.indexOf(i) < 0) libres.push(i);
+      bankEl.innerHTML = libres.length ? libres.map(function (i) { return pieceHtml(i, 'bank'); }).join('') : '<span class="tiny" style="padding:10px">Todas las piezas están colocadas.</span>';
+      setReady(placed.every(function (p) { return p !== null; }));
+    }
+    function tap(i) {
+      var at = placed.indexOf(i);
+      if (at >= 0) placed[at] = null;
+      else { var free = placed.indexOf(null); if (free >= 0) placed[free] = i; }
+      render();
+      var again = ui.$('[data-piece="' + i + '"]', area); if (again) again.focus();
+    }
+    function drop(i, target) {
+      var from = placed.indexOf(i);
+      if (target && target.slot !== undefined) {
+        var s = target.slot, occupant = placed[s];
+        if (from >= 0) placed[from] = occupant; // intercambio entre espacios
+        placed[s] = i;
+      } else if (from >= 0) placed[from] = null;  // de vuelta al banco
+      render();
+    }
+
+    // Arrastre con Pointer Events (ratón, táctil y lápiz)
+    var drag = null;
+    area.addEventListener('pointerdown', function (e) {
+      var el = e.target.closest('.piece'); if (!el || e.button > 0) return;
+      drag = { i: Number(el.dataset.piece), el: el, x: e.clientX, y: e.clientY, active: false, clone: null, over: null };
+      el.setPointerCapture(e.pointerId);
+    });
+    area.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      if (!drag.active && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) {
+        drag.active = true;
+        var r = drag.el.getBoundingClientRect();
+        drag.dx = e.clientX - r.left; drag.dy = e.clientY - r.top;
+        drag.clone = drag.el.cloneNode(true);
+        drag.clone.classList.add('is-dragging'); drag.clone.style.width = r.width + 'px';
+        document.body.appendChild(drag.clone);
+        drag.el.classList.add('is-ghost');
+      }
+      if (!drag.active) return;
+      e.preventDefault();
+      drag.clone.style.left = (e.clientX - drag.dx) + 'px';
+      drag.clone.style.top = (e.clientY - drag.dy) + 'px';
+      var under = document.elementFromPoint(e.clientX, e.clientY);
+      var slot = under && under.closest('.slot');
+      ui.$$('.slot', area).forEach(function (s) { s.classList.toggle('is-over', s === slot); });
+      drag.over = slot ? { slot: Number(slot.dataset.slot) } : (under && under.closest('#bank') ? { bank: true } : null);
+    });
+    function endDrag() {
+      if (!drag) return;
+      var d = drag; drag = null;
+      if (!d.active) { tap(d.i); return; }
+      d.clone.remove();
+      ui.$$('.slot', area).forEach(function (s) { s.classList.remove('is-over'); });
+      if (d.over) drop(d.i, d.over); else render();
+    }
+    area.addEventListener('pointerup', endDrag);
+    area.addEventListener('pointercancel', function () { if (drag && drag.clone) drag.clone.remove(); drag = null; render(); });
+    // Teclado: Enter / Espacio coloca o devuelve la pieza
+    area.addEventListener('click', function (e) { if (e.detail === 0) { var el = e.target.closest('.piece'); if (el) tap(Number(el.dataset.piece)); } });
+
+    render();
+    getAnswer = function () { return placed.every(function (p) { return p !== null; }) ? placed.map(function (p) { return piezas[p]; }).join(E.content.SEP) : null; };
+  }
+
+  if (ej.tipo_interaccion === 'arrastrar' && ej.piezas && ej.piezas.length) renderDrag(ej.piezas);
+  else if (isBlank) renderBlank();
+  else if (ej.opciones && ej.opciones.length) renderOptions(ej.opciones);
+  else {
+    area.innerHTML = '<div class="field"><label for="free">Tu respuesta</label><input class="input" id="free" autocomplete="off"></div>';
+    var inp = ui.$('#free');
+    inp.addEventListener('input', function () { setReady(!!inp.value.trim()); });
+    getAnswer = function () { return inp.value.trim() || null; };
+  }
+
+  // ── pistas (máx. 2; la segunda solo bajo solicitud explícita — RF-11) ───
+  var maxPistas = Math.min(cfg.MAX_PISTAS, (ej.pistas && ej.pistas.length) || cfg.MAX_PISTAS);
+  var hintBtn = ui.$('#hint-btn'), hintsEl = ui.$('#hints');
+  function renderHints() {
+    hintsEl.innerHTML = res.pistas.map(function (t, i) {
+      return '<div class="hint">' + ui.icon('bulb', { size: 18 }) + '<p><strong>Pista ' + (i + 1) + ':</strong> ' + ui.esc(t) + '</p></div>';
+    }).join('');
+    var quedan = maxPistas - res.pistas.length;
+    hintBtn.hidden = quedan <= 0; // se oculta tras agotarlas (WF-02)
+    hintBtn.querySelector('span').textContent = res.pistas.length ? '¿Otra pista? (queda ' + quedan + ')' : '¿Necesitas una pista? (' + quedan + ' disponibles)';
+  }
+  hintBtn.addEventListener('click', function () {
+    var n = res.pistas.length + 1;
+    ui.busy(hintBtn, true, 'Buscando pista…');
+    E.api.hint(ej.id_ejercicio, n).then(function (h) {
+      res.pistas.push(h.texto_pista);
+      ui.lessonSession.set(S);
+      ui.busy(hintBtn, false); renderHints();
+    }).catch(function (err) { ui.busy(hintBtn, false); renderHints(); ui.toast(err.message, 'error'); });
+  });
+  renderHints();
+
+  // ── enviar respuesta ────────────────────────────────────────────────────
+  send.addEventListener('click', function () {
+    var r = getAnswer();
+    if (r === null) return;
+    ui.busy(send, true, 'Revisando…');
+    E.api.answer(ej.id_ejercicio, r).then(function (out) {
+      res.intentos += 1;
+      if (res.primer_intento === null) res.primer_intento = !!out.correcto;
+      res.correcto = !!out.correcto;
+      var items = S.ejercicios.length + (S.minijuego ? S.minijuego.items.length : 0);
+      S.ultimo = {
+        id_ejercicio: ej.id_ejercicio, correcto: !!out.correcto, explicacion: out.explicacion || null,
+        respuesta: r, primer_intento: res.intentos === 1,
+        xp: out.correcto && res.intentos === 1 ? Math.round(S.xp_base / items) : 0
+      };
+      ui.lessonSession.set(S);
+      ui.go('pages/wf10-feedback.html');
+    }).catch(function (err) { ui.busy(send, false); ui.toast(err.message, 'error'); });
+  });
+
+  ui.requireAuth('estudiante');
+})();
+</script>
+</body>
+</html>

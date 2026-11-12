@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-13 · Medallas — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-13 · Pantalla de Medallas — RF-14, RF-15 · GET /gamification/medals -->
+<div class="app">
+  <header class="appbar">
+    <a class="icon-btn" href="wf03-perfil.html" aria-label="Volver al perfil"><i data-icon="arrow-left"></i></a>
+    <h1>Medallas</h1>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="skeleton" style="min-height:240px"></div>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  ui.tabbar('perfil');
+
+  var ICON = { nivel_completado: 'shield-star', puntaje_perfecto: 'target', streak: 'flame', xp_acumulado: 'bolt' };
+  function condicion(m) {
+    var v = m.condicion_valor;
+    switch (m.condicion_tipo) {
+      case 'nivel_completado': return 'Aprueba el nivel ' + v;
+      case 'puntaje_perfecto': return 'Saca ' + v + '% en una lección';
+      case 'streak': return 'Racha de ' + v + ' días';
+      case 'xp_acumulado': return 'Acumula ' + ui.fmt.num(v) + ' XP';
+      default: return m.descripcion || '';
+    }
+  }
+
+  function render(medallas) {
+    var ganadas = medallas.filter(function (m) { return m.obtenida; }).length;
+    ui.$('#main').innerHTML =
+      '<section class="card-soft row" style="gap:12px"><span class="row-icon gold" style="width:48px;height:48px">' + ui.icon('award', { size: 26 }) + '</span>' +
+      '<div class="stack" style="gap:6px;flex:1"><p><strong class="num">' + ganadas + ' de ' + medallas.length + '</strong> medallas obtenidas</p>' +
+      '<div class="mini-bar gold" style="height:8px"><span style="width:' + Math.round(ganadas / Math.max(1, medallas.length) * 100) + '%"></span></div></div></section>' +
+      '<ul class="medals" style="list-style:none;margin:0;padding:0">' + medallas.map(function (m) {
+        return '<li class="medal' + (m.obtenida ? ' is-earned' : '') + '" aria-label="' + ui.esc(m.nombre) + (m.obtenida ? ', obtenida el ' + ui.fmt.dateLong(m.fecha_obtencion) : ', pendiente: ' + condicion(m)) + '">' +
+          '<span class="medal-icon">' + ui.icon(ICON[m.condicion_tipo] || 'award', { size: 26 }) + '</span>' +
+          '<span class="medal-name">' + ui.esc(m.nombre) + '</span>' +
+          '<span class="medal-sub">' + (m.obtenida ? ui.fmt.dateLong(m.fecha_obtencion) : ui.esc(condicion(m))) + '</span></li>';
+      }).join('') + '</ul>';
+  }
+
+  function load() { E.api.medals().then(render).catch(function (err) { ui.errorState(ui.$('#main'), err, load); }); }
+  ui.requireAuth('estudiante').then(load);
+})();
+</script>
+</body>
+</html>

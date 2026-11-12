@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-06 · Recuperar contraseña — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-06 · Recuperar Contraseña — RF-19 · CU-05 -->
+<div class="app">
+  <header class="appbar">
+    <a class="icon-btn" href="wf05-login.html" aria-label="Volver al login"><i data-icon="arrow-left"></i></a>
+    <h1>Recuperar contraseña</h1>
+  </header>
+
+  <main class="app-main">
+    <div class="stack" style="align-items:flex-start">
+      <span class="row-icon" style="width:56px;height:56px;border-radius:16px"><i data-icon="mail" data-size="28"></i></span>
+      <p style="font-size:16px">Ingresa tu correo institucional y te enviaremos un enlace de recuperación.</p>
+      <p class="tiny">El enlace vence en 30 minutos y solo se puede usar una vez.</p>
+    </div>
+
+    <div id="error" class="banner banner-error" role="alert" hidden></div>
+    <div id="sent" class="banner banner-ok" role="status" hidden></div>
+
+    <form id="form" class="stack" novalidate>
+      <div class="field" id="f-correo">
+        <label for="correo">Correo institucional</label>
+        <input class="input" id="correo" type="email" inputmode="email" autocomplete="email" placeholder="nombre.apellido@miremington.edu.co" required aria-describedby="correo-msg">
+        <p class="field-msg" id="correo-msg" aria-live="polite"></p>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg btn-block" id="submit">Enviar enlace</button>
+    </form>
+
+    <p class="small" style="text-align:center"><a href="wf05-login.html">Volver al login</a></p>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui, cfg = E.config;
+  var form = ui.$('#form'), input = ui.$('#correo'), submit = ui.$('#submit');
+  var dominio = new RegExp('^[^\\s@]+@' + cfg.DOMINIO.replace(/\./g, '\\.') + '$', 'i');
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    ui.$('#error').hidden = true;
+    var v = input.value.trim().toLowerCase();
+    var field = ui.$('#f-correo');
+    if (!dominio.test(v)) {
+      field.classList.add('is-invalid');
+      input.setAttribute('aria-invalid', 'true');
+      ui.$('#correo-msg').textContent = 'Debe terminar en @' + cfg.DOMINIO;
+      input.focus();
+      return;
+    }
+    field.classList.remove('is-invalid');
+    input.setAttribute('aria-invalid', 'false');
+    ui.$('#correo-msg').textContent = '';
+    ui.busy(submit, true, 'Enviando…');
+    E.api.recover({ correo_institucional: v }).then(function (r) {
+      ui.busy(submit, false);
+      // Respuesta genérica: no revela si el correo existe (RF-19)
+      ui.toast(r.message || 'Si el correo existe, recibirás un enlace de recuperación', 'success');
+      var sent = ui.$('#sent');
+      sent.innerHTML = ui.icon('mail-check', { size: 18 }) + '<span>Si <strong>' + ui.esc(v) + '</strong> está registrado, recibirás el enlace en unos minutos. Revisa también la carpeta de spam.</span>';
+      sent.hidden = false;
+      submit.textContent = 'Reenviar enlace';
+    }).catch(function (err) {
+      ui.busy(submit, false);
+      var box = ui.$('#error');
+      box.innerHTML = ui.icon('alert-triangle', { size: 18 }) + '<span>' + ui.esc(err.message) + '</span>';
+      box.hidden = false;
+    });
+  });
+})();
+</script>
+</body>
+</html>

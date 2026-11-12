@@ -14,8 +14,8 @@ EduDer es una aplicación móvil educativa gamificada que fortalece las competen
 ##  Estructura del Repositorio
 
 ```
-proyecto-[nombre]-[apellido]/
-├── src/                         → Código fuente del framework
+eduder/
+├── src/                         → Código fuente (backend, panel admin, app móvil)
 ├── docs/
 │   ├── analisis/                → Fase de análisis
 │   │   ├── 01-planteamiento-problema.md
@@ -29,7 +29,7 @@ proyecto-[nombre]-[apellido]/
 │   │   ├── fase1-arquitectura/
 │   │   ├── fase2-datos/
 │   │   ├── fase3-componentes/
-│   │   ├── fase4-interfaz/
+│   │   ├── fase4-interfaz/      → E15–E17 + prototipo-web/ (wireframes navegables en HTML)
 │   │   └── imagenes/
 │   └── trazabilidad/            → Matrices de trazabilidad
 ├── README.md
@@ -80,12 +80,16 @@ cp .env.example .env        # completar variables de entorno (DB, JWT_SECRET, SM
 npm install
 # Crear la base de datos (13 tablas, 3FN):
 mysql -u root -p < ../../docs/diseno/fase2-datos/E11-script-DDL.sql
+npm run seed                # carga 5 niveles, 15 lecciones, 45 ejercicios y 12 medallas (solo si no hay lecciones)
 npm run dev                 # corre en http://localhost:3000
 # GET http://localhost:3000/health  →  { "status": "ok" }
 npm test                    # pruebas jest
 ```
 Al arrancar se programan tres tareas (zona `CRON_TZ`, por defecto America/Bogota; `DISABLE_CRON=true` las desactiva):
 reinicio semanal del ranking (lunes 00:00, RF-17), recordatorio de racha (18:00, RF-16) y backup diario con `mysqldump` (02:00, RF-23; carpeta `BACKUP_DIR`, log en `backup.log`).
+
+> Correos institucionales: estudiantes `@miremington.edu.co`, administración `@uniremington.edu.co` (variable `DOMINIOS_PERMITIDOS`).
+> Contraseñas: mínimo 8 caracteres con al menos una letra y un número. La sesión (JWT) dura 24 h (`JWT_EXPIRES_IN`).
 
 ### Panel de administración
 Con el backend corriendo, abre `http://localhost:3000/panel/` en el navegador. En la app móvil, un usuario con rol `admin` entra directamente a este panel (pantalla *Panel de administración*). Entra con una cuenta de rol `admin`
@@ -99,6 +103,7 @@ npm start                   # abre Metro y muestra un código QR
 ```
 - **Celular físico (recomendado):** instala *Expo Go* (Play Store / App Store), conecta el celular a la misma red Wi-Fi que el computador y escanea el QR. La app detecta sola la IP del computador para llegar al backend (puerto 3000); si no la detecta define `EXPO_PUBLIC_API_URL=http://IP_DEL_PC:3000`.
 - **Emulador Android:** con Android Studio instalado pulsa `a` en la terminal de Metro (usa `10.0.2.2` para el backend).
+- **Diseño:** la app sigue los wireframes WF-00 a WF-16 (`docs/diseno/fase4-interfaz/prototipo-web/`, ábrelo con doble clic en `index.html`): sistema visual Uniremington, tipografía Lexend, modo claro/oscuro (botón en *Perfil*) y barra inferior *Inicio · Niveles · Ranking · Perfil*.
 - Si Windows pregunta por el firewall al iniciar el backend, permite el acceso en redes privadas.
 
 ### Estructura de `src/`
@@ -115,7 +120,7 @@ src/
 │   │   ├── middleware/         ← JWT (verifyToken valida cuenta activa) y requireAdmin
 │   │   └── jobs/               ← scheduler (node-cron) y backup
 │   └── tests/                  ← pruebas jest
-└── mobile/src/                 ← App React Native (screens, navigation, services, components)
+└── mobile/src/                 ← App Expo: screens, navigation, ui (componentes), theme (tokens claro/oscuro), hooks, utils, services
 ```
 
 > Documentación de diseño en `docs/`; la fuente de verdad es el documento final del proyecto (EduDer_parcial1_FINAL).

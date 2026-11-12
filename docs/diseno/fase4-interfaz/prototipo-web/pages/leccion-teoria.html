@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>Lección · Teoría — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- Lección: Teoría — Mapa de navegación, pantalla 9 (sin wireframe propio en 8.4.2)
+     GET /lessons/:id/content · RF-08, RF-09 (marca EN_PROGRESO) -->
+<div class="app">
+  <header class="appbar">
+    <a class="icon-btn" id="back" href="wf08-niveles.html" aria-label="Volver a las lecciones"><i data-icon="arrow-left"></i></a>
+    <h1 id="title">Lección</h1>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="skeleton" style="min-height:120px"></div><div class="skeleton" style="min-height:120px"></div>
+  </main>
+
+  <div class="bottom-bar" id="bar" hidden>
+    <button type="button" class="btn btn-primary btn-lg btn-block" id="start">Comenzar ejercicios</button>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  var id = ui.param('leccion');
+  if (!id) { ui.go('pages/wf08-niveles.html'); return; }
+
+  function bloque(b, i, total) {
+    var body;
+    if (b.tipo_bloque === 'imagen') body = '<img src="' + ui.esc(b.contenido) + '" alt="Ilustración de la lección">';
+    else if (b.tipo_bloque === 'video') body = '<video src="' + ui.esc(b.contenido) + '" controls preload="metadata"></video>';
+    else body = '<p>' + ui.esc(b.contenido) + '</p>';
+    return '<article class="theory-block"><p class="theory-step">' + (i + 1) + ' de ' + total + '</p>' + body + '</article>';
+  }
+
+  function load() {
+    Promise.all([E.api.lessonContent(id), E.api.logic.loadDashboard(), E.api.medals()]).then(function (r) {
+      var l = r[0], st = r[1].state, medallas = r[2];
+      var nivel = null, item = null;
+      st.niveles.forEach(function (n) { n.lecciones.forEach(function (x) { if (x.id_leccion === id) { nivel = n; item = x; } }); });
+      if (!nivel) throw { message: 'No encontramos esta lección.' };
+
+      ui.$('#back').href = 'wf09-lecciones.html?nivel=' + nivel.id_nivel;
+      ui.$('#title').textContent = l.titulo;
+      document.title = l.titulo + ' — EduDer';
+
+      // RF-08: solo se accede si la lección anterior está completada
+      if (!item.desbloqueada) {
+        ui.$('#main').innerHTML = '<div class="empty">' + ui.icon('lock', { size: 36 }) + '<h2>Lección bloqueada</h2><p>Completa la lección anterior para continuar.</p><a class="btn btn-secondary" href="wf09-lecciones.html?nivel=' + nivel.id_nivel + '">Ver lecciones</a></div>';
+        return;
+      }
+
+      var t = ui.TIPOS[l.tipo] || ui.TIPOS.ejercicio;
+      var nEj = l.ejercicios.length;
+      ui.$('#main').innerHTML =
+        '<div class="stack" style="gap:6px"><span class="chip chip-blue" style="align-self:flex-start">' + ui.icon(t.icon, { size: 14 }) + t.label + ' · Nivel ' + nivel.orden + '</span>' +
+        '<h2 style="font-size:22px">' + ui.esc(l.titulo) + '</h2>' +
+        '<p class="small muted">' + nEj + ' ejercicios' + (l.minijuego ? ' + mini-juego' : '') + ' · hasta ' + l.xp_base + ' XP' +
+        (item.estado === 'completada' ? ' · Mejor puntaje: ' + item.puntaje + '%' : '') + '</p></div>' +
+        (l.contenidos.length ? l.contenidos.map(function (b, i) { return bloque(b, i, l.contenidos.length); }).join('') : '<p class="muted">Esta lección no tiene teoría previa.</p>');
+
+      if (!nEj) { ui.$('#main').insertAdjacentHTML('beforeend', '<div class="banner banner-warn">' + ui.icon('info-circle', { size: 18 }) + '<span>Esta lección aún no tiene ejercicios cargados.</span></div>'); return; }
+
+      var bar = ui.$('#bar'); bar.hidden = false;
+      var start = ui.$('#start');
+      start.textContent = item.estado === 'completada' ? 'Repetir ejercicios' : item.estado === 'en_progreso' ? 'Continuar con los ejercicios' : 'Comenzar ejercicios';
+
+      start.addEventListener('click', function () {
+        ui.busy(start, true, 'Preparando…');
+        var marcar = item.estado === 'completada' ? Promise.resolve() : E.api.updateProgress(id, { estado: 'en_progreso' });
+        marcar.then(function () {
+          ui.lessonSession.set({
+            id_leccion: l.id_leccion, titulo: l.titulo, tipo: l.tipo, xp_base: l.xp_base,
+            id_nivel: nivel.id_nivel, nivel_nombre: nivel.nombre, nivel_orden: nivel.orden,
+            ejercicios: l.ejercicios, idx: 0, resultados: {}, ultimo: null,
+            minijuego: l.minijuego || null, mg: null,
+            // Fotografía previa para detectar desbloqueos y medallas nuevas en WF-11
+            previo: {
+              nivel_aprobado: nivel.aprobado,
+              niveles_desbloqueados: st.niveles.filter(function (n) { return n.desbloqueado; }).length,
+              medallas: medallas.filter(function (m) { return m.obtenida; }).map(function (m) { return m.id_medalla; })
+            },
+            iniciada: new Date().toISOString(), completada: null
+          });
+          ui.go('pages/wf02-ejercicio.html');
+        }).catch(function (err) { ui.busy(start, false); ui.toast(err.message, 'error'); });
+      });
+    }).catch(function (err) { ui.errorState(ui.$('#main'), err, load); });
+  }
+  ui.requireAuth('estudiante').then(load);
+})();
+</script>
+</body>
+</html>

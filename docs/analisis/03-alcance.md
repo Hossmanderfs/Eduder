@@ -9,7 +9,7 @@ EduDer es una aplicación móvil educativa gamificada dirigida exclusivamente a 
 - 5 niveles de lógica matemática: Fundamentos Lógicos, Tablas de Verdad, Álgebra Booleana, Métodos de Demostración y Razonamiento Aplicado
 - 8 a 12 lecciones por nivel con ejercicios interactivos (selección múltiple, completar espacios, arrastrar elementos)
 - Sistema de gamificación: XP, streaks, medallas y ranking semanal por nivel
-- Autenticación restringida a correo institucional `@uniremington.edu.co`
+- Autenticación restringida a correo institucional @miremington.edu.co (estudiantes) o @uniremington.edu.co (administración)
 - Dos roles: Estudiante y Administrador
 - Panel de administración web para gestión de usuarios y visualización de métricas
 - Notificaciones push diarias para mantener la racha de estudio

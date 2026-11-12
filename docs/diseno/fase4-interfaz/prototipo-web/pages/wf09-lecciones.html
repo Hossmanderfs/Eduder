@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-09 · Lecciones — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-09 · Selección de Lección — RF-08, RF-09 -->
+<div class="app">
+  <header class="appbar">
+    <a class="icon-btn" href="wf08-niveles.html" aria-label="Atrás"><i data-icon="arrow-left"></i></a>
+    <h1 id="title">Lecciones</h1>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  var idNivel = Number(ui.param('nivel') || 1);
+  ui.tabbar('niveles');
+
+  var ESTADO = {
+    no_iniciada: { chip: 'chip-neutral', txt: 'No iniciada' },
+    en_progreso: { chip: 'chip-blue', txt: 'En progreso' },
+    completada: { chip: 'chip-ok', txt: 'Completada' }
+  };
+
+  function render(d) {
+    var n = d.state.niveles.filter(function (x) { return x.id_nivel === idNivel; })[0];
+    if (!n) { ui.errorState(ui.$('#main'), { message: 'Ese nivel no existe.' }); return; }
+    ui.$('#title').textContent = 'Nivel ' + n.orden + ' · ' + n.nombre;
+    document.title = 'WF-09 · ' + n.nombre + ' — EduDer';
+    if (n.estado === 'bloqueado') {
+      ui.$('#main').innerHTML = '<div class="empty">' + ui.icon('lock', { size: 36 }) + '<h2>Nivel bloqueado</h2><p>Completa el nivel anterior con ' + n.umbral_aprobacion + '% de promedio para desbloquearlo.</p><a class="btn btn-secondary" href="wf08-niveles.html">Ver niveles</a></div>';
+      return;
+    }
+
+    var html = '<section class="card-soft row" style="gap:12px">' +
+      '<span class="lvl-badge" style="width:44px;height:44px;font-size:17px">' + n.orden + '</span>' +
+      '<div class="stack" style="gap:4px;flex:1"><p class="small muted">' + ui.esc(n.descripcion || '') + '</p>' +
+      '<div class="row" style="gap:8px"><span class="mini-bar ' + (n.aprobado ? 'ok' : '') + '" style="flex:1"><span style="width:' + n.porcentaje + '%"></span></span><span class="tiny num">' + n.completadas + '/' + n.total + '</span></div>' +
+      (n.promedio !== null ? '<p class="tiny">Promedio del nivel: <strong class="' + (n.promedio >= n.umbral_aprobacion ? 'c-ok' : 'c-err') + '">' + n.promedio + '%</strong> · se necesita ' + n.umbral_aprobacion + '%</p>' : '') +
+      '</div></section>';
+
+    html += '<ol class="list" style="list-style:none;margin:0;padding:0" aria-label="Lecciones del nivel">' + n.lecciones.map(function (l) {
+      var t = ui.TIPOS[l.tipo] || ui.TIPOS.ejercicio;
+      var e = ESTADO[l.estado] || ESTADO.no_iniciada;
+      var sub = '<span>' + t.label + '</span><span aria-hidden="true">·</span>' +
+        (l.estado === 'completada' ? '<span>' + l.puntaje + '% · ' + Math.round(l.xp_base * l.puntaje / 100) + ' XP ganados</span>' : '<span>+' + l.xp_base + ' XP</span>');
+      if (!l.desbloqueada) {
+        return '<li><div class="list-row is-locked" aria-label="' + ui.esc(l.titulo) + ', bloqueada">' +
+          '<span class="row-icon neutral">' + ui.icon('lock', { size: 20 }) + '</span>' +
+          '<span class="row-body"><span class="row-title">' + ui.esc(l.titulo) + '</span><span class="row-sub">Completa la lección anterior</span></span></div></li>';
+      }
+      return '<li><a class="list-row" href="leccion-teoria.html?leccion=' + encodeURIComponent(l.id_leccion) + '">' +
+        '<span class="row-icon ' + (l.estado === 'completada' ? 'ok' : '') + '">' + ui.icon(l.estado === 'completada' ? 'check' : t.icon, { size: 20 }) + '</span>' +
+        '<span class="row-body"><span class="row-title">' + ui.esc(l.titulo) + '</span><span class="row-sub">' + sub + '</span></span>' +
+        '<span class="chip ' + e.chip + '">' + e.txt + '</span></a></li>';
+    }).join('') + '</ol>';
+
+    ui.$('#main').innerHTML = html;
+  }
+
+  function load() {
+    E.api.logic.loadDashboard().then(render).catch(function (err) { ui.errorState(ui.$('#main'), err, load); });
+  }
+  ui.requireAuth('estudiante').then(load);
+})();
+</script>
+</body>
+</html>

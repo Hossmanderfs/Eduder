@@ -8,26 +8,37 @@
   /* ── Reset & Variables ──────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --indigo:     #4F46E5;
-    --indigo-l:   #EEF2FF;
-    --indigo-d:   #3730A3;
+:root {
+    /* Sistema visual Uniremington (mismo de la app móvil y los wireframes) */
+    --indigo:     #003DA5;   /* azul institucional (nombre heredado) */
+    --indigo-l:   #E5ECF8;
+    --indigo-d:   #002D7A;
     --surface:    #FFFFFF;
-    --bg:         #F5F6FA;
-    --border:     #E5E7EB;
-    --text:       #111827;
-    --muted:      #6B7280;
-    --success:    #059669;
-    --success-l:  #ECFDF5;
-    --danger:     #DC2626;
-    --danger-l:   #FEF2F2;
-    --warning:    #D97706;
-    --warning-l:  #FFFBEB;
+    --bg:         #E9EDF4;
+    --border:     #DCE2EB;
+    --text:       #121A2C;
+    --muted:      #4B566C;
+    --success:    #126B3D;
+    --success-l:  #E2F4EA;
+    --danger:     #AE231B;
+    --danger-l:   #FDEAE8;
+    --warning:    #7A5000;
+    --warning-l:  #FCF1D8;
+    --brand-red:  #C8102E;
+    --line-soft:  #FECACA;
     --sidebar-w:  240px;
-    --font:       'DM Sans', system-ui, sans-serif;
+    --font:       'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --indigo:#2F6CD8; --indigo-l:#16264A; --indigo-d:#4A80E4;
+      --surface:#111A2B; --bg:#070B14; --border:#26324C; --text:#E9EDF6; --muted:#B2BBCF;
+      --success:#74D6A4; --success-l:#0F3020; --danger:#FF9890; --danger-l:#3A1614;
+      --warning:#F6CD70; --warning-l:#33270E; --brand-red:#E1384F; --line-soft:#5A2A27;
+    }
   }
 
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap');
 
   body {
     font-family: var(--font);
@@ -198,9 +209,9 @@
   .btn-primary:hover:not(:disabled)  { background: var(--indigo-d); }
   .btn-outline  { background: transparent; border-color: var(--border); color: var(--text); }
   .btn-outline:hover:not(:disabled)  { background: var(--bg); }
-  .btn-danger   { background: var(--danger-l); color: var(--danger); border-color: #FECACA; }
-  .btn-danger:hover:not(:disabled)   { background: #FEE2E2; }
-  .btn-success  { background: var(--success-l); color: var(--success); border-color: #A7F3D0; }
+  .btn-danger   { background: var(--danger-l); color: var(--danger); border-color: var(--line-soft); }
+  .btn-danger:hover:not(:disabled)   { background: var(--danger-l); }
+  .btn-success  { background: var(--success-l); color: var(--success); border-color: var(--success); }
   .btn-full { width: 100%; padding: 11px 16px; font-size: 14px; }
   .btn-sm   { padding: 5px 10px; font-size: 12px; }
 
@@ -217,14 +228,14 @@
     max-width: 320px;
   }
   .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.ok   { background: var(--success-l); color: var(--success); border: 1px solid #A7F3D0; }
-  .toast.err  { background: var(--danger-l);  color: var(--danger);  border: 1px solid #FECACA; }
+  .toast.ok   { background: var(--success-l); color: var(--success); border: 1px solid var(--success); }
+  .toast.err  { background: var(--danger-l);  color: var(--danger);  border: 1px solid var(--line-soft); }
 
   /* ── Error banner ───────────────────────────────────────── */
   .error-banner {
     background: var(--danger-l);
     color: var(--danger);
-    border: 1px solid #FECACA;
+    border: 1px solid var(--line-soft);
     border-radius: 8px;
     padding: 10px 14px;
     font-size: 13px;

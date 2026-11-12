@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-08 · Niveles — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-08 · Selección de Nivel — RF-07, RF-08 · HU-03 -->
+<div class="app">
+  <header class="appbar">
+    <h1>Niveles de Lógica Matemática</h1>
+  </header>
+
+  <main class="app-main">
+    <section class="card-soft stack" aria-labelledby="global-title" id="global" style="gap:8px">
+      <div class="row"><h2 id="global-title" style="font-size:15px">Tu avance en el curso</h2><span class="spacer"></span><strong class="num" id="global-pct">–</strong></div>
+      <div class="mini-bar" style="height:10px" role="progressbar" aria-labelledby="global-title" aria-valuemin="0" aria-valuemax="100" id="global-bar"><span style="width:0"></span></div>
+      <p class="tiny" id="global-sub"></p>
+    </section>
+
+    <section class="list" id="list" aria-label="Niveles">
+      <div class="skeleton" style="min-height:84px"></div><div class="skeleton" style="min-height:84px"></div><div class="skeleton" style="min-height:84px"></div>
+    </section>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  ui.tabbar('niveles');
+
+  function render(d) {
+    var st = d.state;
+    ui.$('#global-pct').textContent = st.porcentaje_global + '%';
+    ui.$('#global-bar').setAttribute('aria-valuenow', st.porcentaje_global);
+    ui.$('#global-bar span').style.width = st.porcentaje_global + '%';
+    ui.$('#global-sub').textContent = st.lecciones_completadas + ' de ' + st.lecciones_total + ' lecciones completadas · Se aprueba un nivel con ' + E.config.UMBRAL_APROBACION + '% de promedio.';
+
+    ui.$('#list').innerHTML = st.niveles.map(function (n) {
+      if (n.estado === 'bloqueado') {
+        return '<div class="lvl-card is-locked" aria-label="Nivel ' + n.orden + ', ' + ui.esc(n.nombre) + ', bloqueado">' +
+          '<span class="lvl-badge">' + ui.icon('lock', { size: 22 }) + '</span>' +
+          '<span class="lvl-body"><span class="lvl-title">Nivel ' + n.orden + ' · ' + ui.esc(n.nombre) + '</span>' +
+          '<span class="lvl-sub">Completa el nivel anterior</span></span></div>';
+      }
+      var chip = n.estado === 'completado' ? '<span class="chip chip-ok">' + ui.icon('check', { size: 14 }) + 'Aprobado · ' + n.promedio + '%</span>'
+        : n.completo && !n.aprobado ? '<span class="chip chip-err">Promedio ' + n.promedio + '% · repasa para aprobar</span>'
+        : n.estado === 'en_progreso' ? '<span class="chip chip-blue">En progreso</span>' : '<span class="chip chip-neutral">Disponible</span>';
+      return '<a class="lvl-card ' + (n.estado === 'completado' ? 'is-done' : '') + '" href="wf09-lecciones.html?nivel=' + n.id_nivel + '">' +
+        '<span class="lvl-badge">' + (n.estado === 'completado' ? ui.icon('check', { size: 24 }) : n.orden) + '</span>' +
+        '<span class="lvl-body"><span class="lvl-title">Nivel ' + n.orden + ' · ' + ui.esc(n.nombre) + '</span>' +
+        '<span class="lvl-sub">' + ui.esc(n.descripcion || '') + '</span>' +
+        '<span class="row" style="gap:8px"><span class="mini-bar ' + (n.estado === 'completado' ? 'ok' : '') + '" style="flex:1"><span style="width:' + n.porcentaje + '%"></span></span><span class="tiny num">' + n.porcentaje + '%</span></span>' +
+        chip + '</span>' + ui.icon('chevron-right', { size: 20, cls: 'muted' }) + '</a>';
+    }).join('');
+  }
+
+  function load() {
+    E.api.logic.loadDashboard().then(render).catch(function (err) { ui.errorState(ui.$('#list'), err, load); });
+  }
+  ui.requireAuth('estudiante').then(load);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-03 · Mi perfil — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-03 · Perfil del Estudiante — RF-18 · CU-04
+     GET /profile/summary · GET /profile/progress · GET /gamification/medals -->
+<div class="app">
+  <header class="carne">
+    <div class="carne-top">
+      <span class="carne-inst">Uniremington · Carné EduDer</span>
+      <button type="button" class="icon-btn" id="theme" aria-label="Cambiar tema"><i data-icon="moon" data-size="22"></i></button>
+    </div>
+    <div class="carne-id">
+      <span class="avatar lg" id="avatar" aria-hidden="true">·</span>
+      <div style="min-width:0">
+        <p class="carne-name" id="nombre">Cargando…</p>
+        <p class="carne-mail" id="correo"></p>
+        <span class="chip" id="nivel-chip" style="margin-top:6px;background:rgba(255,255,255,.16);color:#fff"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="skeleton" style="min-height:72px"></div><div class="skeleton" style="min-height:200px"></div>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  ui.tabbar('perfil');
+
+  function themeIcon() {
+    var dark = ui.theme.current() === 'dark';
+    ui.$('#theme').innerHTML = ui.icon(dark ? 'sun' : 'moon', { size: 22 });
+    ui.$('#theme').setAttribute('aria-label', dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+  }
+  ui.$('#theme').addEventListener('click', function () { ui.theme.toggle(); themeIcon(); });
+  themeIcon();
+
+  function render(d, medallas) {
+    var u = d.perfilData, p = d.perfil, st = d.state;
+    ui.$('#avatar').textContent = ui.fmt.initials(u.nombre, u.apellido);
+    ui.$('#nombre').textContent = u.nombre + ' ' + u.apellido;
+    ui.$('#correo').textContent = u.correo_institucional;
+    ui.$('#nivel-chip').innerHTML = ui.icon('shield-star', { size: 14 }) + 'Nivel ' + st.nivel_actual + ' · ' + ui.esc(st.niveles[st.nivel_actual - 1].nombre);
+
+    var ganadas = medallas.filter(function (m) { return m.obtenida; });
+    var preview = ganadas.concat(medallas.filter(function (m) { return !m.obtenida; })).slice(0, 4);
+
+    var html =
+      '<section class="stats" aria-label="Estadísticas">' +
+      '<div class="stat">' + ui.icon('shield-star', { size: 18, cls: 'c-blue' }) + '<span class="stat-value num">' + st.nivel_actual + ' / ' + st.niveles.length + '</span><span class="stat-label">Nivel actual</span></div>' +
+      '<div class="stat">' + ui.icon('bolt', { size: 18, cls: 'c-gold' }) + '<span class="stat-value num">' + ui.fmt.num(p.xp_total || 0) + '</span><span class="stat-label">XP total</span></div>' +
+      '<div class="stat">' + ui.icon('flame', { size: 18, cls: 'c-gold' }) + '<span class="stat-value num">' + (p.streak_dias || 0) + '</span><span class="stat-label">' + ((p.streak_dias || 0) === 1 ? 'Día de racha' : 'Días de racha') + '</span></div>' +
+      '</section>';
+
+    html += '<section class="stack" aria-labelledby="prog-title"><div class="section-head"><h2 id="prog-title">Mi progreso</h2><span class="tiny">' + st.porcentaje_global + '% del curso</span></div><div class="stack" style="gap:14px">' +
+      st.niveles.map(function (n) {
+        var locked = n.estado === 'bloqueado';
+        return '<div' + (locked ? ' style="opacity:.6"' : '') + '><div class="row small" style="justify-content:space-between;margin-bottom:6px">' +
+          '<span>' + (locked ? ui.icon('lock', { size: 14 }) : '') + 'Nivel ' + n.orden + ' · ' + ui.esc(n.nombre) + '</span><span class="num muted">' + n.porcentaje + '%</span></div>' +
+          '<div class="mini-bar ' + (n.aprobado ? 'ok' : n.porcentaje ? 'gold' : '') + '" style="height:8px" role="progressbar" aria-label="Nivel ' + n.orden + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + n.porcentaje + '"><span style="width:' + n.porcentaje + '%"></span></div></div>';
+      }).join('') + '</div></section>';
+
+    html += '<section class="stack" aria-labelledby="med-title"><div class="section-head"><h2 id="med-title">Mis medallas</h2><a href="wf13-medallas.html">Ver todas (' + ganadas.length + '/' + medallas.length + ')</a></div>' +
+      '<div class="medals two">' + preview.map(function (m) {
+        return '<div class="medal' + (m.obtenida ? ' is-earned' : '') + '"><span class="medal-icon">' + ui.icon(m.obtenida ? 'award' : 'lock', { size: 26 }) + '</span>' +
+          '<span class="medal-name">' + ui.esc(m.nombre) + '</span><span class="medal-sub">' + (m.obtenida ? 'Obtenida ' + ui.fmt.date(m.fecha_obtencion) : ui.esc(m.descripcion || '')) + '</span></div>';
+      }).join('') + '</div></section>';
+
+    html += '<a class="btn btn-primary btn-lg btn-block" href="historial.html">' + ui.icon('history', { size: 20 }) + 'Ver historial de lecciones</a>';
+
+    html += '<section class="list" aria-label="Cuenta">' +
+      '<a class="list-row" href="wf16-notificaciones.html"><span class="row-icon">' + ui.icon('bell', { size: 20 }) + '</span><span class="row-body"><span class="row-title">Notificaciones</span></span>' + ui.icon('chevron-right', { size: 18 }) + '</a>' +
+      '<button type="button" class="list-row" id="logout"><span class="row-icon red">' + ui.icon('logout', { size: 20 }) + '</span><span class="row-body"><span class="row-title">Cerrar sesión</span></span></button>' +
+      '</section>' + ui.modeNote();
+
+    ui.$('#main').innerHTML = html;
+    ui.$('#logout').addEventListener('click', function () {
+      ui.confirm({ title: '¿Cerrar sesión?', confirmText: 'Cerrar sesión' }).then(function (ok) {
+        if (ok) E.api.logout().then(function () { ui.go('index.html'); });
+      });
+    });
+  }
+
+  function load() {
+    Promise.all([E.api.logic.loadDashboard(), E.api.medals()])
+      .then(function (r) { render(r[0], r[1]); })
+      .catch(function (err) { ui.errorState(ui.$('#main'), err, load); });
+  }
+  ui.requireAuth('estudiante').then(load);
+})();
+</script>
+</body>
+</html>

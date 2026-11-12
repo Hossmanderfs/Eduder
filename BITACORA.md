@@ -50,3 +50,19 @@ Los servicios no tenían los comentarios de trazabilidad que vinculan el código
 Usé la Matriz M9 (Clases → Métodos → CU → RF) como referencia para agregar el encabezado de trazabilidad a cada método en el formato `// CU-XX | RF-XX | E12 - método()`. Revisé que cada comentario correspondiera exactamente a las entradas de M9 para mantener la coherencia entre diseño y código.
 
 **¿Usé IA?** Sí — Usé IA para generar los comentarios de trazabilidad basados en la Matriz M9. Verifiqué manualmente que cada comentario referenciara los CU y RF correctos según los artefactos de diseño del proyecto, y corregí los casos donde la IA sugirió referencias incorrectas.
+
+---
+
+## Entrada cuarta semana
+
+**¿Qué hice?**  
+Unifiqué las ramas `main` y `backend`, rediseñé la app móvil (Expo) a partir del prototipo web de wireframes (todas las pantallas WF-00 a WF-16, tema claro/oscuro, tipografía Lexend), añadí el script `npm run seed` con el contenido semilla, la política de contraseña (8+ caracteres con letra y número) y la sesión JWT de 24 h, y sincronicé la documentación (`docs/`) con el documento final (tablas E1–E16, matrices M1–M13, requisitos, historias de usuario y casos de uso).
+
+**¿Qué problema encontré?**  
+Las dos ramas estaban desincronizadas y la documentación en Markdown era una versión resumida del documento Word, con numeración de requisitos (RF-01 a RF-24, RNF-01 a RNF-06) y dominio de correo desactualizados.
+
+**¿Cómo lo resolví?**  
+Fusioné y conservé una sola rama; regeneré las tablas de los `.md` desde el documento final con un script y corregí a mano el dominio de correo y los textos de E16/E17.
+
+**¿Usé IA?** Sí — Claude (Anthropic) ayudó a portar los wireframes a React Native y a sincronizar la documentación. Revisé el resultado ejecutando la app y las pruebas del backend (30 en verde).
+

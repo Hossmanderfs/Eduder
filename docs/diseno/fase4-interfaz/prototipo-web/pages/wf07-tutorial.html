@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-07 · Tutorial de bienvenida — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-07 · Tutorial de Bienvenida (primer acceso) — CU-01 postcondición -->
+<div class="app">
+  <header class="appbar" style="border-bottom:0">
+    <span class="spacer"></span>
+    <button type="button" class="link-btn" id="skip">Omitir tutorial</button>
+  </header>
+
+  <main class="carousel" aria-roledescription="carrusel" aria-label="Tutorial de bienvenida">
+    <div class="slides" id="slides">
+      <section class="slide" aria-roledescription="diapositiva" aria-label="1 de 3">
+        <div class="slide-art"><i data-icon="school" data-size="76"></i></div>
+        <h2 id="t1">Bienvenido a EduDer</h2>
+        <p id="hola">Aprende lógica matemática a tu ritmo, en sesiones de pocos minutos.</p>
+      </section>
+      <section class="slide" aria-roledescription="diapositiva" aria-label="2 de 3" aria-hidden="true">
+        <div class="slide-art"><i data-icon="puzzle" data-size="76"></i></div>
+        <h2>¿Cómo funciona?</h2>
+        <p>Cada lección tiene teoría breve y ejercicios. Si te equivocas, verás la explicación paso a paso y puedes pedir hasta 2 pistas.</p>
+      </section>
+      <section class="slide" aria-roledescription="diapositiva" aria-label="3 de 3" aria-hidden="true">
+        <div class="slide-art"><i data-icon="flame" data-size="76"></i></div>
+        <h2>¡Comienza tu primer nivel!</h2>
+        <p>Gana XP, mantén tu racha diaria y desbloquea los 5 niveles. Con 70% o más en un nivel, pasas al siguiente.</p>
+      </section>
+    </div>
+    <div class="dots" id="dots" aria-hidden="true"><span class="dot is-active"></span><span class="dot"></span><span class="dot"></span></div>
+  </main>
+
+  <div class="bottom-bar" style="border-top:0">
+    <button type="button" class="btn btn-primary btn-lg btn-block" id="next">Siguiente</button>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  ui.requireAuth('estudiante').then(function (u) {
+    ui.$('#hola').textContent = 'Hola, ' + u.nombre + '. Aprende lógica matemática a tu ritmo, en sesiones de pocos minutos.';
+  });
+
+  var i = 0, total = 3;
+  var slides = ui.$('#slides'), dots = ui.$$('.dot'), next = ui.$('#next'), sections = ui.$$('.slide');
+
+  function finish() {
+    try { localStorage.setItem('eduder_tutorial_visto', '1'); } catch (e) { }
+    ui.go('pages/wf01-menu.html');
+  }
+  function render() {
+    slides.style.transform = 'translateX(' + (-100 * i) + '%)';
+    dots.forEach(function (d, k) { d.classList.toggle('is-active', k === i); });
+    sections.forEach(function (s, k) { s.setAttribute('aria-hidden', k === i ? 'false' : 'true'); });
+    next.textContent = i === total - 1 ? 'Empezar' : 'Siguiente';
+  }
+  next.addEventListener('click', function () { if (i < total - 1) { i++; render(); } else finish(); });
+  ui.$('#skip').addEventListener('click', finish);
+
+  // Deslizar con el dedo y con el teclado
+  var x0 = null;
+  slides.addEventListener('pointerdown', function (e) { x0 = e.clientX; });
+  slides.addEventListener('pointerup', function (e) {
+    if (x0 === null) return;
+    var dx = e.clientX - x0; x0 = null;
+    if (dx < -40 && i < total - 1) { i++; render(); }
+    if (dx > 40 && i > 0) { i--; render(); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' && i < total - 1) { i++; render(); }
+    if (e.key === 'ArrowLeft' && i > 0) { i--; render(); }
+  });
+})();
+</script>
+</body>
+</html>

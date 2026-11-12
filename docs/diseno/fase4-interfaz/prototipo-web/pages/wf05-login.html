@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-05 · Iniciar sesión — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-05 · Pantalla de Login — RF-03, RF-04, RF-05, RF-06, RF-20 · CU-02 -->
+<div class="app">
+  <header class="appbar">
+    <a class="icon-btn" href="../index.html" aria-label="Volver"><i data-icon="arrow-left"></i></a>
+    <h1 class="sr-only">Iniciar sesión</h1>
+  </header>
+
+  <main class="app-main">
+    <div class="brand-head">
+      <span class="logo" style="--logo-size:52px" aria-hidden="true"><span class="logo-mark">E</span></span>
+      <h1>Iniciar sesión</h1>
+      <p class="muted small">Entra con tu correo institucional.</p>
+    </div>
+
+    <div id="notice" class="banner banner-warn" role="status" hidden></div>
+    <!-- Banner visible solo tras un fallo (WF-05) -->
+    <div id="error" class="banner banner-error" role="alert" hidden></div>
+
+    <form id="form" class="stack" novalidate>
+      <div class="field">
+        <label for="correo">Correo institucional</label>
+        <input class="input" id="correo" name="correo" type="email" inputmode="email" autocomplete="username" placeholder="nombre.apellido@miremington.edu.co" required>
+      </div>
+      <div class="field">
+        <label for="clave">Contraseña</label>
+        <div class="input-wrap">
+          <input class="input" id="clave" name="clave" type="password" autocomplete="current-password" required>
+          <button type="button" class="icon-btn" id="toggle" aria-label="Mostrar contraseña" aria-pressed="false"><i data-icon="eye"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg btn-block" id="submit">Entrar</button>
+    </form>
+
+    <div class="stack" style="align-items:center; gap:4px">
+      <a href="wf06-recuperar.html" class="small">¿Olvidaste tu contraseña?</a>
+      <p class="small">¿No tienes cuenta? <a href="wf04-registro.html">Crear cuenta</a></p>
+    </div>
+
+    <div id="demo"></div>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  var form = ui.$('#form'), submit = ui.$('#submit'), errBox = ui.$('#error'), notice = ui.$('#notice');
+
+  var motivo = ui.param('motivo');
+  if (motivo) {
+    notice.innerHTML = ui.icon('info-circle', { size: 18 }) + '<span>' +
+      (motivo === 'desactivada' ? 'Tu cuenta fue desactivada por un administrador. Escribe a soporte si crees que es un error.'
+        : motivo === 'recuperar' ? 'Revisa tu correo institucional para restablecer la contraseña.'
+        : 'Tu sesión terminó. Vuelve a iniciar sesión.') + '</span>';
+    notice.hidden = false;
+  }
+
+  ui.$('#toggle').addEventListener('click', function () {
+    var show = form.clave.type === 'password';
+    form.clave.type = show ? 'text' : 'password';
+    this.setAttribute('aria-pressed', show ? 'true' : 'false');
+    this.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    this.innerHTML = ui.icon(show ? 'eye-off' : 'eye');
+  });
+
+  function showError(msg) {
+    errBox.innerHTML = ui.icon('alert-triangle', { size: 18 }) + '<span>' + ui.esc(msg) + '</span>';
+    errBox.hidden = false;
+  }
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    errBox.hidden = true;
+    var correo = form.correo.value.trim().toLowerCase();
+    if (!correo || !form.clave.value) { showError('Escribe tu correo y tu contraseña.'); return; }
+    ui.busy(submit, true, 'Entrando…');
+    E.api.login({ correo_institucional: correo, contrasena: form.clave.value })
+      .then(function (r) {
+        E.api.session.save(r.token, r.usuario);
+        ui.go(r.usuario.rol === 'admin' ? 'admin/wf15-metricas.html' : 'pages/wf01-menu.html');
+      })
+      .catch(function (err) {
+        ui.busy(submit, false);
+        // 401 → "Credenciales incorrectas" · 403 → cuenta desactivada · 429 → bloqueo 15 min (RF-05)
+        showError(err.status === 403 ? 'Tu cuenta está desactivada. Contacta al administrador.' : err.message);
+        form.clave.value = '';
+        form.clave.focus();
+      });
+  });
+
+  if (E.api.isMock()) {
+    ui.$('#demo').innerHTML =
+      '<div class="card-soft stack small">' +
+      '<p><strong>Cuentas de prueba</strong> (modo demostración)</p>' +
+      '<button type="button" class="list-row" data-demo="juan.perez@miremington.edu.co|Eduder2026">' + ui.icon('user', { size: 18 }) +
+      '<span class="row-body"><span class="row-title">Estudiante · Juan Pérez</span><span class="row-sub">juan.perez@miremington.edu.co · Eduder2026</span></span></button>' +
+      '<button type="button" class="list-row" data-demo="admin@uniremington.edu.co|Admin2026">' + ui.icon('layout-dashboard', { size: 18 }) +
+      '<span class="row-body"><span class="row-title">Administrador</span><span class="row-sub">admin@uniremington.edu.co · Admin2026</span></span></button>' +
+      '</div>';
+    ui.$$('[data-demo]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var p = b.dataset.demo.split('|');
+        form.correo.value = p[0]; form.clave.value = p[1]; submit.focus();
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-10 · Resultado — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-10 · Feedback de Respuesta — RF-10 (feedback < 1 s) · DS-02 -->
+<div class="app">
+  <header class="ex-top">
+    <span style="width:12px" aria-hidden="true"></span>
+    <div class="ex-progress">
+      <div class="mini-bar" id="pbar" role="progressbar" aria-label="Progreso de la lección" aria-valuemin="0"><span style="width:0"></span></div>
+      <span class="ex-count" id="count"></span>
+    </div>
+  </header>
+
+  <main class="feedback-screen">
+    <section class="sheet" id="sheet" aria-live="assertive"></section>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  var S = ui.lessonSession.get();
+  if (!S || !S.ultimo) { ui.go(S ? 'pages/wf02-ejercicio.html' : 'pages/wf08-niveles.html'); return; }
+  if (S.completada) { ui.go('pages/wf11-resumen.html'); return; }
+
+  var r = S.ultimo, total = S.ejercicios.length;
+  var esUltimo = S.idx >= total - 1;
+  var pbar = ui.$('#pbar');
+  pbar.setAttribute('aria-valuemax', total); pbar.setAttribute('aria-valuenow', S.idx + 1);
+  ui.$('#count').textContent = 'Ejercicio ' + (S.idx + 1) + ' de ' + total;
+  requestAnimationFrame(function () { ui.$('#pbar span').style.width = ((S.idx + (r.correcto ? 1 : 0)) / total * 100) + '%'; });
+
+  var sheet = ui.$('#sheet');
+  if (r.correcto) {
+    var nextLabel = !esUltimo ? 'Siguiente ejercicio' : S.minijuego ? 'Ir al mini-juego' : 'Ver resumen';
+    sheet.innerHTML =
+      '<div class="verdict ok"><span class="verdict-icon">' + ui.icon('check', { size: 24 }) + '</span>¡Correcto!</div>' +
+      (r.xp > 0
+        ? '<p class="xp-gain animate" aria-label="Ganaste ' + r.xp + ' XP">' + ui.icon('bolt', { size: 28 }) + '<span><span id="xp" class="num">+0</span> XP</span></p>' +
+          '<p class="small muted">Los XP se suman a tu perfil al terminar la lección.</p>'
+        : '<p class="small muted">Bien resuelto. Los XP solo cuentan cuando aciertas en el primer intento.</p>') +
+      '<p class="small"><span class="muted">Tu respuesta:</span> <strong>' + ui.esc(r.respuesta) + '</strong></p>' +
+      '<button type="button" class="btn btn-ok btn-lg btn-block" id="next">' + nextLabel + ui.icon('chevron-right', { size: 20 }) + '</button>';
+    if (r.xp > 0) ui.countUp(ui.$('#xp'), r.xp, 700, '+');
+    ui.$('#next').addEventListener('click', function () {
+      S.idx += 1; S.ultimo = null;
+      ui.lessonSession.set(S);
+      ui.go(!esUltimo ? 'pages/wf02-ejercicio.html' : S.minijuego ? 'pages/mini-juego.html' : 'pages/wf11-resumen.html');
+    });
+    ui.$('#next').focus();
+  } else {
+    var intentos = (S.resultados[r.id_ejercicio] || {}).intentos || 1;
+    sheet.innerHTML =
+      '<div class="verdict err"><span class="verdict-icon">' + ui.icon('x', { size: 24 }) + '</span>Incorrecto</div>' +
+      '<p class="small"><span class="muted">Tu respuesta:</span> <strong>' + ui.esc(r.respuesta) + '</strong></p>' +
+      (r.explicacion
+        ? '<details class="explain" open><summary>' + ui.icon('bulb', { size: 18 }) + 'Explicación paso a paso' + ui.icon('chevron-down', { size: 18, cls: 'chev' }) + '</summary><div class="explain-body">' + ui.esc(r.explicacion) + '</div></details>'
+        : '') +
+      '<button type="button" class="btn btn-primary btn-lg btn-block" id="retry">' + ui.icon('arrow-back-up', { size: 20 }) + 'Intentar de nuevo</button>' +
+      (intentos >= 2 ? '<button type="button" class="btn btn-ghost btn-block" id="skip">Saltar este ejercicio</button>' : '');
+    ui.$('#retry').addEventListener('click', function () { S.ultimo = null; ui.lessonSession.set(S); ui.go('pages/wf02-ejercicio.html'); });
+    var skip = ui.$('#skip');
+    if (skip) skip.addEventListener('click', function () {
+      // Cuenta como no acertado; evita quedarse bloqueado en un ejercicio
+      S.idx += 1; S.ultimo = null; ui.lessonSession.set(S);
+      ui.go(!esUltimo ? 'pages/wf02-ejercicio.html' : S.minijuego ? 'pages/mini-juego.html' : 'pages/wf11-resumen.html');
+    });
+    ui.$('#retry').focus();
+  }
+  ui.requireAuth('estudiante');
+})();
+</script>
+</body>
+</html>

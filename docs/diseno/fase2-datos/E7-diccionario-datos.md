@@ -6,7 +6,7 @@
 | Atributo | Tipo | Restricción | Descripción |
 |----------|------|-------------|-------------|
 | id_usuario | CHAR(36) | PK, NOT NULL | UUID v4 generado al registrarse |
-| correo_institucional | VARCHAR(150) | UNIQUE, NOT NULL, CHECK regex | Correo @uniremington.edu.co |
+| correo_institucional | VARCHAR(150) | UNIQUE, NOT NULL, CHECK regex | Correo @miremington.edu.co (estudiantes) o @uniremington.edu.co (administración) |
 | nombre | VARCHAR(80) | NOT NULL | Nombre(s) del usuario |
 | apellido | VARCHAR(80) | NOT NULL | Apellido(s) del usuario |
 | contrasena_hash | VARCHAR(255) | NOT NULL | bcrypt costo ≥ 10 |

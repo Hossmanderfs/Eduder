@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-01 · Menú principal — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-01 · Menú Principal — RF-07, RF-09, RF-12, RF-13 · CU-03, CU-04 -->
+<div class="app">
+  <header class="carne" id="carne">
+    <div class="carne-top">
+      <span class="carne-inst">Uniremington · EduDer</span>
+      <span class="streak-pill" id="streak" title="Racha de días seguidos"><i data-icon="flame" data-size="18"></i><span>–</span></span>
+      <a class="icon-btn" href="wf16-notificaciones.html" id="bell" aria-label="Notificaciones"><i data-icon="bell" data-size="22"></i></a>
+    </div>
+    <div class="carne-id">
+      <span class="avatar" id="avatar" aria-hidden="true">·</span>
+      <div style="min-width:0">
+        <p class="carne-name" id="nombre">Cargando…</p>
+        <p class="carne-mail" id="nivel-txt"></p>
+      </div>
+    </div>
+    <div class="xp">
+      <div class="xp-row"><span id="xp-label">XP del nivel</span><strong class="num" id="xp-num"></strong></div>
+      <div class="xp-track" role="progressbar" aria-label="Progreso de XP hacia el siguiente nivel" aria-valuemin="0" aria-valuemax="100" id="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+    </div>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="skeleton" style="min-height:140px"></div>
+    <div class="skeleton" style="min-height:120px"></div>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  ui.tabbar('inicio');
+
+  function render(d) {
+    var u = d.perfilData, p = d.perfil, st = d.state;
+    ui.$('#avatar').textContent = ui.fmt.initials(u.nombre, u.apellido);
+    ui.$('#nombre').textContent = u.nombre + ' ' + u.apellido;
+    var nivel = st.niveles[st.nivel_actual - 1];
+    ui.$('#nivel-txt').textContent = 'Nivel ' + st.nivel_actual + ' · ' + nivel.nombre;
+    ui.$('#streak').innerHTML = ui.icon('flame', { size: 18 }) + '<span>' + (p.streak_dias || 0) + '</span>';
+    ui.$('#streak').setAttribute('aria-label', 'Racha de ' + ui.fmt.dias(p.streak_dias || 0));
+
+    var unread = (u.notificaciones || []).filter(function (n) { return !n.leida; }).length;
+    if (unread) {
+      ui.$('#bell').insertAdjacentHTML('beforeend', '<span class="dot-badge">' + (unread > 9 ? '9+' : unread) + '</span>');
+      ui.$('#bell').setAttribute('aria-label', 'Notificaciones, ' + unread + ' sin leer');
+    }
+
+    // Barra de XP: XP ganado en el nivel actual frente al máximo del nivel
+    var max = nivel.lecciones.reduce(function (a, l) { return a + l.xp_base; }, 0);
+    var ganado = nivel.lecciones.reduce(function (a, l) { return a + (l.estado === 'completada' ? Math.round(l.xp_base * (l.puntaje || 0) / 100) : 0); }, 0);
+    var pct = max ? Math.min(100, Math.round(ganado / max * 100)) : 0;
+    ui.$('#xp-label').textContent = st.nivel_actual < st.niveles.length ? 'Hacia el nivel ' + (st.nivel_actual + 1) : 'Último nivel';
+    ui.$('#xp-num').textContent = ganado + ' / ' + max + ' XP · Total ' + ui.fmt.num(p.xp_total);
+    ui.$('#xp-bar').setAttribute('aria-valuenow', pct);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { ui.$('#xp-fill').style.width = pct + '%'; }); });
+
+    var next = E.api.logic.nextLesson(st);
+    var tipo = next ? ui.TIPOS[next.leccion.tipo] : null;
+    var html = '';
+    if (next) {
+      var repaso = next.leccion.estado === 'completada';
+      html += '<section class="daily" aria-labelledby="daily-title">' +
+        '<p class="daily-kicker">' + ui.icon(tipo.icon, { size: 16 }) + (next.leccion.estado === 'en_progreso' ? 'Lección en progreso' : repaso ? 'Repaso' : 'Siguiente lección') + ' · Nivel ' + next.nivel.orden + '</p>' +
+        '<h2 class="daily-title" id="daily-title">' + ui.esc(next.leccion.titulo) + '</h2>' +
+        '<p class="small muted">' + tipo.label + ' · hasta ' + next.leccion.xp_base + ' XP</p>' +
+        '<a class="btn btn-primary btn-lg btn-block btn-pulse" href="leccion-teoria.html?leccion=' + encodeURIComponent(next.leccion.id_leccion) + '">' +
+        ui.icon('player-play', { size: 20 }) + 'Continuar lección diaria</a></section>';
+    }
+
+    html += '<section class="stack" aria-labelledby="niv-title"><div class="section-head"><h2 id="niv-title">Tus niveles</h2><a href="wf08-niveles.html">Ver todos</a></div>' +
+      '<div class="hscroll" role="list">' + st.niveles.map(function (n) {
+        var cls = n.estado === 'bloqueado' ? 'is-locked' : n.estado === 'completado' ? 'is-done' : '';
+        var label = n.estado === 'bloqueado' ? 'Bloqueado' : n.estado === 'completado' ? 'Completado' : n.porcentaje + '% completado';
+        var inner = '<span class="lvl-num">' + (n.estado === 'bloqueado' ? ui.icon('lock', { size: 18 }) : n.estado === 'completado' ? ui.icon('check', { size: 18 }) : n.orden) + '</span>' +
+          '<span class="lvl-name">' + ui.esc(n.nombre) + '</span>' +
+          '<span class="mini-bar ' + (n.estado === 'completado' ? 'ok' : '') + '"><span style="width:' + n.porcentaje + '%"></span></span>' +
+          '<span class="tiny">' + label + '</span>';
+        return n.estado === 'bloqueado'
+          ? '<div class="lvl-mini ' + cls + '" role="listitem" aria-label="Nivel ' + n.orden + ', ' + ui.esc(n.nombre) + ', bloqueado">' + inner + '</div>'
+          : '<a class="lvl-mini ' + cls + '" role="listitem" href="wf09-lecciones.html?nivel=' + n.id_nivel + '" aria-label="Nivel ' + n.orden + ', ' + ui.esc(n.nombre) + ', ' + label + '">' + inner + '</a>';
+      }).join('') + '</div></section>';
+
+    html += '<section class="stats" aria-label="Resumen">' +
+      '<div class="stat">' + ui.icon('bolt', { size: 18, cls: 'c-gold' }) + '<span class="stat-value num">' + ui.fmt.num(p.xp_semana_actual || 0) + '</span><span class="stat-label">XP esta semana</span></div>' +
+      '<div class="stat">' + ui.icon('list-check', { size: 18, cls: 'c-blue' }) + '<span class="stat-value num">' + st.lecciones_completadas + '/' + st.lecciones_total + '</span><span class="stat-label">Lecciones</span></div>' +
+      '<div class="stat">' + ui.icon('award', { size: 18, cls: 'c-gold' }) + '<span class="stat-value num">' + (u.medallas || []).length + '</span><span class="stat-label">Medallas</span></div>' +
+      '</section>';
+
+    ui.$('#main').innerHTML = html;
+  }
+
+  function load() {
+    E.api.logic.loadDashboard().then(render).catch(function (err) { ui.errorState(ui.$('#main'), err, load); });
+  }
+  ui.requireAuth('estudiante').then(load);
+})();
+</script>
+</body>
+</html>

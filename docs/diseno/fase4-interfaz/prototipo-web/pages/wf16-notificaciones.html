@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-16 · Notificaciones — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-16 · Pantalla de Notificaciones — RF-16 · tipos: racha / logro / sistema
+     GET /notifications · PATCH /notifications/read-all (rutas propuestas, ver README) -->
+<div class="app">
+  <header class="appbar">
+    <a class="icon-btn" href="wf01-menu.html" aria-label="Volver al inicio"><i data-icon="arrow-left"></i></a>
+    <h1>Notificaciones</h1>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="skeleton"></div><div class="skeleton"></div>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  ui.tabbar('inicio');
+  var TIPO = {
+    racha: { icon: 'flame', cls: 'gold', label: 'Racha' },
+    logro: { icon: 'award', cls: 'ok', label: 'Logro' },
+    sistema: { icon: 'info-circle', cls: '', label: 'Sistema' }
+  };
+
+  function render(list) {
+    var unread = list.filter(function (n) { return !n.leida; }).length;
+    if (!list.length) {
+      ui.$('#main').innerHTML = '<div class="empty">' + ui.icon('bell', { size: 40 }) + '<h2>Sin notificaciones</h2><p>Aquí verás tus logros y recordatorios de racha.</p></div>';
+      return;
+    }
+    ui.$('#main').innerHTML =
+      '<div class="row"><p class="small muted" style="flex:1">' + (unread ? unread + (unread === 1 ? ' sin leer' : ' sin leer') : 'Todo al día') + '</p>' +
+      '<button type="button" class="btn btn-secondary btn-sm" id="all"' + (unread ? '' : ' disabled') + '>' + ui.icon('check', { size: 16 }) + 'Marcar todo como leído</button></div>' +
+      '<ul class="list" style="list-style:none;margin:0;padding:0;gap:4px">' + list.map(function (n) {
+        var t = TIPO[n.tipo] || TIPO.sistema;
+        return '<li class="notif' + (n.leida ? '' : ' is-unread') + '">' +
+          '<span class="row-icon ' + t.cls + '">' + ui.icon(t.icon, { size: 20 }) + '</span>' +
+          '<span class="row-body"><span class="row-title">' + ui.esc(n.mensaje) + '</span>' +
+          '<span class="row-sub"><span>' + t.label + '</span><span aria-hidden="true">·</span><time datetime="' + ui.esc(n.fecha_envio) + '">' + ui.fmt.ago(n.fecha_envio) + '</time>' + (n.leida ? '' : '<span class="sr-only">, sin leer</span>') + '</span></span>' +
+          (n.leida ? '' : '<span class="unread-dot" aria-hidden="true"></span>') + '</li>';
+      }).join('') + '</ul>';
+    var all = ui.$('#all');
+    if (all && unread) all.addEventListener('click', function () {
+      ui.busy(all, true, 'Marcando…');
+      E.api.readAllNotifications().then(function () {
+        list.forEach(function (n) { n.leida = true; });
+        render(list); ui.toast('Notificaciones marcadas como leídas', 'success');
+      }).catch(function (err) { ui.busy(all, false); ui.toast(err.status === 404 ? 'El servidor aún no tiene la ruta para marcar como leídas.' : err.message, 'error'); });
+    });
+  }
+
+  function load() { E.api.notifications().then(render).catch(function (err) { ui.errorState(ui.$('#main'), err, load); }); }
+  ui.requireAuth('estudiante').then(load);
+})();
+</script>
+</body>
+</html>

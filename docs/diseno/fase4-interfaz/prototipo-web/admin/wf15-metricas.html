@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#003DA5">
+<title>WF-15 · Métricas y exportación — EduDer Admin</title>
+<link rel="stylesheet" href="../css/eduder.css">
+<link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+<!-- WF-15 · Panel de Administración — Métricas y Exportación — RF-22 · CU-06
+     GET /admin/metrics?desde=&hasta= (forma extendida propuesta, ver README) -->
+<div class="admin">
+  <main class="admin-main">
+    <div class="admin-head">
+      <div><h1>Dashboard</h1><p id="range-txt">Indicadores del periodo seleccionado</p></div>
+      <button type="button" class="btn btn-primary" id="export" disabled><i data-icon="download" data-size="18"></i>Exportar CSV</button>
+    </div>
+
+    <section class="panel">
+      <div class="panel-body">
+        <form class="filters" id="filters">
+          <div class="field"><label for="desde">Desde</label><input class="input" type="date" id="desde" required></div>
+          <div class="field"><label for="hasta">Hasta</label><input class="input" type="date" id="hasta" required></div>
+          <button type="submit" class="btn btn-secondary">Aplicar</button>
+          <div class="presets" role="group" aria-label="Rangos rápidos" style="padding-bottom:6px">
+            <button type="button" class="chip-btn" data-days="7" aria-pressed="true">7 días</button>
+            <button type="button" class="chip-btn" data-days="30" aria-pressed="false">30 días</button>
+            <button type="button" class="chip-btn" data-days="90" aria-pressed="false">90 días</button>
+          </div>
+        </form>
+        <p class="field-msg" id="filter-msg" role="alert" style="margin-top:8px"></p>
+      </div>
+    </section>
+
+    <section class="kpis" id="kpis" aria-live="polite"></section>
+
+    <section class="panel" id="detalle" tabindex="-1">
+      <div class="panel-head"><h2>Detalle diario</h2><span class="tiny" id="detalle-sub"></span></div>
+      <div class="table-wrap" id="table"></div>
+    </section>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/admin.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  E.adminShell(location.hash === '#detalle' ? 'metricas' : 'dashboard');
+  window.addEventListener('hashchange', function () {
+    ui.$$('.side-link').forEach(function (a, i) { a.removeAttribute('aria-current'); });
+    ui.$$('.side-link')[location.hash === '#detalle' ? 2 : 0].setAttribute('aria-current', 'page');
+  });
+
+  var desde = ui.$('#desde'), hasta = ui.$('#hasta'), data = null;
+  function iso(d) { return E.mock.util.isoDay(d); }
+  function setRange(days) {
+    var h = new Date(), d = new Date(); d.setDate(d.getDate() - (days - 1));
+    desde.value = iso(d); hasta.value = iso(h);
+  }
+  var hoy = iso(new Date());
+  desde.max = hoy; hasta.max = hoy;
+
+  function trend(cur, prev, decimals) {
+    if (prev === null || prev === undefined || cur === null) return '<span class="kpi-trend flat">Sin periodo anterior</span>';
+    if (!prev) return '<span class="kpi-trend flat">' + ui.icon('trending-up', { size: 16 }) + 'Nuevo</span>';
+    var pct = (cur - prev) / prev * 100;
+    var cls = Math.abs(pct) < 0.5 ? 'flat' : pct > 0 ? 'up' : 'down';
+    var arrow = cls === 'down' ? '↓' : cls === 'up' ? '↑' : '→';
+    return '<span class="kpi-trend ' + cls + '" aria-label="' + (cls === 'up' ? 'Sube' : cls === 'down' ? 'Baja' : 'Igual') + ' ' + Math.abs(pct).toFixed(1) + '% frente al periodo anterior">' +
+      ui.icon(cls === 'down' ? 'trending-down' : 'trending-up', { size: 16 }) + arrow + ' ' + Math.abs(pct).toFixed(1) + '% vs. periodo anterior</span>';
+  }
+
+  function render(m) {
+    data = m;
+    var dias = m.serie && m.serie.length ? m.serie.length : null;
+    ui.$('#range-txt').textContent = ui.fmt.dateLong(m.desde + 'T12:00:00') + ' – ' + ui.fmt.dateLong(m.hasta + 'T12:00:00') + (dias ? ' · ' + dias + ' días' : '') + (m.cuentas_activas ? ' · ' + m.cuentas_activas + ' cuentas de estudiante activas' : '');
+    var k = m.kpis, p = m.previo;
+    ui.$('#kpis').innerHTML =
+      '<article class="kpi"><span class="kpi-label">' + ui.icon('users', { size: 18, cls: 'c-blue' }) + 'Usuarios activos <span class="tiny">(promedio diario)</span></span><span class="kpi-value num">' + ui.fmt.num(k.usuarios_activos) + '</span>' + trend(k.usuarios_activos, p && p.usuarios_activos) + '</article>' +
+      '<article class="kpi"><span class="kpi-label">' + ui.icon('list-check', { size: 18, cls: 'c-blue' }) + 'Lecciones completadas</span><span class="kpi-value num">' + ui.fmt.num(k.lecciones_completadas) + '</span>' + trend(k.lecciones_completadas, p && p.lecciones_completadas) + '</article>' +
+      (k.puntaje_promedio !== null && k.puntaje_promedio !== undefined
+        ? '<article class="kpi"><span class="kpi-label">' + ui.icon('target', { size: 18, cls: 'c-blue' }) + 'Puntaje promedio</span><span class="kpi-value num">' + String(k.puntaje_promedio).replace('.', ',') + '%</span>' + trend(k.puntaje_promedio, p && p.puntaje_promedio) + '</article>'
+        : '<article class="kpi"><span class="kpi-label">' + ui.icon('bolt', { size: 18, cls: 'c-blue' }) + 'XP promedio</span><span class="kpi-value num">' + ui.fmt.num(k.xp_promedio || 0) + '</span><span class="kpi-trend flat">El backend aún no envía puntaje promedio</span></article>');
+
+    var serie = (m.serie || []).slice().reverse();
+    ui.$('#detalle-sub').textContent = serie.length ? 'Más reciente primero' : '';
+    ui.$('#table').innerHTML = serie.length
+      ? '<table class="table"><caption class="sr-only">Detalle diario del periodo</caption><thead><tr><th scope="col">Fecha</th><th scope="col" class="num">Usuarios activos</th><th scope="col" class="num">Lecciones completadas</th><th scope="col" class="num">Puntaje promedio</th></tr></thead><tbody>' +
+        serie.map(function (r) {
+          return '<tr><td>' + ui.fmt.dateLong(r.fecha + 'T12:00:00') + '</td><td class="num">' + ui.fmt.num(r.usuarios_activos) + '</td><td class="num">' + ui.fmt.num(r.lecciones_completadas) + '</td><td class="num">' + (r.puntaje_promedio === null ? '—' : String(r.puntaje_promedio).replace('.', ',') + '%') + '</td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<div class="empty"><p>El backend actual no devuelve el detalle por día. Ver README → "GET /admin/metrics".</p></div>';
+    ui.$('#export').disabled = false;
+  }
+
+  function load() {
+    var msg = ui.$('#filter-msg');
+    msg.textContent = '';
+    if (!desde.value || !hasta.value) { msg.textContent = 'Elige las dos fechas.'; return; }
+    if (desde.value > hasta.value) { msg.textContent = 'La fecha "Desde" no puede ser posterior a "Hasta".'; return; }
+    ui.$('#export').disabled = true;
+    ui.loading(ui.$('#kpis'), 'Calculando indicadores…');
+    E.api.admin.metrics(desde.value, hasta.value).then(render).catch(function (err) { ui.errorState(ui.$('#kpis'), err, load); });
+  }
+
+  // Exportación CSV (RF-22): UTF-8 con BOM para que Excel respete las tildes
+  function exportCsv() {
+    if (!data) return;
+    function cell(v) { v = v === null || v === undefined ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+    var lines = [
+      ['Reporte EduDer — Métricas'], ['Desde', data.desde], ['Hasta', data.hasta], [],
+      ['Indicador', 'Valor', 'Periodo anterior'],
+      ['Usuarios activos (promedio diario)', data.kpis.usuarios_activos, data.previo ? data.previo.usuarios_activos : ''],
+      ['Lecciones completadas', data.kpis.lecciones_completadas, data.previo ? data.previo.lecciones_completadas : ''],
+      ['Puntaje promedio (%)', data.kpis.puntaje_promedio, data.previo ? data.previo.puntaje_promedio : ''], [],
+      ['Fecha', 'Usuarios activos', 'Lecciones completadas', 'Puntaje promedio (%)']
+    ];
+    (data.serie || []).forEach(function (r) { lines.push([r.fecha, r.usuarios_activos, r.lecciones_completadas, r.puntaje_promedio]); });
+    var csv = '﻿' + lines.map(function (l) { return l.map(cell).join(','); }).join('\r\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'eduder-metricas_' + data.desde + '_a_' + data.hasta + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    ui.toast('Descargando ' + a.download, 'success');
+  }
+
+  ui.$('#filters').addEventListener('submit', function (e) {
+    e.preventDefault();
+    ui.$$('[data-days]').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+    load();
+  });
+  ui.$$('[data-days]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      setRange(Number(b.dataset.days));
+      ui.$$('[data-days]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      load();
+    });
+  });
+  ui.$('#export').addEventListener('click', exportCsv);
+
+  setRange(7);
+  ui.requireAuth('admin').then(function () {
+    load();
+    if (location.hash === '#detalle') setTimeout(function () { ui.$('#detalle').focus(); }, 300);
+  });
+})();
+</script>
+</body>
+</html>

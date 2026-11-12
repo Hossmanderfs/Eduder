@@ -1,12 +1,12 @@
 # E1 — Tabla de Contexto
 
 | ENTRADAS | PROCESOS | SALIDAS |
-|----------|----------|---------|
-| Correo institucional y contraseña | Validación regex; encriptación bcrypt; creación JWT | Confirmación de registro o error |
-| Selección de lección | Carga de contenido desde BD; secuencia de ejercicios | Pantalla de lección con contenido animado |
-| Respuesta del estudiante a ejercicio | Evaluación vs. respuesta_correcta; cálculo XP; actualización progreso_leccion | Feedback inmediato (< 1 s) + XP ganados |
-| Finalización de lección | Suma XP; evaluación medallas; actualización streak; verificación umbral nivel (≥ 70%) | Pantalla resumen: XP, medallas, animación si aplica |
-| Solicitud de pista | Consulta tabla PISTAS (máx. 2) | Texto de pista contextual |
-| Cron job 02:00 h | Snapshot BD; compresión; almacenamiento S3/Firebase | Log de backup exitoso o alerta fallo |
-| Cron job 18:00 h (usuario inactivo) | Revisión ultima_actividad; generación notificación push | Push al dispositivo del estudiante |
-| Acción del administrador (activar/desactivar) | UPDATE estado en USUARIOS; invalidación JWT | Confirmación en panel; notificación al usuario |
+|---|---|---|
+| Correo institucional y contraseña | Validación de dominio @miremington.edu.co (estudiantes) o @uniremington.edu.co (administración); encriptación bcrypt; creación de sesión JWT | Confirmación de registro o mensaje de error |
+| Selección de lección por parte del estudiante | Carga de contenido desde BD (bloques JSON/HTML); secuencia de ejercicios graduales | Pantalla de lección con introducción animada, ejercicios y mini-juego |
+| Respuesta del estudiante a un ejercicio | Evaluación de respuesta contra respuesta_correcta; cálculo de XP; actualización de progreso_leccion | Feedback inmediato (acierto/error + explicación paso a paso + XP ganados) |
+| Finalización de lección | Suma de XP a perfil; evaluación de condiciones de medalla; actualización de streak; verificación de umbral de nivel (≥70%) | Pantalla de resumen: XP, medallas desbloqueadas, animación de celebración si aplica |
+| Solicitud de pista | Consulta de tabla PISTAS para el ejercicio activo; control de máximo 2 pistas | Texto de pista contextual sin revelar respuesta completa |
+| Cron job diario 02:00 h | Snapshot de todas las tablas de la BD; compresión y almacenamiento en nube (S3/Firebase) | Log de backup exitoso; alerta por fallo |
+| Cron job 18:00 h por usuario inactivo | Revisión de ultima_actividad en PERFIL_ESTUDIANTE; generación de notificación push | Notificación push al dispositivo del estudiante |
+| Acción del administrador (activar/desactivar usuario) | Actualización de campo estado en USUARIOS; invalidación inmediata de sesiones activas | Confirmación en panel admin; notificación al usuario afectado |

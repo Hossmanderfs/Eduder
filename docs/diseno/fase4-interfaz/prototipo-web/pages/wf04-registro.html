@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-04 · Crear cuenta — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-04 · Pantalla de Registro — RF-01, RF-02 · CU-01 · HU-01 -->
+<div class="app">
+  <header class="appbar">
+    <a class="icon-btn" href="../index.html" aria-label="Volver"><i data-icon="arrow-left"></i></a>
+    <h1 class="sr-only">Crear cuenta</h1>
+  </header>
+
+  <main class="app-main">
+    <div class="brand-head">
+      <span class="logo" style="--logo-size:52px" aria-hidden="true"><span class="logo-mark">E</span></span>
+      <h1>Crear cuenta</h1>
+      <p class="muted small">Usa tu correo institucional de Uniremington.</p>
+    </div>
+
+    <div id="form-error" class="banner banner-error" role="alert" hidden></div>
+
+    <form id="form" class="stack" novalidate>
+      <div class="grid-2">
+        <div class="field" data-field="nombre">
+          <label for="nombre">Nombre</label>
+          <input class="input" id="nombre" name="nombre" autocomplete="given-name" required aria-describedby="nombre-msg">
+          <p class="field-msg" id="nombre-msg" aria-live="polite"></p>
+        </div>
+        <div class="field" data-field="apellido">
+          <label for="apellido">Apellido</label>
+          <input class="input" id="apellido" name="apellido" autocomplete="family-name" required aria-describedby="apellido-msg">
+          <p class="field-msg" id="apellido-msg" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="field" data-field="correo">
+        <label for="correo">Correo institucional</label>
+        <input class="input" id="correo" name="correo" type="email" inputmode="email" autocomplete="email" placeholder="nombre.apellido@miremington.edu.co" required aria-describedby="correo-msg">
+        <p class="field-msg" id="correo-msg" aria-live="polite"></p>
+      </div>
+
+      <div class="field" data-field="clave">
+        <label for="clave">Contraseña</label>
+        <div class="input-wrap">
+          <input class="input" id="clave" name="clave" type="password" autocomplete="new-password" required aria-describedby="clave-msg">
+          <button type="button" class="icon-btn" data-toggle="clave" aria-label="Mostrar contraseña" aria-pressed="false"><i data-icon="eye"></i></button>
+        </div>
+        <p class="field-msg" id="clave-msg" aria-live="polite">Mínimo 8 caracteres, con al menos una letra y un número.</p>
+      </div>
+
+      <div class="field" data-field="clave2">
+        <label for="clave2">Confirmar contraseña</label>
+        <div class="input-wrap">
+          <input class="input" id="clave2" name="clave2" type="password" autocomplete="new-password" required aria-describedby="clave2-msg">
+          <button type="button" class="icon-btn" data-toggle="clave2" aria-label="Mostrar contraseña" aria-pressed="false"><i data-icon="eye"></i></button>
+        </div>
+        <p class="field-msg" id="clave2-msg" aria-live="polite"></p>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg btn-block" id="submit" disabled>Registrarse</button>
+    </form>
+
+    <p class="small" style="text-align:center">¿Ya tienes cuenta? <a href="wf05-login.html">Iniciar sesión</a></p>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui, cfg = E.config;
+  var form = ui.$('#form'), submit = ui.$('#submit'), errBox = ui.$('#form-error');
+  var touched = {};
+  var dominio = new RegExp('^[^\\s@]+@' + cfg.DOMINIO.replace(/\./g, '\\.') + '$', 'i');
+
+  // Reglas de validación inline (RF-01). La regla de contraseña es una propuesta
+  // del frontend; el backend hoy solo exige que no esté vacía.
+  var rules = {
+    nombre: function (v) { return v.trim().length >= 2 ? '' : 'Escribe tu nombre.'; },
+    apellido: function (v) { return v.trim().length >= 2 ? '' : 'Escribe tu apellido.'; },
+    correo: function (v) {
+      v = v.trim();
+      if (!v) return 'Escribe tu correo institucional.';
+      if (!dominio.test(v)) return 'Debe terminar en @' + cfg.DOMINIO;
+      return '';
+    },
+    clave: function (v) {
+      if (v.length < 8) return 'Mínimo 8 caracteres.';
+      if (!/[a-zA-ZñÑ]/.test(v) || !/\d/.test(v)) return 'Incluye al menos una letra y un número.';
+      return '';
+    },
+    clave2: function (v) { return v && v === form.clave.value ? '' : 'Las contraseñas no coinciden.'; }
+  };
+  var okMsg = { correo: 'Correo válido', clave: 'Contraseña segura', clave2: 'Las contraseñas coinciden' };
+
+  function check(name, show) {
+    var input = form[name], msg = rules[name](input.value);
+    var field = ui.$('[data-field="' + name + '"]'), out = ui.$('#' + name + '-msg');
+    if (show) {
+      field.classList.toggle('is-invalid', !!msg);
+      field.classList.toggle('is-valid', !msg && !!okMsg[name]);
+      input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      out.textContent = msg || okMsg[name] || '';
+    }
+    return !msg;
+  }
+  function validateAll(showAll) {
+    var ok = true;
+    Object.keys(rules).forEach(function (n) { if (!check(n, showAll || touched[n])) ok = false; });
+    submit.disabled = !ok; // botón activo solo si el formulario es válido (WF-04)
+    return ok;
+  }
+
+  Object.keys(rules).forEach(function (n) {
+    form[n].addEventListener('input', function () { if (n === 'clave' && touched.clave2) touched.clave2 = true; validateAll(false); });
+    form[n].addEventListener('blur', function () { touched[n] = true; validateAll(false); });
+  });
+
+  ui.$$('[data-toggle]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var input = ui.$('#' + b.dataset.toggle), show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      b.setAttribute('aria-pressed', show ? 'true' : 'false');
+      b.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+      b.innerHTML = ui.icon(show ? 'eye-off' : 'eye');
+    });
+  });
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    errBox.hidden = true;
+    if (!validateAll(true)) return;
+    ui.busy(submit, true, 'Creando cuenta…');
+    E.api.register({
+      nombre: form.nombre.value.trim(), apellido: form.apellido.value.trim(),
+      correo_institucional: form.correo.value.trim().toLowerCase(), contrasena: form.clave.value
+    }).then(function (r) {
+      E.api.session.save(r.token, r.usuario);
+      ui.go('pages/wf07-tutorial.html'); // CU-01 paso 7: inicia sesión y lanza el tutorial
+    }).catch(function (err) {
+      ui.busy(submit, false);
+      errBox.innerHTML = ui.icon('alert-triangle', { size: 18 }) + '<span>' + ui.esc(err.message) + '</span>';
+      errBox.hidden = false;
+      if (err.status === 409) { touched.correo = true; ui.$('[data-field="correo"]').classList.add('is-invalid'); form.correo.focus(); }
+      validateAll(false);
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -15,10 +15,9 @@ El modelo cumple las tres primeras formas normales.
 ## 3FN — Sin Dependencias Transitivas ✅
 
 | Situación Analizada | Decisión de Diseño | Justificación 3FN |
-|--------------------|--------------------|-------------------|
-| xp_total, nivel_actual, streak_dias en USUARIOS | Se mueven a PERFIL_ESTUDIANTE | Evita: id_usuario → correo → xp_total |
-| nombre, descripcion en MEDALLAS_USUARIO | Solo en MEDALLAS_CATALOGO | Evita: id_med_usuario → id_medalla → nombre_medalla |
-| bloqueado_hasta depende de intentos_login | Ambos en USUARIOS | Es regla de negocio, no dependencia funcional |
-| xp_semana_actual en PERFIL_ESTUDIANTE | Atributo desnormalizado deliberado | Caché justificado: RNF-02 (carga < 3 s) |
-| posicion en RANKING_SEMANAL | Atributo calculado almacenado | Evita recálculo costoso con 5 000 usuarios (RNF-04) |
-| MEDALLAS_USUARIO con PK propia | PK sustituta (UUID) + UNIQUE compuesto | Tabla asociativa con clave de negocio UNIQUE(id_usuario, id_medalla) |
+|---|---|---|
+| xp_total, nivel_actual, streak_dias en USUARIOS | Se mueve a PERFIL_ESTUDIANTE | No se sustenta en una dependencia transitiva demostrable (correo → xp_total no aplica). El criterio real es de responsabilidad: USUARIOS administra identidad/autenticación; PERFIL_ESTUDIANTE administra el progreso gamificado del estudiante |
+| nombre, descripcion en MEDALLAS_USUARIO | Se mantiene solo en MEDALLAS_CATALOGO | Evita que cada usuario repita la descripción de la medalla (dependencia transitiva id_med_usuario → id_medalla → nombre_medalla) |
+| bloqueado_hasta depende de intentos_login | Ambos en USUARIOS como atributos directos | La relación entre intentos y bloqueo es regla de negocio, no dependencia funcional de datos |
+| xp_semana_actual en PERFIL_ESTUDIANTE | Atributo desnormalizado deliberadamente | Caché de consulta rápida justificado por RNF de carga ≤ 3 segundos |
+| posicion en RANKING_SEMANAL | Atributo calculado almacenado | Se persiste para evitar recálculo costoso con 5 000 usuarios concurrentes (RNF-04) |

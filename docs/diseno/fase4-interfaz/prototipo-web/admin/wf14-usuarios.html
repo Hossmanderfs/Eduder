@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#003DA5">
+<title>WF-14 · Gestión de usuarios — EduDer Admin</title>
+<link rel="stylesheet" href="../css/eduder.css">
+<link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+<!-- WF-14 · Panel de Administración — Gestión de Usuarios — RF-20, RF-21 · CU-06
+     GET /admin/users · PATCH /admin/users/:id { estado } -->
+<div class="admin">
+  <main class="admin-main">
+    <div class="admin-head">
+      <div><h1>Usuarios</h1><p id="summary">Cargando…</p></div>
+      <div class="search">
+        <i data-icon="search" data-size="18"></i>
+        <label for="q" class="sr-only">Buscar por correo institucional</label>
+        <input class="input" id="q" type="search" placeholder="Buscar por correo institucional" autocomplete="off">
+      </div>
+    </div>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2 id="count">Estudiantes</h2>
+        <div class="presets" role="group" aria-label="Filtrar por estado">
+          <button type="button" class="chip-btn" data-f="todos" aria-pressed="true">Todos</button>
+          <button type="button" class="chip-btn" data-f="activos" aria-pressed="false">Activos</button>
+          <button type="button" class="chip-btn" data-f="inactivos" aria-pressed="false">Inactivos</button>
+        </div>
+      </div>
+      <div class="table-wrap" id="table"></div>
+    </section>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/admin.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  E.adminShell('usuarios');
+  var users = [], filtro = 'todos', q = '';
+  var table = ui.$('#table');
+
+  function nivelNombre(n) { var x = E.content.NIVELES[(n || 1) - 1]; return x ? x.nombre : ''; }
+
+  function render() {
+    var est = users.filter(function (u) { return u.rol === 'estudiante'; });
+    var activos = est.filter(function (u) { return u.estado; }).length;
+    ui.$('#summary').textContent = est.length + ' estudiantes registrados · ' + activos + ' activos · ' + (est.length - activos) + ' inactivos';
+
+    var rows = est.filter(function (u) {
+      if (filtro === 'activos' && !u.estado) return false;
+      if (filtro === 'inactivos' && u.estado) return false;
+      return !q || u.correo_institucional.toLowerCase().indexOf(q) >= 0; // RF-21: búsqueda por correo
+    });
+    ui.$('#count').textContent = rows.length + (rows.length === 1 ? ' resultado' : ' resultados');
+
+    if (!rows.length) {
+      table.innerHTML = '<div class="empty">' + ui.icon('user-off', { size: 36 }) + '<p>No hay estudiantes que coincidan' + (q ? ' con "' + ui.esc(q) + '"' : '') + '.</p></div>';
+      return;
+    }
+    table.innerHTML = '<table class="table"><caption class="sr-only">Estudiantes registrados</caption><thead><tr>' +
+      '<th scope="col">Estudiante</th><th scope="col">Nivel actual</th><th scope="col">Estado</th><th scope="col">Fecha de registro</th><th scope="col"><span class="sr-only">Acción</span></th></tr></thead><tbody>' +
+      rows.map(function (u) {
+        var nivel = u.perfil ? u.perfil.nivel_actual : 1;
+        return '<tr><td><div class="cell-user">' + ui.avatar(u.nombre, u.apellido, 'sm') + '<div><div style="font-weight:500">' + ui.esc(u.nombre + ' ' + u.apellido) + '</div><div class="cell-mail">' + ui.esc(u.correo_institucional) + '</div></div></div></td>' +
+          '<td>Nivel ' + nivel + ' <span class="tiny">· ' + ui.esc(nivelNombre(nivel)) + '</span></td>' +
+          '<td>' + (u.estado ? '<span class="chip chip-ok">' + ui.icon('circle-check', { size: 14 }) + 'Activo</span>' : '<span class="chip chip-err">' + ui.icon('circle-x', { size: 14 }) + 'Inactivo</span>') + '</td>' +
+          '<td class="num" style="text-align:left">' + ui.fmt.dateLong(u.fecha_registro) + '</td>' +
+          '<td style="text-align:right"><button type="button" class="btn btn-sm ' + (u.estado ? 'btn-secondary' : 'btn-primary') + '" data-id="' + ui.esc(u.id_usuario) + '">' +
+          ui.icon(u.estado ? 'user-off' : 'user-check', { size: 16 }) + (u.estado ? 'Desactivar' : 'Activar') + '</button></td></tr>';
+      }).join('') + '</tbody></table>';
+
+    ui.$$('[data-id]', table).forEach(function (b) {
+      b.addEventListener('click', function () { toggle(users.filter(function (u) { return u.id_usuario === b.dataset.id; })[0], b); });
+    });
+  }
+
+  function toggle(u, btn) {
+    var desactivar = u.estado;
+    ui.confirm({
+      title: (desactivar ? 'Desactivar' : 'Activar') + ' a ' + u.nombre + ' ' + u.apellido,
+      message: desactivar
+        ? 'No podrá iniciar sesión y su sesión actual se cerrará de inmediato. Su progreso se conserva.'
+        : 'Podrá volver a iniciar sesión con sus credenciales actuales.',
+      confirmText: desactivar ? 'Desactivar cuenta' : 'Activar cuenta', danger: desactivar
+    }).then(function (ok) {
+      if (!ok) return;
+      ui.busy(btn, true, desactivar ? 'Desactivando…' : 'Activando…');
+      E.api.admin.updateUser(u.id_usuario, { estado: !desactivar }).then(function () {
+        u.estado = !desactivar;
+        ui.toast((desactivar ? 'Cuenta desactivada: ' : 'Cuenta activada: ') + u.correo_institucional, 'success');
+        render();
+      }).catch(function (err) { ui.busy(btn, false); ui.toast(err.message, 'error'); });
+    });
+  }
+
+  var t = null;
+  ui.$('#q').addEventListener('input', function (e) { clearTimeout(t); t = setTimeout(function () { q = e.target.value.trim().toLowerCase(); render(); }, 150); });
+  ui.$$('[data-f]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      filtro = b.dataset.f;
+      ui.$$('[data-f]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      render();
+    });
+  });
+
+  function load() {
+    ui.loading(table, 'Cargando usuarios…');
+    E.api.admin.users().then(function (list) { users = list; render(); }).catch(function (err) { ui.errorState(table, err, load); });
+  }
+  ui.requireAuth('admin').then(load);
+})();
+</script>
+</body>
+</html>

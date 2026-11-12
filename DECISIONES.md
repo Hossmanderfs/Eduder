@@ -55,3 +55,43 @@ El sistema registra el progreso de los estudiantes (PROGRESO_LECCION) con FK a L
 - E11 — Script DDL: `ON DELETE RESTRICT` en la FK de `PROGRESO_LECCION → LECCIONES`.  
 - E9 — Modelo Relacional: campo `estado` en las tablas `NIVELES` y `LECCIONES`.  
 - RNF-06: integridad referencial en todas las relaciones de la base de datos.
+
+---
+
+## Decisión #04
+
+**¿Qué decidí?**  
+Unificar `main` y `backend` en una sola rama (`main`) y trabajar siempre desde ella.
+
+**¿Por qué?**  
+Las dos ramas tenían el mismo contenido y se habían desincronizado por merges manuales. Mantener dos ramas duplicaba el trabajo y generaba conflictos (p. ej. `package-lock.json`).
+
+**¿Qué artefacto respalda esta decisión?**  
+- Historial de git: `main` y `backend` apuntaban al mismo commit tras el merge; se conserva solo `main`.
+
+---
+
+## Decisión #05
+
+**¿Qué decidí?**  
+Aceptar dos dominios institucionales: `@miremington.edu.co` (estudiantes) y `@uniremington.edu.co` (administración), configurables con `DOMINIOS_PERMITIDOS`.
+
+**¿Por qué?**  
+El requisito del cliente es que los estudiantes ingresen con el correo `@miremington.edu.co`, mientras que la cuenta de administración del sistema usa el dominio `@uniremington.edu.co`.
+
+**¿Qué artefacto respalda esta decisión?**  
+- RF-01 / RN-01 (docs/analisis/01), E11 (CHECK con REGEXP), `src/backend/src/config/dominios.js`, `src/mobile/src/config.js`.
+
+---
+
+## Decisión #06
+
+**¿Qué decidí?**  
+Basar la app móvil en el prototipo web de wireframes (sistema visual Uniremington, Lexend, modo claro/oscuro) y guardar ese prototipo en `docs/diseno/fase4-interfaz/prototipo-web/`.
+
+**¿Por qué?**  
+El prototipo ya implementa los 16 wireframes con las reglas del documento (pistas, saltar tras 2 fallos, umbral 70 %, ranking semanal), de modo que la app y la documentación comparten una misma referencia visual.
+
+**¿Qué artefacto respalda esta decisión?**  
+- E15 (mapa de navegación), E16 (wireframes) y E17 (prototipo); RNF-05 (accesibilidad).
+

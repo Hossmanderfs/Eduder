@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>Historial de lecciones — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- Historial de Lecciones — destino del botón de WF-03 (RF-18: nombre, fecha y puntaje)
+     GET /profile/progress → detalle[] con estado 'completada' -->
+<div class="app">
+  <header class="appbar">
+    <a class="icon-btn" href="wf03-perfil.html" aria-label="Volver al perfil"><i data-icon="arrow-left"></i></a>
+    <h1>Historial de lecciones</h1>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  ui.tabbar('perfil');
+
+  function badge(p) {
+    var cls = p >= 85 ? 'chip-ok' : p >= E.config.UMBRAL_APROBACION ? 'chip-gold' : 'chip-err';
+    return '<span class="chip ' + cls + ' num" style="font-size:13px">' + p + '%</span>';
+  }
+
+  function render(niveles, prog) {
+    var nombres = {};
+    niveles.forEach(function (n) { nombres[n.id_nivel] = n.nombre; n.lecciones.forEach(function (l) { nombres[l.id_leccion] = l; }); });
+    var hechas = (prog.detalle || []).filter(function (p) { return p.estado === 'completada'; })
+      .sort(function (a, b) { return String(b.fecha_completado).localeCompare(String(a.fecha_completado)); });
+
+    if (!hechas.length) {
+      ui.$('#main').innerHTML = '<div class="empty">' + ui.icon('history', { size: 40 }) + '<h2>Aún no completas lecciones</h2><p>Cuando termines tu primera lección, aparecerá aquí con su fecha y puntaje.</p><a class="btn btn-primary" href="wf01-menu.html">Empezar una lección</a></div>';
+      return;
+    }
+    var prom = Math.round(hechas.reduce(function (a, p) { return a + (p.puntaje || 0); }, 0) / hechas.length);
+    var html = '<section class="stats" style="grid-template-columns:1fr 1fr" aria-label="Resumen">' +
+      '<div class="stat"><span class="stat-value num">' + hechas.length + '</span><span class="stat-label">Lecciones completadas</span></div>' +
+      '<div class="stat"><span class="stat-value num">' + prom + '%</span><span class="stat-label">Puntaje promedio</span></div></section>';
+
+    html += '<ul class="list" style="list-style:none;margin:0;padding:0">' + hechas.map(function (p) {
+      var l = p.leccion || {};
+      var meta = nombres[p.id_leccion] || {};
+      var tipo = ui.TIPOS[E.api.logic.normTipo(l.tipo || meta.tipo)] || ui.TIPOS.ejercicio;
+      var nivelNombre = nombres[l.id_nivel || p.id_nivel] || '';
+      return '<li><a class="list-row" href="leccion-teoria.html?leccion=' + encodeURIComponent(p.id_leccion) + '" aria-label="' + ui.esc(l.titulo || meta.titulo) + ', ' + p.puntaje + '%, ' + ui.fmt.dateLong(p.fecha_completado) + '">' +
+        '<span class="row-icon">' + ui.icon(tipo.icon, { size: 20 }) + '</span>' +
+        '<span class="row-body"><span class="row-title">' + ui.esc(l.titulo || meta.titulo || 'Lección') + '</span>' +
+        '<span class="row-sub"><span>' + ui.esc(nivelNombre) + '</span><span aria-hidden="true">·</span><span>' + ui.fmt.dateLong(p.fecha_completado) + '</span></span></span>' +
+        badge(p.puntaje || 0) + '</a></li>';
+    }).join('') + '</ul>';
+    ui.$('#main').innerHTML = html;
+  }
+
+  function load() {
+    Promise.all([E.api.levels(), E.api.progress()]).then(function (r) { render(r[0], r[1]); })
+      .catch(function (err) { ui.errorState(ui.$('#main'), err, load); });
+  }
+  ui.requireAuth('estudiante').then(load);
+})();
+</script>
+</body>
+</html>

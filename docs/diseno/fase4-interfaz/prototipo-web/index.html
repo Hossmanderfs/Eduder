@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<meta name="description" content="EduDer — aprende lógica matemática con lecciones cortas, retos y medallas.">
+<title>EduDer · Bienvenida</title>
+<link rel="stylesheet" href="css/eduder.css">
+</head>
+<body>
+<!-- WF-00 · Splash / Bienvenida — Mapa de navegación (8.4.1), pantalla 1 -->
+<div class="app">
+  <main class="splash">
+    <div class="splash-body">
+      <span class="logo" style="--logo-size:64px" aria-hidden="true"><span class="logo-mark">E</span></span>
+      <h1 class="splash-title">EduDer</h1>
+      <p class="splash-tag">Lógica matemática en lecciones cortas, con retos, rachas y medallas.</p>
+      <p class="splash-symbols" aria-hidden="true">¬ ∧ ∨ → ↔</p>
+    </div>
+    <div class="splash-actions">
+      <a class="btn btn-primary btn-lg btn-block" href="pages/wf04-registro.html">Crear cuenta</a>
+      <a class="btn btn-secondary btn-lg btn-block" href="pages/wf05-login.html">Iniciar sesión</a>
+      <div id="mode"></div>
+    </div>
+  </main>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/content.js"></script>
+<script src="js/store.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  (function () {
+    var E = window.EduDer;
+    // Si ya hay sesión, se entra directo (RF-04)
+    var u = E.api.session.user();
+    if (u && E.api.session.currentToken()) {
+      E.ui.go(u.rol === 'admin' ? 'admin/wf15-metricas.html' : 'pages/wf01-menu.html');
+      return;
+    }
+    document.getElementById('mode').innerHTML = E.ui.modeNote();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-12 · Ranking semanal — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-12 · Ranking Semanal — RF-17 · GET /gamification/ranking/:nivel -->
+<div class="app">
+  <header class="appbar">
+    <h1>Ranking semanal</h1>
+  </header>
+
+  <main class="app-main">
+    <div class="stack" style="gap:10px">
+      <div class="chips-scroll" role="group" aria-label="Elegir nivel" id="chips"></div>
+      <p class="countdown"><i data-icon="clock" data-size="16"></i><span><strong>Semana actual</strong> · se reinicia el lunes en <span id="cd" class="num">–</span></span></p>
+    </div>
+    <section id="board" aria-live="polite"></section>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  ui.tabbar('ranking');
+  var board = ui.$('#board'), nivel = Number(ui.param('nivel')) || null, niveles = [];
+
+  // Cuenta regresiva al próximo lunes 00:00 (reinicio del ranking, RF-17)
+  function tick() {
+    var now = new Date(), next = new Date(now);
+    next.setHours(0, 0, 0, 0);
+    next.setDate(next.getDate() + ((8 - now.getDay()) % 7 || 7));
+    var s = Math.max(0, Math.floor((next - now) / 1000));
+    var d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+    ui.$('#cd').textContent = (d ? d + ' d ' : '') + h + ' h ' + m + ' min';
+  }
+  tick(); setInterval(tick, 30000);
+
+  function chips() {
+    ui.$('#chips').innerHTML = niveles.map(function (n) {
+      return '<button type="button" class="chip-btn" data-n="' + n.id_nivel + '" aria-pressed="' + (n.id_nivel === nivel) + '" title="' + ui.esc(n.nombre) + '">Nivel ' + n.orden + '</button>';
+    }).join('');
+    ui.$$('[data-n]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        nivel = Number(b.dataset.n);
+        history.replaceState(null, '', '?nivel=' + nivel);
+        chips(); load();
+      });
+    });
+  }
+
+  function link(r, inner, cls) {
+    if (r.es_yo) return '<div class="' + cls + '">' + inner + '</div>';
+    return '<a class="' + cls + '" href="perfil-publico.html" data-uid="' + ui.esc(r.id_usuario) + '">' + inner + '</a>';
+  }
+
+  function render(data) {
+    var rows = data.ranking || [];
+    var nv = niveles.filter(function (n) { return n.id_nivel === nivel; })[0];
+    if (!rows.length) {
+      board.innerHTML = '<div class="empty">' + ui.icon('trophy', { size: 40 }) + '<h2>Aún no hay posiciones</h2><p>Nadie ha sumado XP en ' + ui.esc(nv ? nv.nombre : 'este nivel') + ' esta semana. Completa una lección y sé el primero.</p></div>';
+      return;
+    }
+    var top = rows.filter(function (r) { return r.posicion <= 3; });
+    var resto = rows.filter(function (r) { return r.posicion > 3; });
+    var order = [2, 1, 3];
+    var html = '<p class="tiny" style="margin-bottom:8px">' + ui.esc(nv ? nv.nombre : '') + ' · ' + rows.length + (rows.length === 1 ? ' estudiante' : ' estudiantes') + '</p>';
+    html += '<div class="podium" aria-label="Podio">' + order.map(function (pos) {
+      var r = top.filter(function (x) { return x.posicion === pos; })[0];
+      if (!r) return '<div class="podium-col p' + pos + '"></div>';
+      var parts = r.nombre.split(' ');
+      return '<div class="podium-col p' + pos + (r.es_yo ? ' is-me' : '') + '">' +
+        ui.avatar(parts[0], parts.slice(1).join(' '), pos === 1 ? 'md' : 'sm' + (r.es_yo ? '' : ' neutral')) +
+        '<span class="podium-name">' + (r.es_yo ? 'Tú' : ui.esc(parts[0])) + '</span>' +
+        '<span class="podium-xp num">' + ui.fmt.num(r.xp_semana) + ' XP</span>' +
+        '<span class="podium-step" aria-label="Puesto ' + pos + '">' + (pos === 1 ? ui.icon('crown', { size: 22 }) : pos) + '</span></div>';
+    }).join('') + '</div>';
+
+    if (resto.length) {
+      html += '<ol class="list" style="list-style:none;margin:12px 0 0;padding:0;gap:4px" aria-label="Posiciones">' + resto.map(function (r) {
+        var parts = r.nombre.split(' ');
+        var sep = r.es_yo && resto.length > 1 && r.posicion > 20 ? '<li class="tiny" style="text-align:center;padding:4px">…</li>' : '';
+        return sep + '<li>' + link(r,
+          '<span class="rank-pos">' + r.posicion + '</span>' + ui.avatar(parts[0], parts.slice(1).join(' '), 'sm' + (r.es_yo ? '' : ' neutral')) +
+          '<span class="row-body"><span class="row-title">' + (r.es_yo ? 'Tú · ' : '') + ui.esc(r.nombre) + '</span></span>' +
+          '<span class="num" style="font-weight:600">' + ui.fmt.num(r.xp_semana) + ' XP</span>', 'rank-row' + (r.es_yo ? ' is-me' : '')) + '</li>';
+      }).join('') + '</ol>';
+    }
+    var yo = rows.filter(function (r) { return r.es_yo; })[0];
+    html += yo ? '' : '<p class="banner banner-info" style="margin-top:12px">' + ui.icon('info-circle', { size: 18 }) + '<span>Completa una lección de este nivel para aparecer en el ranking.</span></p>';
+    board.innerHTML = html;
+
+    ui.$$('[data-uid]', board).forEach(function (a) {
+      a.addEventListener('click', function () {
+        var r = rows.filter(function (x) { return String(x.id_usuario) === a.dataset.uid; })[0];
+        try { sessionStorage.setItem('eduder_perfil_publico', JSON.stringify({ fila: r, nivel: nv, total: rows.length })); } catch (e) { }
+      });
+    });
+  }
+
+  function load() {
+    ui.loading(board, 'Cargando ranking…');
+    E.api.ranking(nivel).then(render).catch(function (err) { ui.errorState(board, err, load); });
+  }
+
+  ui.requireAuth('estudiante').then(function () {
+    return E.api.logic.loadDashboard();
+  }).then(function (d) {
+    niveles = d.state.niveles;
+    if (!nivel) nivel = d.state.nivel_actual;
+    chips(); load();
+  }).catch(function (err) { ui.errorState(board, err, function () { location.reload(); }); });
+})();
+</script>
+</body>
+</html>

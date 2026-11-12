@@ -1,18 +1,16 @@
 # M5 — Entidades de BD → Arquetipos → RF → Reglas de Negocio
 
-| Tabla (BD) | Arquetipo | RF Relacionados | Reglas de Negocio Clave |
-|------------|-----------|-----------------|------------------------|
-| rol | — (catálogo) | RF-03 | Solo dos valores válidos: 'estudiante', 'admin'. No acepta otros valores. |
-| usuarios | Usuario | RF-01, RF-02, RF-03, RF-04, RF-05, RF-06 | correo debe terminar en @uniremington.edu.co; bloqueo tras 5 intentos fallidos; bcrypt costo ≥ 10 |
-| perfil_estudiante | PerfilEstudiante | RF-15, RF-17, RF-18 | Relación 1:1 con usuarios; nivel_actual entre 1 y 5; streak_dias se reinicia si ultima_actividad > ayer |
-| tokens_recuperacion | TokenRecuperacion | RF-19 | Expira en 30 min; usado=TRUE lo invalida permanentemente; solo un token vigente por usuario |
-| niveles | Nivel | RF-07, RF-08 | umbral_aprobacion=70%; acceso secuencial; nivel 1 desbloqueado por defecto |
-| lecciones | Leccion | RF-08, RF-09 | Orden secuencial por (id_nivel, orden); xp_base × (puntaje/100) = XP ganados |
-| contenido_leccion | ContenidoLeccion | RF-08 | tipo_bloque determina cómo se renderiza: texto, imagen, video, animacion |
-| ejercicios | Ejercicio | RF-10, RF-11, RF-12 | respuesta_correcta almacenada serializada; explicacion siempre presente |
-| pistas | Pista | RF-11 | Máximo 2 por ejercicio (CHECK numero_pista IN (1,2)); se revelan bajo demanda |
-| progreso_leccion | ProgresoLeccion | RF-09, RF-15 | UNIQUE(id_usuario, id_leccion); puntaje 0–100; intentos incrementa en cada sesión |
-| medallas_catalogo | MedallaCatalogo | RF-14 | condicion_valor es umbral numérico para condicion_tipo |
-| medallas_usuario | MedallaUsuario | RF-14 | UNIQUE(id_usuario, id_medalla): cada medalla se otorga una sola vez |
-| notificaciones | — | RF-13, RF-16 | leida=FALSE por defecto; tipo: racha, logro, sistema |
-| ranking_semanal | RankingSemanal | RF-17 | UNIQUE(semana_inicio, id_usuario, id_nivel); posicion es caché recalculable |
+| Entidad / Tabla | Arquetipos Relacionados | RF que Soporta | Reglas de Negocio Aplicadas |
+|---|---|---|---|
+| USUARIOS | Usuario | RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-20 | RN-01: correo debe terminar en @miremington.edu.co (estudiantes) o @uniremington.edu.co (administración); RN-02: contraseña encriptada con bcrypt costo ≥ 10; RN-03: bloqueo de cuenta tras 5 intentos fallidos durante 15 minutos |
+| PERFIL_ESTUDIANTE | PerfilEstudiante | RF-09, RF-12, RF-13, RF-14, RF-15, RF-17, RF-18 | RN-04: xp_total nunca disminuye; RN-05: streak_dias se reinicia si ultima_actividad es anterior a ayer; RN-06: nivel_actual solo avanza cuando promedio de puntajes del nivel actual ≥ 70% |
+| NIVELES | Nivel | RF-07, RF-08, RF-25 | RN-07: los niveles son 5 y secuenciales, no se puede saltar; RN-08: umbral_aprobacion mínimo es 70%; RN-20: no se puede eliminar un nivel con lecciones asociadas sin reasignarlas |
+| LECCIONES | Leccion | RF-07, RF-08, RF-10, RF-26 | RN-09: dentro de un nivel las lecciones se desbloquean en orden; RN-10: el estudiante debe completar la lección anterior para acceder a la siguiente; RN-21: no se elimina una lección con progreso registrado, se archiva |
+| EJERCICIOS | Ejercicio | RF-10, RF-11, RF-27 | RN-11: el feedback debe entregarse en menos de 1 segundo; RN-12: un ejercicio tiene máximo 2 pistas |
+| PISTAS | Ejercicio (relación) | RF-11 | RN-12: cada ejercicio puede tener 1 o 2 pistas (campo numero_pista CHECK IN (1,2)); la segunda pista solo se muestra si el estudiante la solicita |
+| PROGRESO_LECCION | ProgresoLeccion | RF-09, RF-10, RF-12 | RN-13: puntaje entre 0 y 100 (porcentaje de aciertos); RN-14: el estado transita NO_INICIADA → EN_PROGRESO → COMPLETADA; se puede retomar desde EN_PROGRESO |
+| MEDALLAS_CATALOGO / MEDALLAS_USUARIO | MedallaCatalogo | RF-14, RF-15, RF-28 | RN-15: una medalla se otorga una sola vez por usuario; RN-16: las condiciones de desbloqueo se evalúan al finalizar cada lección; RN-22: no se elimina una medalla ya otorgada, se marca inactiva |
+| RANKING_SEMANAL | RankingSemanal | RF-17 | RN-17: el ranking es semanal y por nivel; el XP acumulado en la semana determina la posición; se reinicia cada lunes a las 00:00 |
+| TOKENS_RECUPERACION | TokenRecuperacion | RF-19 | RN-18: el token tiene validez de 30 minutos; RN-19: un token usado (usado=TRUE) no puede reutilizarse |
+| NOTIFICACIONES | Notificación (clase) | RF-13, RF-16 | Sin regla de negocio dedicada; tipo ∈ {racha, logro, sistema} |
+| CONTENIDO_LECCION | ContenidoLeccion (clase) | RF-07, RF-26 | Sin regla de negocio dedicada; los bloques se ordenan por el campo orden dentro de la lección |

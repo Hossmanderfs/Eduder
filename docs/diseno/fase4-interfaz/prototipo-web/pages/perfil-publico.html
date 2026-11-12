@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>Perfil de estudiante — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- Perfil de otro usuario (solo lectura) — destino desde WF-12 (Mapa de navegación, pantalla 15).
+     Privacidad (RNF-09): solo se muestran nombre, posición y XP semanal. -->
+<div class="app">
+  <header class="appbar">
+    <a class="icon-btn" id="back" href="wf12-ranking.html" aria-label="Volver al ranking"><i data-icon="arrow-left"></i></a>
+    <h1>Perfil</h1>
+  </header>
+  <main class="app-main" id="main"></main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  ui.tabbar('ranking');
+  var data = null;
+  try { data = JSON.parse(sessionStorage.getItem('eduder_perfil_publico') || 'null'); } catch (e) { }
+  ui.requireAuth('estudiante').then(function () {
+    if (!data || !data.fila) { ui.go('pages/wf12-ranking.html'); return; }
+    var r = data.fila, parts = r.nombre.split(' ');
+    if (data.nivel) ui.$('#back').href = 'wf12-ranking.html?nivel=' + data.nivel.id_nivel;
+    ui.$('#main').innerHTML =
+      '<div class="stack" style="align-items:center;text-align:center;gap:10px;padding-top:12px">' +
+      ui.avatar(parts[0], parts.slice(1).join(' '), 'lg neutral') +
+      '<h2>' + ui.esc(r.nombre) + '</h2>' +
+      (data.nivel ? '<span class="chip chip-blue">' + ui.icon('shield-star', { size: 14 }) + 'Nivel ' + data.nivel.orden + ' · ' + ui.esc(data.nivel.nombre) + '</span>' : '') +
+      '</div>' +
+      '<section class="stats" style="grid-template-columns:1fr 1fr">' +
+      '<div class="stat">' + ui.icon('trophy', { size: 18, cls: 'c-gold' }) + '<span class="stat-value num">#' + r.posicion + '</span><span class="stat-label">de ' + data.total + ' esta semana</span></div>' +
+      '<div class="stat">' + ui.icon('bolt', { size: 18, cls: 'c-gold' }) + '<span class="stat-value num">' + ui.fmt.num(r.xp_semana) + '</span><span class="stat-label">XP esta semana</span></div></section>' +
+      '<p class="banner banner-info">' + ui.icon('lock', { size: 18 }) + '<span>Por privacidad, del resto de estudiantes solo se muestran su posición y sus XP semanales.</span></p>';
+  });
+})();
+</script>
+</body>
+</html>

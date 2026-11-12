@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003DA5">
+<title>WF-11 · Resumen de la lección — EduDer</title>
+<link rel="stylesheet" href="../css/eduder.css">
+</head>
+<body>
+<!-- WF-11 · Resumen de Lección — RF-12, RF-13, RF-14, RF-15 · HU-07 · DS-03
+     PUT /progress/:id_leccion { estado: 'completada', puntaje } -->
+<div class="app">
+  <header class="appbar">
+    <h1 id="title">Resumen de la lección</h1>
+  </header>
+
+  <main class="app-main" id="main">
+    <div class="state" aria-busy="true"><span class="spinner" aria-hidden="true"></span><p>Guardando tu resultado…</p></div>
+  </main>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+(function () {
+  var E = window.EduDer, ui = E.ui;
+  var S = ui.lessonSession.get();
+  if (!S) { ui.go('pages/wf08-niveles.html'); return; }
+  var main = ui.$('#main');
+
+  // Puntaje = % de aciertos (RF-12). Un ejercicio cuenta si se acertó al primer intento.
+  function calcularPuntaje() {
+    var bien = 0, n = S.ejercicios.length;
+    S.ejercicios.forEach(function (e) { var r = S.resultados[e.id_ejercicio]; if (r && r.primer_intento === true) bien++; });
+    if (S.mg) { bien += S.mg.aciertos; n += S.mg.total; }
+    return n ? Math.round(bien / n * 100) : 0;
+  }
+
+  function guardar() {
+    var puntaje = calcularPuntaje();
+    E.api.updateProgress(S.id_leccion, { estado: 'completada', puntaje: puntaje })
+      .then(function (pr) {
+        return Promise.all([E.api.logic.loadDashboard(), E.api.medals()]).then(function (r) {
+          var d = r[0], medallas = r[1], st = d.state;
+          var nivel = st.niveles.filter(function (n) { return n.id_nivel === S.id_nivel; })[0];
+          var idx = nivel.lecciones.map(function (l) { return l.id_leccion; }).indexOf(S.id_leccion);
+
+          // Nivel desbloqueado: comparación con la foto tomada al empezar (ambos modos)
+          var abiertos = st.niveles.filter(function (n) { return n.desbloqueado; });
+          var nuevoNivel = null;
+          if (abiertos.length > S.previo.niveles_desbloqueados) { var nn = abiertos[abiertos.length - 1]; nuevoNivel = { id_nivel: nn.id_nivel, orden: nn.orden, nombre: nn.nombre }; }
+
+          var nuevas = medallas.filter(function (m) { return m.obtenida && S.previo.medallas.indexOf(m.id_medalla) < 0; })
+            .map(function (m) { return { id_medalla: m.id_medalla, nombre: m.nombre }; });
+
+          // DS-03 alternativa 4B: nivel completo pero promedio < umbral → lecciones a mejorar
+          var repasar = nivel.completo && !nivel.aprobado
+            ? nivel.lecciones.filter(function (l) { return l.puntaje < nivel.umbral_aprobacion; }).map(function (l) { return { id_leccion: l.id_leccion, titulo: l.titulo, puntaje: l.puntaje }; })
+            : [];
+
+          var sig = null;
+          if (idx >= 0 && idx < nivel.lecciones.length - 1 && nivel.lecciones[idx + 1].desbloqueada) sig = nivel.lecciones[idx + 1];
+          else if (nuevoNivel) sig = st.niveles[nuevoNivel.orden - 1].lecciones[0];
+
+          S.completada = {
+            puntaje: puntaje,
+            xp: Math.round(S.xp_base * puntaje / 100), // igual que progress.service.js
+            streak: d.perfil.streak_dias || 0, xp_total: d.perfil.xp_total || 0,
+            nivel_desbloqueado: nuevoNivel, medallas: nuevas, repasar: repasar,
+            promedio_nivel: nivel.promedio, nivel_completo: nivel.completo,
+            siguiente: sig ? { id_leccion: sig.id_leccion, titulo: sig.titulo } : null,
+            celebrado: false
+          };
+          ui.lessonSession.set(S);
+          render();
+        });
+      })
+      .catch(function (err) { ui.errorState(main, err, guardar); });
+  }
+
+  function render() {
+    var c = S.completada;
+    var aprobado = c.puntaje >= E.config.UMBRAL_APROBACION;
+    var R = 70, CIRC = 2 * Math.PI * R;
+    var html =
+      '<div class="stack" style="align-items:center;text-align:center;gap:6px">' +
+      '<p class="small muted">' + ui.esc(S.titulo) + ' · Nivel ' + S.nivel_orden + '</p>' +
+      '<h2>' + (c.puntaje === 100 ? '¡Lección perfecta!' : aprobado ? '¡Buen trabajo!' : 'Lección completada') + '</h2></div>' +
+      '<div class="ring-wrap" role="img" aria-label="Puntaje ' + c.puntaje + ' por ciento">' +
+      '<svg viewBox="0 0 168 168" aria-hidden="true"><circle class="ring-bg" cx="84" cy="84" r="' + R + '" fill="none" stroke-width="14"/>' +
+      '<circle class="ring-fg ' + (aprobado ? 'ok' : 'low') + '" id="ring" cx="84" cy="84" r="' + R + '" fill="none" stroke-width="14" stroke-linecap="round" stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC + '"/></svg>' +
+      '<div class="ring-label"><span class="ring-value num" id="pct">0%</span><span class="ring-cap">puntaje</span></div></div>' +
+      '<div class="stats">' +
+      '<div class="stat">' + ui.icon('bolt', { size: 18, cls: 'c-gold' }) + '<span class="stat-value num" id="xp">+0</span><span class="stat-label">XP ganados</span></div>' +
+      '<div class="stat">' + ui.icon('flame', { size: 18, cls: 'c-gold' }) + '<span class="stat-value num">' + c.streak + '</span><span class="stat-label">' + (c.streak === 1 ? 'día de racha' : 'días de racha') + '</span></div>' +
+      '<div class="stat">' + ui.icon('star', { size: 18, cls: 'c-blue' }) + '<span class="stat-value num">' + ui.fmt.num(c.xp_total) + '</span><span class="stat-label">XP total</span></div></div>';
+
+    if (c.nivel_desbloqueado) {
+      html += '<section class="unlock" aria-live="polite"><span class="lvl-badge">' + c.nivel_desbloqueado.orden + '</span>' +
+        '<div><p class="unlock-kicker">¡Nuevo nivel desbloqueado!</p><p style="font-weight:600;font-size:17px">Nivel ' + c.nivel_desbloqueado.orden + ' · ' + ui.esc(c.nivel_desbloqueado.nombre) + '</p>' +
+        '<p class="unlock-kicker">Aprobaste el nivel ' + S.nivel_orden + ' con ' + c.promedio_nivel + '% de promedio.</p></div></section>';
+    }
+    if (c.medallas.length) {
+      html += '<section class="stack" aria-labelledby="med-title"><h2 id="med-title" style="font-size:16px">Medallas nuevas</h2><div class="list">' +
+        c.medallas.map(function (m) { return '<div class="list-row"><span class="row-icon gold">' + ui.icon('award', { size: 20 }) + '</span><span class="row-body"><span class="row-title">' + ui.esc(m.nombre) + '</span><span class="row-sub">Ya está en tu perfil</span></span></div>'; }).join('') +
+        '</div></section>';
+    }
+    if (c.repasar.length) {
+      html += '<section class="banner banner-warn" style="flex-direction:column;gap:8px">' +
+        '<p><strong>Promedio del nivel: ' + c.promedio_nivel + '%.</strong> Necesitas ' + E.config.UMBRAL_APROBACION + '% para desbloquear el siguiente. Repasa estas lecciones:</p>' +
+        '<ul style="margin:0;padding-left:18px">' + c.repasar.map(function (l) { return '<li><a href="leccion-teoria.html?leccion=' + encodeURIComponent(l.id_leccion) + '">' + ui.esc(l.titulo) + '</a> · ' + l.puntaje + '%</li>'; }).join('') + '</ul></section>';
+    } else if (!aprobado) {
+      html += '<p class="banner banner-info">' + ui.icon('info-circle', { size: 18 }) + '<span>Puedes repetir la lección cuando quieras: se guarda tu mejor puntaje.</span></p>';
+    }
+
+    html += '<div class="stack">' +
+      (c.siguiente ? '<a class="btn btn-primary btn-lg btn-block" data-leave href="leccion-teoria.html?leccion=' + encodeURIComponent(c.siguiente.id_leccion) + '">Siguiente lección' + ui.icon('chevron-right', { size: 20 }) + '</a>' : '') +
+      '<a class="btn btn-secondary btn-block" data-leave href="wf09-lecciones.html?nivel=' + (c.nivel_desbloqueado ? c.nivel_desbloqueado.id_nivel : S.id_nivel) + '">' + (c.nivel_desbloqueado ? 'Ir al nuevo nivel' : 'Volver al nivel') + '</a>' +
+      '<a class="btn btn-ghost btn-block" data-leave href="wf01-menu.html">Volver al menú principal</a></div>';
+
+    main.innerHTML = html;
+    ui.$$('[data-leave]').forEach(function (a) { a.addEventListener('click', function () { ui.lessonSession.clear(); }); });
+
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      ui.$('#ring').style.strokeDashoffset = CIRC * (1 - c.puntaje / 100);
+      ui.countUp(ui.$('#pct'), c.puntaje, 1100); setTimeout(function () { ui.$('#pct').textContent = c.puntaje + '%'; }, 1150);
+      ui.countUp(ui.$('#xp'), c.xp, 1100, '+');
+    }); });
+    if ((c.nivel_desbloqueado || c.puntaje === 100) && !c.celebrado) {
+      setTimeout(ui.confetti, 500);
+      c.celebrado = true; ui.lessonSession.set(S);
+    }
+  }
+
+  ui.requireAuth('estudiante').then(function () { if (S.completada) render(); else guardar(); });
+})();
+</script>
+</body>
+</html>
