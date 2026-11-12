@@ -70,24 +70,32 @@ proyecto-[nombre]-[apellido]/
 
 ### Prerequisitos
 - Node.js 18+
-- MySQL 8.0+
+- MySQL 8.0+ (y `mysqldump` en el PATH si se usa el backup automático)
 - React Native CLI + Android Studio o Xcode
 
 ### Backend (API REST)
 ```bash
 cd src/backend
-cp .env.example .env        # completar variables de entorno
+cp .env.example .env        # completar variables de entorno (DB, JWT_SECRET, SMTP opcional)
 npm install
-# Crear la base de datos primero:
+# Crear la base de datos (13 tablas, 3FN):
 mysql -u root -p < ../../docs/diseno/fase2-datos/E11-script-DDL.sql
 npm run dev                 # corre en http://localhost:3000
 # GET http://localhost:3000/health  →  { "status": "ok" }
+npm test                    # pruebas jest
 ```
+Al arrancar se programan tres tareas (zona `CRON_TZ`, por defecto America/Bogota; `DISABLE_CRON=true` las desactiva):
+reinicio semanal del ranking (lunes 00:00, RF-17), recordatorio de racha (18:00, RF-16) y backup diario con `mysqldump` (02:00, RF-23; carpeta `BACKUP_DIR`, log en `backup.log`).
+
+### Panel de administración (web)
+Abrir `src/admin/index.html` en el navegador (o servirlo con cualquier servidor estático). Entra con una cuenta de rol `admin`
+(el DDL crea `admin@uniremington.edu.co`; ajusta su hash de contraseña). Permite gestionar usuarios, niveles, lecciones, ejercicios y medallas, ver KPIs por rango de fechas y exportarlos a CSV.
 
 ### App Móvil (React Native)
 ```bash
 cd src/mobile
 npm install
+# La URL del backend se configura en src/config.js (10.0.2.2 = localhost desde el emulador Android)
 npm start                   # Metro bundler
 # En otra terminal:
 npm run android             # o npm run ios
@@ -96,49 +104,18 @@ npm run android             # o npm run ios
 ### Estructura de `src/`
 ```
 src/
+├── admin/index.html            ← Panel de administración (una sola página)
 ├── backend/
-│   ├── package.json
-│   ├── .env.example
-│   └── src/
-│       ├── server.js           ← Entrada del servidor Express
-│       ├── config/
-│       │   └── database.js     ← Conexión Sequelize → MySQL
-│       ├── models/
-│       │   ├── index.js        ← Relaciones entre entidades
-│       │   ├── Rol.js
-│       │   ├── Usuario.js
-│       │   ├── PerfilEstudiante.js
-│       │   ├── TokenRecuperacion.js
-│       │   ├── Nivel.js
-│       │   ├── TipoLeccion.js
-│       │   ├── Leccion.js
-│       │   ├── ContenidoLeccion.js
-│       │   ├── Ejercicio.js
-│       │   ├── Pista.js
-│       │   ├── ProgresoLeccion.js
-│       │   ├── MedallaCatalogo.js
-│       │   ├── MedallaUsuario.js
-│       │   ├── Notificacion.js
-│       │   └── RankingSemanal.js
-│       ├── routes/             ← Endpoints REST por servicio
-│       ├── services/           ← Lógica de negocio (por implementar)
-│       ├── middleware/         ← JWT auth, validación (por implementar)
-│       └── utils/              ← Helpers (por implementar)
-└── mobile/
-    ├── package.json
-    ├── index.js
-    └── src/
-        ├── App.js              ← Navegación principal (Stack + Tabs)
-        └── screens/            ← Pantallas stub listas para implementar
-            ├── SplashScreen.js
-            ├── LoginScreen.js
-            ├── RegisterScreen.js
-            ├── MenuScreen.js
-            ├── LessonScreen.js
-            ├── PerfilScreen.js
-            └── RankingScreen.js
+│   ├── src/
+│   │   ├── server.js           ← Entrada del servidor Express
+│   │   ├── config/database.js  ← Conexión Sequelize → MySQL
+│   │   ├── models/             ← 13 entidades (rol, tipo y estado son ENUM)
+│   │   ├── routes/             ← auth, levels, lessons, exercise, progress, profile, gamification, admin, notifications
+│   │   ├── services/           ← Lógica de negocio por servicio
+│   │   ├── middleware/         ← JWT (verifyToken valida cuenta activa) y requireAdmin
+│   │   └── jobs/               ← scheduler (node-cron) y backup
+│   └── tests/                  ← pruebas jest
+└── mobile/src/                 ← App React Native (screens, navigation, services, components)
 ```
 
-# Notas para usuario.
-## Archivo bases de datos
-Este archivo existe porque contiene todos los **CREATE** necesarios para implementar la base de datos del programa.
+> Documentación de diseño en `docs/`; la fuente de verdad es el documento final del proyecto (EduDer_parcial1_FINAL).
