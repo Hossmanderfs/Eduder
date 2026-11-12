@@ -11,6 +11,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// ── Panel de administración (web) ──────────────
+// Disponible en http://localhost:3000/panel/ y dentro de la app móvil para el rol admin.
+app.use('/panel', express.static(require('path').join(__dirname, '../../admin')));
+
 // ── Rutas ───────────────────────────────────
 app.use('/auth',         require('./routes/auth.routes'));
 app.use('/levels',       require('./routes/level.routes'));

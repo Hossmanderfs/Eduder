@@ -23,6 +23,7 @@ import ResetPasswordScreen  from '../screens/ResetPasswordScreen';
 import MenuScreen           from '../screens/MenuScreen';
 import MapaNivelesScreen    from '../screens/MapaNivelesScreen';
 import ListaLeccionesScreen from '../screens/ListaLeccionesScreen';
+import AdminPanelScreen from '../screens/AdminPanelScreen';
 import LessonScreen         from '../screens/LessonScreen';
 import MiniJuegoScreen      from '../screens/MiniJuegoScreen';
 import ResumenScreen        from '../screens/ResumenScreen';
@@ -89,6 +90,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Recover"       component={RecoverScreen} />
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
         <Stack.Screen name="Main"          component={MainTabs} />
+        <Stack.Screen name="AdminPanel"    component={AdminPanelScreen} />
         <Stack.Screen name="MapaNiveles"     component={MapaNivelesScreen} />
         <Stack.Screen name="ListaLecciones"  component={ListaLeccionesScreen} />
         <Stack.Screen name="Lesson"          component={LessonScreen} />

@@ -87,8 +87,8 @@ npm test                    # pruebas jest
 Al arrancar se programan tres tareas (zona `CRON_TZ`, por defecto America/Bogota; `DISABLE_CRON=true` las desactiva):
 reinicio semanal del ranking (lunes 00:00, RF-17), recordatorio de racha (18:00, RF-16) y backup diario con `mysqldump` (02:00, RF-23; carpeta `BACKUP_DIR`, log en `backup.log`).
 
-### Panel de administración (web)
-Abrir `src/admin/index.html` en el navegador (o servirlo con cualquier servidor estático). Entra con una cuenta de rol `admin`
+### Panel de administración
+Con el backend corriendo, abre `http://localhost:3000/panel/` en el navegador. En la app móvil, un usuario con rol `admin` entra directamente a este panel (pantalla *Panel de administración*). Entra con una cuenta de rol `admin`
 (el DDL crea `admin@uniremington.edu.co`; ajusta su hash de contraseña). Permite gestionar usuarios, niveles, lecciones, ejercicios y medallas, ver KPIs por rango de fechas y exportarlos a CSV.
 
 ### App Móvil (React Native + Expo)
