@@ -1,5 +1,5 @@
 // src/services/admin.service.js
-const { fn, col } = require('sequelize');
+const { fn, col, Op } = require('sequelize');
 const {
   Usuario,
   PerfilEstudiante,
@@ -72,9 +72,42 @@ async function updateUser(id, body) {
 }
 
 // ── CU-06 | RF-22 | E12 - Gestión de Usuarios (Administrador) ────────────────
-// Devuelve KPIs del sistema: usuarios activos, lecciones completadas,
-// promedio de XP, nuevos registros en los últimos 7 días (RF-22).
-async function getMetrics() {
+// Convierte ?desde=YYYY-MM-DD&hasta=YYYY-MM-DD en un rango de fechas (inclusive).
+function parseRango(query = {}) {
+  const rango = {};
+  if (query.desde) {
+    const d = new Date(`${query.desde}T00:00:00.000Z`);
+    if (isNaN(d)) { const e = new Error('desde debe tener formato YYYY-MM-DD'); e.status = 400; throw e; }
+    rango.desde = d;
+  }
+  if (query.hasta) {
+    const h = new Date(`${query.hasta}T23:59:59.999Z`);
+    if (isNaN(h)) { const e = new Error('hasta debe tener formato YYYY-MM-DD'); e.status = 400; throw e; }
+    rango.hasta = h;
+  }
+  if (rango.desde && rango.hasta && rango.desde > rango.hasta) {
+    const e = new Error('desde no puede ser posterior a hasta');
+    e.status = 400;
+    throw e;
+  }
+  return rango;
+}
+
+function filtroFecha(rango) {
+  const f = {};
+  if (rango.desde) f[Op.gte] = rango.desde;
+  if (rango.hasta) f[Op.lte] = rango.hasta;
+  return Object.getOwnPropertySymbols(f).length ? f : null;
+}
+
+// ── CU-06 | RF-22 | E12 - Gestión de Usuarios (Administrador) ────────────────
+// Devuelve KPIs del sistema: usuarios activos, lecciones completadas y
+// promedio de puntajes, filtrables por rango de fechas (?desde=&hasta=).
+async function getMetrics(query = {}) {
+  const rango = parseRango(query);
+  const fRegistro  = filtroFecha(rango);
+  const fCompletado = filtroFecha(rango);
+
   const [totalUsuarios, totalActivos, totalLecciones, totalNiveles] = await Promise.all([
     Usuario.count(),
     Usuario.count({ where: { estado: 'activo' } }),
@@ -82,29 +115,67 @@ async function getMetrics() {
     Nivel.count({ where: { estado: 'activo' } }),
   ]);
 
-  const completadas = await ProgresoLeccion.count({ where: { estado: 'completada' } });
+  const whereCompletadas = { estado: 'completada' };
+  if (fCompletado) whereCompletadas.fecha_completado = fCompletado;
+  const completadas = await ProgresoLeccion.count({ where: whereCompletadas });
   const enProgreso  = await ProgresoLeccion.count({ where: { estado: 'en_progreso' } });
 
-  // RF-22: XP promedio entre todos los estudiantes
+  // RF-22: promedio de puntajes de las lecciones completadas en el rango
+  const pj = await ProgresoLeccion.findOne({
+    attributes: [[fn('AVG', col('puntaje')), 'promedio']],
+    where: whereCompletadas,
+    raw: true,
+  });
+  const promedio_puntaje = Math.round((parseFloat(pj?.promedio) || 0) * 10) / 10;
+
   const xpResult = await PerfilEstudiante.findOne({
     attributes: [[fn('AVG', col('xp_total')), 'xp_promedio']],
     raw: true,
   });
   const xp_promedio = Math.round(parseFloat(xpResult?.xp_promedio) || 0);
 
-  // RF-22: nuevos registros última semana
-  const hace7dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const { Op }    = require('sequelize');
-  const nuevosUsuarios = await Usuario.count({
-    where: { fecha_registro: { [Op.gte]: hace7dias } },
-  });
+  // Nuevos registros: en el rango pedido o, por defecto, los últimos 7 días
+  const whereNuevos = fRegistro
+    ? { fecha_registro: fRegistro }
+    : { fecha_registro: { [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } };
+  const nuevosUsuarios = await Usuario.count({ where: whereNuevos });
 
   return {
-    usuarios: { total: totalUsuarios, activos: totalActivos, nuevos_ultima_semana: nuevosUsuarios },
+    rango: { desde: query.desde || null, hasta: query.hasta || null },
+    usuarios: { total: totalUsuarios, activos: totalActivos, nuevos: nuevosUsuarios },
     contenido: { niveles: totalNiveles, lecciones: totalLecciones },
     progreso:  { completadas, en_progreso: enProgreso },
+    promedio_puntaje,
     xp_promedio,
   };
 }
 
-module.exports = { getUsers, getUserByEmail, updateUser, getMetrics };
+// Escapa un valor para CSV (RFC 4180) y neutraliza inyección de fórmulas.
+function csvCell(v) {
+  let s = v === null || v === undefined ? '' : String(v);
+  if (/^[=+\-@]/.test(s)) s = `'${s}`;
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+// ── CU-06 | RF-22 | E12 - exportarCSV() ──────────────────────────────────────
+// Exporta los KPIs del rango indicado en formato CSV (indicador,valor).
+async function exportMetricsCsv(query = {}) {
+  const m = await getMetrics(query);
+  const filas = [
+    ['indicador', 'valor'],
+    ['desde', m.rango.desde || ''],
+    ['hasta', m.rango.hasta || ''],
+    ['usuarios_total', m.usuarios.total],
+    ['usuarios_activos', m.usuarios.activos],
+    ['usuarios_nuevos', m.usuarios.nuevos],
+    ['niveles_activos', m.contenido.niveles],
+    ['lecciones_activas', m.contenido.lecciones],
+    ['lecciones_completadas', m.progreso.completadas],
+    ['lecciones_en_progreso', m.progreso.en_progreso],
+    ['promedio_puntaje', m.promedio_puntaje],
+    ['xp_promedio', m.xp_promedio],
+  ];
+  return '\uFEFF' + filas.map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
+}
+
+module.exports = { getUsers, getUserByEmail, updateUser, getMetrics, exportMetricsCsv, parseRango, csvCell };

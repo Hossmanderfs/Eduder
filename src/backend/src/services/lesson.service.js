@@ -1,6 +1,6 @@
 // src/services/lesson.service.js
 const { v4: uuidv4 } = require('uuid');
-const { Leccion, ContenidoLeccion, Ejercicio, Pista, Nivel } = require('../models');
+const { Leccion, ContenidoLeccion, Ejercicio, Pista, Nivel, ProgresoLeccion } = require('../models');
 
 const TIPOS_VALIDOS = ['teoria', 'ejercicio', 'mini_juego', 'caso_practico'];
 function validarTipo(tipo) {
@@ -76,6 +76,8 @@ async function createLesson(body) {
     throw err;
   }
 
+  validarTipo(tipo);
+
   // Verificar que el nivel padre existe (integridad referencial)
   const nivel = await Nivel.findByPk(id_nivel);
   if (!nivel) {
@@ -84,7 +86,6 @@ async function createLesson(body) {
     throw err;
   }
 
-  validarTipo(tipo);
   const leccion = await Leccion.create({
     id_leccion: uuidv4(),
     id_nivel,
@@ -119,8 +120,10 @@ async function updateLesson(id, body) {
   return leccion;
 }
 
-// ── Admin | RF-08 | E12 - Leccion CRUD ───────────────────────────────────────
-// Desactiva una lección (soft delete). Sus ejercicios y contenidos se conservan.
+// ── Admin | RF-26 | RN-21 | E12 - Leccion CRUD ───────────────────────────────
+// Elimina una lección. RN-21: si tiene progreso de estudiantes registrado NO se
+// elimina; se archiva (estado = 'inactivo'). Sin progreso se elimina físicamente
+// junto con su contenido y ejercicios (ON DELETE CASCADE).
 async function deleteLesson(id) {
   const leccion = await Leccion.findByPk(id);
   if (!leccion) {
@@ -128,8 +131,13 @@ async function deleteLesson(id) {
     err.status = 404;
     throw err;
   }
-  await leccion.update({ estado: 'inactivo' });
-  return { message: 'Lección desactivada correctamente' };
+  const conProgreso = await ProgresoLeccion.count({ where: { id_leccion: id } });
+  if (conProgreso > 0) {
+    await leccion.update({ estado: 'inactivo' });
+    return { message: 'La lección tiene progreso registrado: se archivó como inactiva (RN-21)', archivado: true };
+  }
+  await leccion.destroy();
+  return { message: 'Lección eliminada correctamente', archivado: false };
 }
 
 // ── Admin | RF-08 | E12 - Leccion CRUD (LIST) ────────────────────────────────

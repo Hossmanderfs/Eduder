@@ -716,7 +716,7 @@ async function loadMetrics() {
     document.getElementById('stat-xp').textContent      = d.xp_promedio ?? '—';
 
     const rows = [
-      ['Nuevos usuarios (7 días)', d.usuarios?.nuevos_ultima_semana ?? 0,  'badge-indigo'],
+      ['Nuevos usuarios (7 días)', d.usuarios?.nuevos ?? 0,  'badge-indigo'],
       ['Niveles activos',          d.contenido?.niveles ?? 0,              'badge-green'],
       ['Lecciones activas',        d.contenido?.lecciones ?? 0,            'badge-green'],
       ['En progreso',              d.progreso?.en_progreso ?? 0,           'badge-indigo'],

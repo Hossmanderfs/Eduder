@@ -80,9 +80,9 @@ async function updateLevel(id, body) {
   return nivel;
 }
 
-// ── Admin | RF-07 | E12 - Nivel CRUD ─────────────────────────────────────────
-// Elimina (desactiva) un nivel. No se puede eliminar un nivel con lecciones
-// activas — ON DELETE RESTRICT en el DDL (RNF-06).
+// ── Admin | RF-25 | RN-20 | E12 - Nivel CRUD ─────────────────────────────────
+// Elimina un nivel. RN-20: no se puede eliminar un nivel con lecciones asociadas
+// (activas o archivadas) sin reasignarlas o eliminarlas antes → 409 Conflict.
 async function deleteLevel(id) {
   const nivel = await Nivel.findByPk(id);
   if (!nivel) {
@@ -90,9 +90,16 @@ async function deleteLevel(id) {
     err.status = 404;
     throw err;
   }
-  // Soft delete: marcar como inactivo en lugar de borrar físicamente
-  await nivel.update({ estado: 'inactivo' });
-  return { message: 'Nivel desactivado correctamente' };
+  const lecciones = await Leccion.count({ where: { id_nivel: id } });
+  if (lecciones > 0) {
+    const err = new Error(
+      `No se puede eliminar el nivel: tiene ${lecciones} lección(es) asociada(s). Reasígnelas o elimínelas primero (RN-20).`
+    );
+    err.status = 409;
+    throw err;
+  }
+  await nivel.destroy();
+  return { message: 'Nivel eliminado correctamente', archivado: false };
 }
 
 module.exports = { getLevels, getLevelById, createLevel, updateLevel, deleteLevel };

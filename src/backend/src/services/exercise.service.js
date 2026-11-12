@@ -1,5 +1,15 @@
 // src/services/exercise.service.js
-const { Ejercicio, Pista } = require('../models');
+const { v4: uuidv4 } = require('uuid');
+const { Ejercicio, Pista, Leccion } = require('../models');
+const sequelize = require('../config/database');
+
+const TIPOS_INTERACCION = ['seleccion_multiple', 'completar', 'arrastrar'];
+
+function httpError(status, message) {
+  const err = new Error(message);
+  err.status = status;
+  return err;
+}
 
 // ── CU-03 | RF-10, RF-12 | E12 - evaluar() ───────────────────────────────────
 // Evalúa la respuesta del estudiante comparándola con la respuesta correcta.
@@ -72,4 +82,84 @@ function normalizar(str) {
   return str.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
-module.exports = { evaluate, getHint };
+// ── Admin | RF-27 | E12 - Ejercicio CRUD ─────────────────────────────────────
+// Valida y normaliza las pistas (máximo 2, numeradas 1 y 2 — RF-11).
+function normalizarPistas(pistas) {
+  if (pistas === undefined) return undefined;
+  if (!Array.isArray(pistas) || pistas.length > 2) {
+    throw httpError(400, 'pistas debe ser un arreglo de máximo 2 textos');
+  }
+  return pistas.map((p, i) => {
+    const texto = typeof p === 'string' ? p : p?.texto_pista;
+    if (!texto || !String(texto).trim()) throw httpError(400, 'Cada pista debe tener texto');
+    return { numero_pista: i + 1, texto_pista: String(texto).trim() };
+  });
+}
+
+// Lista los ejercicios de una lección con respuesta correcta y pistas (solo admin).
+async function listByLesson(id_leccion) {
+  return Ejercicio.findAll({
+    where: { id_leccion },
+    order: [['orden', 'ASC']],
+    include: [{ model: Pista, as: 'pistas', attributes: ['id_pista', 'numero_pista', 'texto_pista'] }],
+  });
+}
+
+// Crea un ejercicio asociado a una lección, con hasta 2 pistas.
+async function createExercise(body) {
+  const { id_leccion, enunciado, tipo_interaccion, orden, respuesta_correcta, explicacion } = body;
+  if (!id_leccion || !enunciado || !tipo_interaccion || !orden || !respuesta_correcta || !explicacion) {
+    throw httpError(400, 'id_leccion, enunciado, tipo_interaccion, orden, respuesta_correcta y explicacion son obligatorios');
+  }
+  if (!TIPOS_INTERACCION.includes(tipo_interaccion)) {
+    throw httpError(400, `tipo_interaccion debe ser uno de: ${TIPOS_INTERACCION.join(', ')}`);
+  }
+  const pistas = normalizarPistas(body.pistas) || [];
+  if (!(await Leccion.findByPk(id_leccion))) throw httpError(404, 'Lección no encontrada');
+
+  const id_ejercicio = uuidv4();
+  await sequelize.transaction(async (t) => {
+    await Ejercicio.create({ id_ejercicio, id_leccion, enunciado, tipo_interaccion, orden, respuesta_correcta, explicacion }, { transaction: t });
+    for (const p of pistas) {
+      await Pista.create({ id_pista: uuidv4(), id_ejercicio, ...p }, { transaction: t });
+    }
+  });
+  return Ejercicio.findByPk(id_ejercicio, { include: [{ model: Pista, as: 'pistas' }] });
+}
+
+// Actualiza un ejercicio; si se envía `pistas` se reemplazan las existentes.
+async function updateExercise(id, body) {
+  const ejercicio = await Ejercicio.findByPk(id);
+  if (!ejercicio) throw httpError(404, 'Ejercicio no encontrado');
+  if (body.tipo_interaccion !== undefined && !TIPOS_INTERACCION.includes(body.tipo_interaccion)) {
+    throw httpError(400, `tipo_interaccion debe ser uno de: ${TIPOS_INTERACCION.join(', ')}`);
+  }
+  const pistas = normalizarPistas(body.pistas);
+  const campos = {};
+  for (const k of ['enunciado', 'tipo_interaccion', 'orden', 'respuesta_correcta', 'explicacion']) {
+    if (body[k] !== undefined) campos[k] = body[k];
+  }
+  if (!Object.keys(campos).length && pistas === undefined) {
+    throw httpError(400, 'No se enviaron campos válidos para actualizar');
+  }
+  await sequelize.transaction(async (t) => {
+    if (Object.keys(campos).length) await ejercicio.update(campos, { transaction: t });
+    if (pistas !== undefined) {
+      await Pista.destroy({ where: { id_ejercicio: id }, transaction: t });
+      for (const p of pistas) {
+        await Pista.create({ id_pista: uuidv4(), id_ejercicio: id, ...p }, { transaction: t });
+      }
+    }
+  });
+  return Ejercicio.findByPk(id, { include: [{ model: Pista, as: 'pistas' }] });
+}
+
+// Elimina un ejercicio y sus pistas (ON DELETE CASCADE).
+async function deleteExercise(id) {
+  const ejercicio = await Ejercicio.findByPk(id);
+  if (!ejercicio) throw httpError(404, 'Ejercicio no encontrado');
+  await ejercicio.destroy();
+  return { message: 'Ejercicio eliminado correctamente' };
+}
+
+module.exports = { evaluate, getHint, listByLesson, createExercise, updateExercise, deleteExercise };

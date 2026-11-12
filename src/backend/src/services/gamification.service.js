@@ -12,9 +12,11 @@ const { v4: uuidv4 } = require('uuid');
 // Devuelve el catálogo completo de medallas indicando cuáles obtuvo el usuario
 // autenticado y la fecha en que las obtuvo. Permite mostrar el perfil de logros (RF-18).
 async function getMedals(id_usuario) {
-  const catalogo  = await MedallaCatalogo.findAll({ order: [['condicion_valor', 'ASC']] });
+  const todas     = await MedallaCatalogo.findAll({ order: [['condicion_valor', 'ASC']] });
   const obtenidas = await MedallaUsuario.findAll({ where: { id_usuario }, attributes: ['id_medalla', 'fecha_obtencion'] });
   const mapObtenidas = new Map(obtenidas.map(m => [m.id_medalla, m.fecha_obtencion]));
+  // RN-22: una medalla inactiva solo se muestra a quien ya la obtuvo
+  const catalogo = todas.filter(m => m.estado === 'activo' || mapObtenidas.has(m.id_medalla));
 
   return catalogo.map(m => ({
     ...m.toJSON(),
@@ -93,4 +95,83 @@ function inicioSemana() {
   return lunes.toISOString().split('T')[0];
 }
 
-module.exports = { getMedals, getRanking, resetWeeklyXP };
+// ── Admin | RF-28 | RN-22 | E12 - Medalla CRUD ───────────────────────────────
+const CONDICIONES = ['nivel_completado', 'puntaje_perfecto', 'streak', 'xp_acumulado'];
+
+function httpError(status, message) {
+  const err = new Error(message);
+  err.status = status;
+  return err;
+}
+
+function validarMedalla(b, parcial) {
+  if (!parcial || b.nombre !== undefined) {
+    if (!b.nombre || !String(b.nombre).trim()) throw httpError(400, 'nombre es obligatorio');
+  }
+  if (!parcial || b.condicion_tipo !== undefined) {
+    if (!CONDICIONES.includes(b.condicion_tipo)) {
+      throw httpError(400, `condicion_tipo debe ser uno de: ${CONDICIONES.join(', ')}`);
+    }
+  }
+  if (!parcial || b.condicion_valor !== undefined) {
+    if (!Number.isInteger(b.condicion_valor) || b.condicion_valor <= 0) {
+      throw httpError(400, 'condicion_valor debe ser un entero positivo');
+    }
+  }
+  if (!parcial || b.icono_url !== undefined) {
+    if (!b.icono_url || !String(b.icono_url).trim()) throw httpError(400, 'icono_url es obligatorio');
+  }
+  if (b.estado !== undefined && !['activo', 'inactivo'].includes(b.estado)) {
+    throw httpError(400, "estado debe ser 'activo' o 'inactivo'");
+  }
+}
+
+// Lista todo el catálogo (activas e inactivas) con el número de veces otorgada.
+async function listCatalog() {
+  const catalogo = await MedallaCatalogo.findAll({ order: [['condicion_valor', 'ASC']] });
+  const otorgadas = await MedallaUsuario.findAll({ attributes: ['id_medalla'], raw: true });
+  const conteo = {};
+  otorgadas.forEach(o => { conteo[o.id_medalla] = (conteo[o.id_medalla] || 0) + 1; });
+  return catalogo.map(m => ({ ...m.toJSON(), veces_otorgada: conteo[m.id_medalla] || 0 }));
+}
+
+async function createMedal(body) {
+  validarMedalla(body, false);
+  return MedallaCatalogo.create({
+    id_medalla: uuidv4(),
+    nombre: String(body.nombre).trim(),
+    descripcion: body.descripcion || null,
+    condicion_tipo: body.condicion_tipo,
+    condicion_valor: body.condicion_valor,
+    icono_url: body.icono_url,
+    estado: 'activo',
+  });
+}
+
+async function updateMedal(id, body) {
+  const medalla = await MedallaCatalogo.findByPk(id);
+  if (!medalla) throw httpError(404, 'Medalla no encontrada');
+  validarMedalla(body, true);
+  const campos = {};
+  for (const k of ['nombre', 'descripcion', 'condicion_tipo', 'condicion_valor', 'icono_url', 'estado']) {
+    if (body[k] !== undefined) campos[k] = body[k];
+  }
+  if (!Object.keys(campos).length) throw httpError(400, 'No se enviaron campos válidos para actualizar');
+  await medalla.update(campos);
+  return medalla;
+}
+
+// RN-22: una medalla ya otorgada no se elimina; se marca inactiva en el catálogo.
+async function deleteMedal(id) {
+  const medalla = await MedallaCatalogo.findByPk(id);
+  if (!medalla) throw httpError(404, 'Medalla no encontrada');
+  const otorgadas = await MedallaUsuario.count({ where: { id_medalla: id } });
+  if (otorgadas > 0) {
+    await medalla.update({ estado: 'inactivo' });
+    return { message: 'La medalla ya fue otorgada: se marcó como inactiva (RN-22)', archivado: true };
+  }
+  await medalla.destroy();
+  return { message: 'Medalla eliminada correctamente', archivado: false };
+}
+
+module.exports = { getMedals, getRanking, resetWeeklyXP, listCatalog, createMedal, updateMedal, deleteMedal };

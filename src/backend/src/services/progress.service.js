@@ -135,7 +135,7 @@ async function getSummary(id_usuario) {
 // Las medallas se otorgan solo una vez por usuario (idempotente).
 // Crea una notificación de logro al otorgar una medalla.
 async function evaluarMedallas(id_usuario, perfil) {
-  const catalogo    = await MedallaCatalogo.findAll();
+  const catalogo    = await MedallaCatalogo.findAll({ where: { estado: 'activo' } });
   const yaObtenidas = await MedallaUsuario.findAll({ where: { id_usuario }, attributes: ['id_medalla'] });
   const idsObtenidos = new Set(yaObtenidas.map(m => m.id_medalla));
 
