@@ -1,6 +1,5 @@
-// index.js — EduDer Mobile Entry Point
-import { AppRegistry } from 'react-native';
+// index.js — EduDer Mobile Entry Point (Expo)
+import { registerRootComponent } from 'expo';
 import App from './src/App';
-import { name as appName } from './app.json';
 
-AppRegistry.registerComponent(appName, () => App);
+registerRootComponent(App);

@@ -10,4 +10,15 @@ export function esCorreoInstitucional(correo) {
 }
 export const TEXTO_DOMINIOS = DOMINIOS_PERMITIDOS.map(d => '@' + d).join(' o ');
 
-export const API_BASE_URL = 'http://10.0.2.2:3000';
+// URL del backend. En desarrollo con Expo Go se deduce la IP del computador desde el
+// servidor de Metro (hostUri), así funciona en un celular físico sin configurar nada.
+// Para fijarla a mano, define EXPO_PUBLIC_API_URL (p. ej. http://192.168.1.20:3000).
+import Constants from 'expo-constants';
+
+function detectarUrl() {
+  if (process.env.EXPO_PUBLIC_API_URL) return process.env.EXPO_PUBLIC_API_URL;
+  const hostUri = Constants.expoConfig?.hostUri || Constants.expoGoConfig?.debuggerHost;
+  if (hostUri) return `http://${hostUri.split(':')[0]}:3000`;
+  return 'http://10.0.2.2:3000'; // emulador Android
+}
+export const API_BASE_URL = detectarUrl();
