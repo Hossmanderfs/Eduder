@@ -16,7 +16,7 @@ import {
 import { login } from '../services/auth.service';
 import { COLORS } from '../theme/colors';
 import { irAMain } from '../utils/sesion';
-import { esCorreoInstitucional, TEXTO_DOMINIOS, DOMINIO_EJEMPLO } from '../config';
+import { esCorreoInstitucional, TEXTO_DOMINIOS, DOMINIO_EJEMPLO, API_BASE_URL } from '../config';
 
 export default function LoginScreen({ navigation }) {
   const [correo, setCorreo]       = useState('');
@@ -53,7 +53,9 @@ export default function LoginScreen({ navigation }) {
       // RF-04: tras el login, Tutorial la primera vez y luego Main (el panel admin es la web aparte)
       await irAMain(navigation);
     } catch (err) {
-      const msg = err?.response?.data?.message || 'Error al iniciar sesión. Intenta de nuevo.';
+      const msg = err?.response?.data?.message
+        || (err?.response ? 'Error al iniciar sesión. Intenta de nuevo.'
+          : `No se pudo conectar con el servidor (${API_BASE_URL}). Revisa que el backend esté corriendo y que el celular esté en la misma red Wi-Fi. Detalle: ${err?.message}`);
       setError(msg);
     } finally {
       setLoading(false);
