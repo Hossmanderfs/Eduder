@@ -15,7 +15,7 @@
 --     La FK vive en USUARIOS. ROL no tiene FK hacia ninguna tabla.
 --   · tipo_leccion: añadidos 4 INSERT de prueba.
 -- ================================================
-
+DROP DATABASE IF EXISTS eduder;
 CREATE DATABASE IF NOT EXISTS eduder
 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
