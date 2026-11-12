@@ -8,6 +8,7 @@ const {
   MedallaUsuario,
   Notificacion,
 } = require('../models');
+const { Op } = require('sequelize');
 
 // ── CU-03 | RF-09 | E12 - registrar() / actualizarEstado() ──────────────────
 // Crea o actualiza el registro de progreso de un estudiante en una lección.
@@ -38,6 +39,7 @@ async function updateProgress(id_leccion, body, id_usuario) {
   }
 
   let progreso = await ProgresoLeccion.findOne({ where: { id_usuario, id_leccion } });
+  const yaCompletada = progreso?.estado === 'completada';
 
   const ahora = new Date();
   const datos  = {};
@@ -59,12 +61,14 @@ async function updateProgress(id_leccion, body, id_usuario) {
   }
 
   // RF-12: al completar, calcular XP y actualizar perfil del estudiante
-  if (estado === 'completada' && datos.puntaje >= 0) {
+  // Solo la PRIMERA vez que se completa suma XP (evita repetir el mismo envío para acumular XP).
+  let resumen = { xp_ganado: 0, streak_dias: null, nuevas_medallas: [] };
+  if (estado === 'completada' && !yaCompletada && datos.puntaje >= 0) {
     const xp_ganado = Math.round(leccion.xp_base * (datos.puntaje / 100));
-    await actualizarPerfil(id_usuario, xp_ganado, leccion, ahora);
+    resumen = await actualizarPerfil(id_usuario, xp_ganado, leccion, ahora, datos.puntaje);
   }
 
-  return progreso;
+  return { ...progreso.toJSON(), resumen };
 }
 
 // ── CU-03 | RF-12, RF-13 | E12 - sumarXP() / calcularStreak() ───────────────
@@ -72,9 +76,9 @@ async function updateProgress(id_leccion, body, id_usuario) {
 // Si la última actividad fue ayer → streak + 1.
 // Si fue hoy → streak sin cambio.
 // Si fue antes de ayer → streak reinicia a 1 (RF-13).
-async function actualizarPerfil(id_usuario, xp_ganado, leccion, ahora) {
+async function actualizarPerfil(id_usuario, xp_ganado, leccion, ahora, puntaje) {
   const perfil = await PerfilEstudiante.findOne({ where: { id_usuario } });
-  if (!perfil) return;
+  if (!perfil) return { xp_ganado: 0, streak_dias: null, nuevas_medallas: [] };
 
   const hoy           = ahora.toISOString().split('T')[0];
   const ultimaAct     = perfil.ultima_actividad;
@@ -96,11 +100,13 @@ async function actualizarPerfil(id_usuario, xp_ganado, leccion, ahora) {
   });
 
   // RF-14, RF-15: evaluar medallas automáticamente al finalizar la lección
-  await evaluarMedallas(id_usuario, {
+  const nuevas_medallas = await evaluarMedallas(id_usuario, {
     ...perfil.dataValues,
-    xp_total:    perfil.xp_total + xp_ganado,
+    xp_total:    perfil.xp_total,
     streak_dias: nuevaRacha,
-  });
+  }, { puntaje });
+
+  return { xp_ganado, streak_dias: nuevaRacha, xp_total: perfil.xp_total, nuevas_medallas };
 }
 
 // ── CU-04 | RF-18 | E12 - obtenerResumen() ───────────────────────────────────
@@ -134,7 +140,9 @@ async function getSummary(id_usuario) {
 // Evalúa cada medalla del catálogo contra el perfil actual del estudiante.
 // Las medallas se otorgan solo una vez por usuario (idempotente).
 // Crea una notificación de logro al otorgar una medalla.
-async function evaluarMedallas(id_usuario, perfil) {
+async function evaluarMedallas(id_usuario, perfil, ctx = {}) {
+  const nuevas = [];
+  const nivelesCompletados = await contarNivelesCompletados(id_usuario);
   const catalogo    = await MedallaCatalogo.findAll({ where: { estado: 'activo' } });
   const yaObtenidas = await MedallaUsuario.findAll({ where: { id_usuario }, attributes: ['id_medalla'] });
   const idsObtenidos = new Set(yaObtenidas.map(m => m.id_medalla));
@@ -149,6 +157,13 @@ async function evaluarMedallas(id_usuario, perfil) {
         break;
       case 'streak':
         cumple = perfil.streak_dias >= medalla.condicion_valor;
+        break;
+      case 'puntaje_perfecto':
+        // se otorga al sacar 100 en una lección (condicion_valor = nº de lecciones perfectas)
+        cumple = ctx.puntaje === 100 && (await contarPerfectas(id_usuario)) >= medalla.condicion_valor;
+        break;
+      case 'nivel_completado':
+        cumple = nivelesCompletados >= medalla.condicion_valor;
         break;
       default:
         break;
@@ -167,8 +182,27 @@ async function evaluarMedallas(id_usuario, perfil) {
         tipo:    'logro',
         mensaje: `🏅 ¡Obtuviste la medalla "${medalla.nombre}"!`,
       });
+      nuevas.push({ id_medalla: medalla.id_medalla, nombre: medalla.nombre, icono_url: medalla.icono_url });
     }
   }
+  return nuevas;
+}
+
+// Número de lecciones completadas con puntaje 100.
+async function contarPerfectas(id_usuario) {
+  return ProgresoLeccion.count({ where: { id_usuario, estado: 'completada', puntaje: 100 } });
+}
+
+// Niveles activos cuyas lecciones activas están TODAS completadas por el usuario.
+async function contarNivelesCompletados(id_usuario) {
+  const lecciones = await Leccion.findAll({ where: { estado: 'activo' }, attributes: ['id_leccion', 'id_nivel'], raw: true });
+  const hechas = await ProgresoLeccion.findAll({ where: { id_usuario, estado: 'completada' }, attributes: ['id_leccion'], raw: true });
+  const ok = new Set(hechas.map(h => h.id_leccion));
+  const porNivel = {};
+  for (const l of lecciones) {
+    (porNivel[l.id_nivel] = porNivel[l.id_nivel] || []).push(ok.has(l.id_leccion));
+  }
+  return Object.values(porNivel).filter(arr => arr.length && arr.every(Boolean)).length;
 }
 
 // ── util ──────────────────────────────────────────────────────────────────────
@@ -178,4 +212,4 @@ function diffDias(fecha1, fecha2) {
   return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
 }
 
-module.exports = { updateProgress, getSummary };
+module.exports = { updateProgress, getSummary, evaluarMedallas };

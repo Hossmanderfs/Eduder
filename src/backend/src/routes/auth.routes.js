@@ -33,6 +33,16 @@ router.post('/recover', async (req, res) => {
   }
 });
 
+// POST /auth/reset-password  { correo_institucional, token, nueva_contrasena }
+router.post('/reset-password', async (req, res) => {
+  try {
+    const result = await AuthService.resetPassword(req.body);
+    res.json(result);
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+});
+
 // DELETE /auth/session
 router.delete('/session', verifyToken, async (req, res) => {
   try {

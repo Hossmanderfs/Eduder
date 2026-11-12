@@ -20,6 +20,7 @@ app.use('/progress',     require('./routes/progress.routes'));
 app.use('/profile',      require('./routes/profile.routes'));
 app.use('/gamification', require('./routes/gamification.routes'));
 app.use('/admin',        require('./routes/admin.routes'));
+app.use('/notifications', require('./routes/notification.routes'));
 
 // ── Health check ────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', project: 'EduDer' }));
@@ -34,6 +35,7 @@ sequelize.authenticate()
     app.listen(PORT, () =>
       console.log(`🚀 EduDer API corriendo en http://localhost:${PORT}`)
     );
+    require('./jobs/scheduler').start();
   })
   .catch(err => {
     console.error('❌ Error al conectar con la base de datos:', err.message);

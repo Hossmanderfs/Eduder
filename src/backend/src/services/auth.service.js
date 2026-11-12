@@ -196,8 +196,9 @@ async function recover(body) {
       to:   correo_institucional,
       subject: 'EduDer — Recuperación de contraseña',
       html: `<p>Hola ${usuario.nombre},</p>
-             <p>Haz clic en el enlace para restablecer tu contraseña (válido 30 minutos):</p>
-             <a href="${link}">${link}</a>`,
+             <p>Usa este código en la app para restablecer tu contraseña (válido 30 minutos):</p>
+             <p><b>${rawToken}</b></p>
+             <p>O abre este enlace: <a href="${link}">${link}</a></p>`,
     });
   }
 
@@ -210,4 +211,43 @@ async function logout() {
   return { message: 'Sesión cerrada correctamente' };
 }
 
-module.exports = { register, login, recover, logout };
+// ── CU-05 | RF-19 | E12 - restablecer() ──────────────────────────────────────
+// Cambia la contraseña con el token recibido por correo. El token debe estar
+// vigente (30 min), no usado, y se invalida tras usarse. Mínimo 8 caracteres.
+async function resetPassword(body) {
+  const { correo_institucional, token, nueva_contrasena } = body;
+  const invalido = () => {
+    const err = new Error('Token inválido o expirado');
+    err.status = 400;
+    return err;
+  };
+  if (!correo_institucional || !token || !nueva_contrasena) {
+    const err = new Error('correo_institucional, token y nueva_contrasena son obligatorios');
+    err.status = 400;
+    throw err;
+  }
+  if (String(nueva_contrasena).length < 8) {
+    const err = new Error('La contraseña debe tener al menos 8 caracteres');
+    err.status = 400;
+    throw err;
+  }
+  const usuario = await Usuario.findOne({ where: { correo_institucional } });
+  if (!usuario) throw invalido();
+
+  const { Op } = require('sequelize');
+  const candidatos = await TokenRecuperacion.findAll({
+    where: { id_usuario: usuario.id_usuario, usado: false, expira_en: { [Op.gt]: new Date() } },
+  });
+  let tokenValido = null;
+  for (const t of candidatos) {
+    if (await bcrypt.compare(String(token), t.token_hash)) { tokenValido = t; break; }
+  }
+  if (!tokenValido) throw invalido();
+
+  const contrasena_hash = await bcrypt.hash(String(nueva_contrasena), 10);
+  await usuario.update({ contrasena_hash, intentos_login: 0, bloqueado_hasta: null });
+  await tokenValido.update({ usado: true });
+  return { message: 'Contraseña actualizada correctamente' };
+}
+
+module.exports = { register, login, recover, logout, resetPassword };
