@@ -349,6 +349,12 @@
       <div class="nav-item" data-page="lessons" onclick="showPage('lessons')">
         <span class="nav-icon">📝</span> Lecciones
       </div>
+      <div class="nav-item" data-page="exercises" onclick="showPage('exercises')">
+        <span class="nav-icon">🧩</span> Ejercicios
+      </div>
+      <div class="nav-item" data-page="medals" onclick="showPage('medals')">
+        <span class="nav-icon">🏅</span> Medallas
+      </div>
       <div class="nav-item" data-page="users" onclick="showPage('users')">
         <span class="nav-icon">👥</span> Usuarios
       </div>
@@ -372,6 +378,12 @@
 
       <!-- ── Dashboard ─────────────────────────────────── -->
       <div id="page-dashboard" class="page active">
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;">
+          <div class="field" style="margin:0;"><label>Desde</label><input id="m-desde" type="date" /></div>
+          <div class="field" style="margin:0;"><label>Hasta</label><input id="m-hasta" type="date" /></div>
+          <button class="btn btn-outline" onclick="loadMetrics()">Aplicar filtro</button>
+          <button class="btn btn-primary" onclick="exportMetricsCsv()">⬇ Exportar CSV</button>
+        </div>
         <div class="stats-grid" id="stats-grid">
           <div class="stat-card"><div class="label">Usuarios</div><div class="value" id="stat-users">—</div><div class="sub">Total registrados</div></div>
           <div class="stat-card"><div class="label">Activos</div><div class="value" id="stat-active">—</div><div class="sub">Cuentas activas</div></div>
@@ -409,6 +421,37 @@
             <tbody id="levels-body">
               <tr><td colspan="6" class="empty">Cargando niveles...</td></tr>
             </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Ejercicios (RF-27) ─────────────────────────── -->
+      <div id="page-exercises" class="page">
+        <div class="section-header">
+          <h2>Gestión de Ejercicios</h2>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="ex-leccion" onchange="loadExercises()" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface);min-width:260px;"></select>
+            <button class="btn btn-primary" onclick="openExerciseModal()">+ Nuevo ejercicio</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Orden</th><th>Enunciado</th><th>Tipo</th><th>Respuesta</th><th>Pistas</th><th>Acciones</th></tr></thead>
+            <tbody id="ex-body"><tr><td colspan="6" class="empty">Selecciona una lección.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Medallas (RF-28) ───────────────────────────── -->
+      <div id="page-medals" class="page">
+        <div class="section-header">
+          <h2>Catálogo de Medallas</h2>
+          <button class="btn btn-primary" onclick="openMedalModal()">+ Nueva medalla</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Ícono</th><th>Nombre</th><th>Condición</th><th>Otorgada</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="medals-body"><tr><td colspan="6" class="empty">Cargando...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -583,6 +626,59 @@
 </div>
 
 <!-- ══ MODAL CONFIRMAR ELIMINAR ═══════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-exercise">
+  <div class="modal" style="width:560px;max-height:90vh;overflow:auto;">
+    <h3 id="modal-ex-title">Nuevo ejercicio</h3>
+    <div class="error-banner" id="modal-ex-error"></div>
+    <input type="hidden" id="ex-id" />
+    <div class="field"><label>Enunciado *</label><textarea id="ex-enunciado" rows="3" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font:inherit;"></textarea></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">
+      <div class="field"><label>Tipo de interacción *</label>
+        <select id="ex-tipo">
+          <option value="seleccion_multiple">Selección múltiple</option>
+          <option value="completar">Completar</option>
+          <option value="arrastrar">Arrastrar</option>
+        </select></div>
+      <div class="field"><label>Orden *</label><input id="ex-orden" type="number" min="1" /></div>
+    </div>
+    <div class="field"><label>Respuesta correcta *</label><input id="ex-respuesta" type="text" /></div>
+    <div class="field"><label>Explicación (se muestra si falla) *</label><input id="ex-explicacion" type="text" /></div>
+    <div class="field"><label>Pista 1</label><input id="ex-pista1" type="text" /></div>
+    <div class="field"><label>Pista 2</label><input id="ex-pista2" type="text" /></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeExerciseModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-ex" onclick="saveExercise()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-medal">
+  <div class="modal" style="width:500px;">
+    <h3 id="modal-medal-title">Nueva medalla</h3>
+    <div class="error-banner" id="modal-medal-error"></div>
+    <input type="hidden" id="medal-id" />
+    <div class="field"><label>Nombre *</label><input id="medal-nombre" type="text" /></div>
+    <div class="field"><label>Descripción</label><input id="medal-desc" type="text" /></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">
+      <div class="field"><label>Condición *</label>
+        <select id="medal-cond">
+          <option value="xp_acumulado">XP acumulado</option>
+          <option value="streak">Racha (días)</option>
+          <option value="nivel_completado">Niveles completados</option>
+          <option value="puntaje_perfecto">Lecciones con 100</option>
+        </select></div>
+      <div class="field"><label>Valor *</label><input id="medal-valor" type="number" min="1" /></div>
+    </div>
+    <div class="field"><label>Ícono (URL o emoji) *</label><input id="medal-icono" type="text" /></div>
+    <div class="field" id="medal-field-estado" style="display:none;"><label>Estado</label>
+      <select id="medal-estado"><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeMedalModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-medal" onclick="saveMedal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="modal-confirm">
   <div class="modal" style="width:380px;">
     <h3>¿Desactivar nivel?</h3>
@@ -601,7 +697,6 @@
 
 <script>
 const API = 'http://localhost:3000';
-let _pendingDeleteId = null;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function getToken() { return localStorage.getItem('eduder_admin_token'); }
@@ -691,7 +786,7 @@ function doLogout() {
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
-const pageTitles = { dashboard: 'Dashboard', levels: 'Gestión de Niveles', lessons: 'Gestión de Lecciones', users: 'Gestión de Usuarios' };
+const pageTitles = { dashboard: 'Dashboard', levels: 'Gestión de Niveles', lessons: 'Gestión de Lecciones', users: 'Gestión de Usuarios', exercises: 'Gestión de Ejercicios', medals: 'Catálogo de Medallas' };
 
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -703,22 +798,49 @@ function showPage(name) {
   if (name === 'levels')    loadLevels();
   if (name === 'lessons')   loadLessonsPage();
   if (name === 'users')     loadUsers();
+  if (name === 'exercises') loadExercisesPage();
+  if (name === 'medals')    loadMedals();
 }
 
 // ── Dashboard / Métricas ──────────────────────────────────────────────────────
+function metricsQuery() {
+  const desde = document.getElementById('m-desde')?.value;
+  const hasta = document.getElementById('m-hasta')?.value;
+  const p = new URLSearchParams();
+  if (desde) p.set('desde', desde);
+  if (hasta) p.set('hasta', hasta);
+  const q = p.toString();
+  return q ? `?${q}` : '';
+}
+
+// RF-22: exportar KPIs en CSV (se descarga con el token del administrador)
+async function exportMetricsCsv() {
+  try {
+    const res = await fetch(`${API}/admin/metrics/export${metricsQuery()}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.message || `Error ${res.status}`); }
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'kpis_eduder.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('CSV exportado', 'ok');
+  } catch (err) { toast(err.message, 'err'); }
+}
 // CU-06 | RF-22 | E12 - getMetrics()
 async function loadMetrics() {
   try {
-    const d = await api('/admin/metrics');
+    const d = await api('/admin/metrics' + metricsQuery());
     document.getElementById('stat-users').textContent   = d.usuarios?.total ?? '—';
     document.getElementById('stat-active').textContent  = d.usuarios?.activos ?? '—';
     document.getElementById('stat-lessons').textContent = d.progreso?.completadas ?? '—';
     document.getElementById('stat-xp').textContent      = d.xp_promedio ?? '—';
 
     const rows = [
-      ['Nuevos usuarios (7 días)', d.usuarios?.nuevos ?? 0,  'badge-indigo'],
+      ['Nuevos usuarios (rango o 7 días)', d.usuarios?.nuevos ?? 0,  'badge-indigo'],
       ['Niveles activos',          d.contenido?.niveles ?? 0,              'badge-green'],
       ['Lecciones activas',        d.contenido?.lecciones ?? 0,            'badge-green'],
+      ['Promedio de puntajes', d.promedio_puntaje ?? 0, 'badge-indigo'],
       ['En progreso',              d.progreso?.en_progreso ?? 0,           'badge-indigo'],
     ];
     document.getElementById('metrics-body').innerHTML = rows.map(([label, val, cls]) =>
@@ -750,9 +872,7 @@ async function loadLevels() {
         <td>
           <div style="display:flex;gap:6px;">
             <button class="btn btn-outline btn-sm" onclick='openLevelModal(${JSON.stringify(n)})'>Editar</button>
-            ${n.estado === 'activo'
-              ? `<button class="btn btn-danger btn-sm" onclick="confirmDelete(${n.id_nivel})">Desactivar</button>`
-              : '<span style="font-size:12px;color:var(--muted);">—</span>'}
+            <button class="btn btn-danger btn-sm" onclick="confirmDelete(${n.id_nivel})">Eliminar</button>
           </div>
         </td>
       </tr>`).join('');
@@ -816,29 +936,38 @@ async function saveLevel() {
   }
 }
 
-// Admin | RF-07 | E12 - deleteLevel() (soft delete)
-function confirmDelete(id) {
-  _pendingDeleteId = id;
+// ── Confirmación genérica de borrado ──────────────────────────────────────────
+// Cada llamada define el texto y la acción a ejecutar al confirmar.
+let _confirmAction = null;
+function askConfirm(titulo, texto, textoBoton, accion) {
+  _confirmAction = accion;
+  document.querySelector('#modal-confirm h3').textContent = titulo;
+  document.querySelector('#modal-confirm p').textContent  = texto;
+  document.getElementById('btn-confirm-del').textContent  = textoBoton;
   document.getElementById('modal-confirm').classList.add('open');
 }
-
 function closeConfirm() {
-  _pendingDeleteId = null;
+  _confirmAction = null;
   document.getElementById('modal-confirm').classList.remove('open');
 }
-
 document.getElementById('btn-confirm-del').addEventListener('click', async () => {
-  if (!_pendingDeleteId) return;
-  try {
-    await api(`/levels/${_pendingDeleteId}`, { method: 'DELETE' });
-    toast('Nivel desactivado', 'ok');
-    closeConfirm();
-    loadLevels();
-  } catch (err) {
-    toast(err.message, 'err');
-    closeConfirm();
-  }
+  const accion = _confirmAction;
+  closeConfirm();
+  if (!accion) return;
+  try { await accion(); } catch (err) { toast(err.message, 'err'); }
 });
+
+// Admin | RF-25 | RN-20 | E12 - deleteLevel(): 409 si tiene lecciones
+function confirmDelete(id) {
+  askConfirm('¿Eliminar nivel?',
+    'Solo se puede eliminar un nivel sin lecciones asociadas (RN-20). Si tiene lecciones, reasígnalas o elimínalas primero.',
+    'Eliminar',
+    async () => {
+      const r = await api(`/levels/${id}`, { method: 'DELETE' });
+      toast(r.message || 'Nivel eliminado', 'ok');
+      loadLevels();
+    });
+}
 
 // ── Usuarios ──────────────────────────────────────────────────────────────────
 // CU-06 | RF-20, RF-21 | E12 - getUsers() / updateUser()
@@ -1008,9 +1137,7 @@ async function loadLessonsPage() {
         <td>
           <div style="display:flex;gap:6px;">
             <button class="btn btn-outline btn-sm" onclick='openLessonModal(${JSON.stringify(l)})'>Editar</button>
-            ${l.estado === 'activo'
-              ? `<button class="btn btn-danger btn-sm" onclick="deleteLessonConfirm('${l.id_leccion}')">Desactivar</button>`
-              : '<span style="font-size:12px;color:var(--muted);">—</span>'}
+            <button class="btn btn-danger btn-sm" onclick="deleteLessonConfirm('${l.id_leccion}')">Eliminar</button>
           </div>
         </td>
       </tr>`).join('');
@@ -1100,36 +1227,18 @@ async function saveLesson() {
   }
 }
 
-// ── Desactivar lección (soft delete) ─────────────────────────────────────────
-// Admin | RF-08 | E12 - deleteLesson()
-// Reutiliza el modal de confirmación genérico.
+// ── Eliminar lección (RN-21: con progreso se archiva) ────────────────────────
+// Admin | RF-26 | E12 - deleteLesson()
 function deleteLessonConfirm(id) {
-  _pendingDeleteId = '__lesson__' + id;
-  document.querySelector('#modal-confirm h3').textContent = '¿Desactivar lección?';
-  document.querySelector('#modal-confirm p').textContent  =
-    'La lección se marcará como inactiva. El progreso de los estudiantes se conserva.';
-  document.getElementById('modal-confirm').classList.add('open');
-}
-
-// Parchar el handler de confirmación para manejar lecciones también
-const _origConfirmDel = document.getElementById('btn-confirm-del').onclick;
-document.getElementById('btn-confirm-del').addEventListener('click', async function handler() {
-  if (!_pendingDeleteId) return;
-
-  if (String(_pendingDeleteId).startsWith('__lesson__')) {
-    const lessonId = String(_pendingDeleteId).replace('__lesson__', '');
-    try {
-      await api(`/lessons/${lessonId}`, { method: 'DELETE' });
-      toast('Lección desactivada', 'ok');
-      closeConfirm();
+  askConfirm('¿Eliminar lección?',
+    'Si la lección tiene progreso de estudiantes se archivará como inactiva (RN-21); si no, se eliminará con sus ejercicios.',
+    'Eliminar',
+    async () => {
+      const r = await api(`/lessons/${id}`, { method: 'DELETE' });
+      toast(r.message || 'Lección eliminada', 'ok');
       loadLessonsPage();
-    } catch (err) {
-      toast(err.message, 'err');
-      closeConfirm();
-    }
-  }
-  // Si no es lección, el handler original de niveles sigue funcionando
-});
+    });
+}
 
 // Cerrar modal lección con Escape
 document.addEventListener('keydown', e => {
@@ -1139,6 +1248,167 @@ document.getElementById('modal-lesson').addEventListener('click', e => {
   if (e.target === document.getElementById('modal-lesson')) closeLessonModal();
 });
 
+
+// ── Utilidades ────────────────────────────────────────────────────────────────
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ── Ejercicios ────────────────────────────────────────────────────────────────
+// Admin | RF-27 | E12 - Ejercicio CRUD (con hasta 2 pistas)
+let _exercises = [];
+async function loadExercisesPage() {
+  const sel = document.getElementById('ex-leccion');
+  try {
+    const lecciones = await api('/lessons/all');
+    const actual = sel.value;
+    sel.innerHTML = '<option value="">Selecciona una lección...</option>' + lecciones.map(l =>
+      `<option value="${esc(l.id_leccion)}">N${esc(l.id_nivel)} · ${esc(l.orden)}. ${esc(l.titulo)}</option>`).join('');
+    sel.value = actual;
+    if (actual) loadExercises();
+  } catch (err) { toast(err.message, 'err'); }
+}
+
+async function loadExercises() {
+  const id = document.getElementById('ex-leccion').value;
+  const body = document.getElementById('ex-body');
+  if (!id) { body.innerHTML = '<tr><td colspan="6" class="empty">Selecciona una lección.</td></tr>'; return; }
+  try {
+    _exercises = await api(`/exercise/by-lesson/${id}`);
+    if (!_exercises.length) { body.innerHTML = '<tr><td colspan="6" class="empty">Esta lección no tiene ejercicios.</td></tr>'; return; }
+    body.innerHTML = _exercises.map((e, i) => `
+      <tr>
+        <td><span class="badge badge-indigo">${esc(e.orden)}</span></td>
+        <td style="max-width:320px;">${esc(e.enunciado)}</td>
+        <td>${esc(e.tipo_interaccion)}</td>
+        <td>${esc(e.respuesta_correcta)}</td>
+        <td>${(e.pistas || []).length}/2</td>
+        <td><div style="display:flex;gap:6px;">
+          <button class="btn btn-outline btn-sm" onclick="openExerciseModal(${i})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteExercise('${esc(e.id_ejercicio)}')">Eliminar</button>
+        </div></td>
+      </tr>`).join('');
+  } catch (err) { body.innerHTML = `<tr><td colspan="6" class="empty" style="color:var(--danger);">${esc(err.message)}</td></tr>`; }
+}
+
+function openExerciseModal(idx = null) {
+  if (!document.getElementById('ex-leccion').value) { toast('Primero selecciona una lección', 'err'); return; }
+  clearErr('modal-ex-error');
+  const e = idx === null ? null : _exercises[idx];
+  const pistas = (e?.pistas || []).slice().sort((a, b) => a.numero_pista - b.numero_pista);
+  document.getElementById('modal-ex-title').textContent = e ? 'Editar ejercicio' : 'Nuevo ejercicio';
+  document.getElementById('ex-id').value          = e?.id_ejercicio ?? '';
+  document.getElementById('ex-enunciado').value   = e?.enunciado ?? '';
+  document.getElementById('ex-tipo').value        = e?.tipo_interaccion ?? 'seleccion_multiple';
+  document.getElementById('ex-orden').value       = e?.orden ?? (_exercises.length + 1);
+  document.getElementById('ex-respuesta').value   = e?.respuesta_correcta ?? '';
+  document.getElementById('ex-explicacion').value = e?.explicacion ?? '';
+  document.getElementById('ex-pista1').value      = pistas[0]?.texto_pista ?? '';
+  document.getElementById('ex-pista2').value      = pistas[1]?.texto_pista ?? '';
+  document.getElementById('modal-exercise').classList.add('open');
+}
+function closeExerciseModal() { document.getElementById('modal-exercise').classList.remove('open'); }
+
+async function saveExercise() {
+  clearErr('modal-ex-error');
+  const id = document.getElementById('ex-id').value;
+  const pistas = [document.getElementById('ex-pista1').value.trim(), document.getElementById('ex-pista2').value.trim()].filter(Boolean);
+  const body = {
+    enunciado: document.getElementById('ex-enunciado').value.trim(),
+    tipo_interaccion: document.getElementById('ex-tipo').value,
+    orden: parseInt(document.getElementById('ex-orden').value, 10),
+    respuesta_correcta: document.getElementById('ex-respuesta').value.trim(),
+    explicacion: document.getElementById('ex-explicacion').value.trim(),
+    pistas,
+  };
+  if (!body.enunciado || !body.orden || !body.respuesta_correcta || !body.explicacion) {
+    return showErr('modal-ex-error', 'Enunciado, orden, respuesta y explicación son obligatorios');
+  }
+  try {
+    if (id) await api(`/exercise/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await api('/exercise', { method: 'POST', body: JSON.stringify({ ...body, id_leccion: document.getElementById('ex-leccion').value }) });
+    toast(id ? '✅ Ejercicio actualizado' : '✅ Ejercicio creado');
+    closeExerciseModal();
+    loadExercises();
+  } catch (err) { showErr('modal-ex-error', err.message); }
+}
+
+function deleteExercise(id) {
+  askConfirm('¿Eliminar ejercicio?', 'Se eliminará el ejercicio junto con sus pistas.', 'Eliminar', async () => {
+    const r = await api(`/exercise/${id}`, { method: 'DELETE' });
+    toast(r.message || 'Ejercicio eliminado', 'ok');
+    loadExercises();
+  });
+}
+
+// ── Medallas ──────────────────────────────────────────────────────────────────
+// Admin | RF-28 | RN-22 | E12 - Medalla CRUD
+let _medals = [];
+const CONDICION_TXT = { xp_acumulado: 'XP acumulado', streak: 'Racha (días)', nivel_completado: 'Niveles completados', puntaje_perfecto: 'Lecciones con 100' };
+
+async function loadMedals() {
+  const body = document.getElementById('medals-body');
+  try {
+    _medals = await api('/gamification/admin/medals');
+    if (!_medals.length) { body.innerHTML = '<tr><td colspan="6" class="empty">No hay medallas. Crea la primera.</td></tr>'; return; }
+    body.innerHTML = _medals.map((m, i) => `
+      <tr>
+        <td style="font-size:22px;">${/^https?:/.test(m.icono_url) ? `<img src="${esc(m.icono_url)}" width="28" height="28" alt="" />` : esc(m.icono_url)}</td>
+        <td style="font-weight:500;">${esc(m.nombre)}<div style="font-size:12px;color:var(--muted);">${esc(m.descripcion || '')}</div></td>
+        <td>${esc(CONDICION_TXT[m.condicion_tipo] || m.condicion_tipo)}: <b>${esc(m.condicion_valor)}</b></td>
+        <td>${esc(m.veces_otorgada)} vez/veces</td>
+        <td><span class="badge ${m.estado === 'activo' ? 'badge-green' : 'badge-gray'}">${esc(m.estado)}</span></td>
+        <td><div style="display:flex;gap:6px;">
+          <button class="btn btn-outline btn-sm" onclick="openMedalModal(${i})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteMedal('${esc(m.id_medalla)}')">Eliminar</button>
+        </div></td>
+      </tr>`).join('');
+  } catch (err) { body.innerHTML = `<tr><td colspan="6" class="empty" style="color:var(--danger);">${esc(err.message)}</td></tr>`; }
+}
+
+function openMedalModal(idx = null) {
+  clearErr('modal-medal-error');
+  const m = idx === null ? null : _medals[idx];
+  document.getElementById('modal-medal-title').textContent = m ? 'Editar medalla' : 'Nueva medalla';
+  document.getElementById('medal-id').value     = m?.id_medalla ?? '';
+  document.getElementById('medal-nombre').value = m?.nombre ?? '';
+  document.getElementById('medal-desc').value   = m?.descripcion ?? '';
+  document.getElementById('medal-cond').value   = m?.condicion_tipo ?? 'xp_acumulado';
+  document.getElementById('medal-valor').value  = m?.condicion_valor ?? '';
+  document.getElementById('medal-icono').value  = m?.icono_url ?? '';
+  document.getElementById('medal-estado').value = m?.estado ?? 'activo';
+  document.getElementById('medal-field-estado').style.display = m ? 'block' : 'none';
+  document.getElementById('modal-medal').classList.add('open');
+}
+function closeMedalModal() { document.getElementById('modal-medal').classList.remove('open'); }
+
+async function saveMedal() {
+  clearErr('modal-medal-error');
+  const id = document.getElementById('medal-id').value;
+  const body = {
+    nombre: document.getElementById('medal-nombre').value.trim(),
+    descripcion: document.getElementById('medal-desc').value.trim() || null,
+    condicion_tipo: document.getElementById('medal-cond').value,
+    condicion_valor: parseInt(document.getElementById('medal-valor').value, 10),
+    icono_url: document.getElementById('medal-icono').value.trim(),
+    ...(id ? { estado: document.getElementById('medal-estado').value } : {}),
+  };
+  try {
+    if (id) await api(`/gamification/medals/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await api('/gamification/medals', { method: 'POST', body: JSON.stringify(body) });
+    toast(id ? '✅ Medalla actualizada' : '✅ Medalla creada');
+    closeMedalModal();
+    loadMedals();
+  } catch (err) { showErr('modal-medal-error', err.message); }
+}
+
+function deleteMedal(id) {
+  askConfirm('¿Eliminar medalla?', 'Si ya fue otorgada a algún estudiante se marcará como inactiva en el catálogo (RN-22); si no, se eliminará.', 'Eliminar', async () => {
+    const r = await api(`/gamification/medals/${id}`, { method: 'DELETE' });
+    toast(r.message || 'Medalla eliminada', 'ok');
+    loadMedals();
+  });
+}
 </script>
 </body>
 </html>
