@@ -63,6 +63,7 @@ eduder/
 
 
 - [Bitácora de avance](./BITACORA.md)
+- [Guía del código y funciones](./docs/GUIA_CODIGO.md)
 
 ---
 
