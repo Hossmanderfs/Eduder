@@ -1,6 +1,7 @@
 # E16 — Wireframes (Baja Fidelidad)
 
 Descripción por zonas de los 16 wireframes (sección 8.4.2 del documento). Cada uno tiene su implementación
+Comparación con las pantallas implementadas: [E16b](E16b-comparacion-wireframes-pantallas.md).
 navegable en el [prototipo web](prototipo-web/README.md) y su versión móvil en `src/mobile` (Expo).
 
 ## WF-01: Menú Principal
