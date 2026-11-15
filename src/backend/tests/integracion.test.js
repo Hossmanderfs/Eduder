@@ -64,8 +64,8 @@ correr('integración API (BD real)', () => {
     const c = `blq.${sufijo}@miremington.edu.co`;
     await request(app).post('/auth/register').send({ correo_institucional: c, nombre: 'B', apellido: 'L', contrasena: 'Clave1234' });
     for (let i = 0; i < 5; i++) await llamar('post', '/auth/login', { body: { correo_institucional: c, contrasena: 'mala' }, caso: `Login fallido ${i + 1}`, rf: 'RF-05 / RN-03', esperado: 401 });
-    r = await llamar('post', '/auth/login', { body: { correo_institucional: c, contrasena: 'Clave1234' }, caso: 'PN-03 Cuenta bloqueada aunque la clave sea correcta', rf: 'RF-05 / RN-03', esperado: 423 });
-    expect([401, 403, 423, 429]).toContain(r.status);
+    r = await llamar('post', '/auth/login', { body: { correo_institucional: c, contrasena: 'Clave1234' }, caso: 'PN-03 Cuenta bloqueada aunque la clave sea correcta', rf: 'RF-05 / RN-03', esperado: 429 });
+    expect(r.status).toBe(429);
     r = await llamar('delete', '/auth/session', { token: tokEst, caso: 'Logout', rf: 'RF-03', esperado: 200 });
     expect(r.status).toBe(200);
     r = await llamar('get', '/levels', { caso: 'Sin token', rf: 'RF-03', esperado: 401 });
@@ -88,8 +88,13 @@ correr('integración API (BD real)', () => {
     r = await llamar('post', '/exercise/answer', { token: tokEst, body: { id_ejercicio: ejercicio.id_ejercicio, respuesta: 'zzz' }, caso: 'Respuesta incorrecta con feedback', rf: 'RF-10', esperado: 200 });
     expect(r.body.correcto).toBe(false);
     r = await llamar('post', '/exercise/answer', { token: tokEst, body: {}, caso: 'Respuesta sin datos', rf: 'RF-10', esperado: 400 });
-    r = await llamar('get', `/exercise/${ejercicio.id_ejercicio}/hint`, { token: tokEst, caso: 'Pista 1', rf: 'RF-11 / RN-12', esperado: 200 });
-    r = await llamar('get', `/exercise/${ejercicio.id_ejercicio}/hint?n=2`, { token: tokEst, caso: 'Pista 2 solicitada', rf: 'RF-11 / RN-12', esperado: 200 });
+    const conPistas = (await M.Pista.findOne({ where: { numero_pista: 2 } })).id_ejercicio;
+    r = await llamar('get', `/exercise/${conPistas}/hint`, { token: tokEst, caso: 'Pista 1', rf: 'RF-11 / RN-12', esperado: 200 });
+    expect(r.status).toBe(200);
+    r = await llamar('get', `/exercise/${conPistas}/hint?numero=2`, { token: tokEst, caso: 'Pista 2 solicitada explícitamente', rf: 'RF-11 / RN-12', esperado: 200 });
+    expect(r.status).toBe(200);
+    r = await llamar('get', `/exercise/${conPistas}/hint?numero=3`, { token: tokEst, caso: 'Pista 3 inexistente (máx. 2, RN-12)', rf: 'RF-11 / RN-12', esperado: 400 });
+    expect([400, 404]).toContain(r.status);
     r = await llamar('put', `/progress/${leccion.id_leccion}`, { token: tokEst, body: { estado: 'completada', puntaje: 100 }, caso: 'Completar lección (XP, racha, medallas)', rf: 'RF-09, RF-12, RF-13, RF-14', esperado: 200 });
     expect(r.status).toBe(200);
     r = await llamar('put', `/progress/${leccion.id_leccion}`, { token: tokEst, body: { estado: 'completada', puntaje: 150 }, caso: 'PN-01 Puntaje fuera de 0-100 (RN-13)', rf: 'RF-12 / RN-13', esperado: 400 });
