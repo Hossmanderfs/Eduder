@@ -1,0 +1,35 @@
+# Resultados de la prueba de carga — RNF-02 y RNF-04 (400 usuarios concurrentes)
+
+Script: `src/backend/scripts/carga.js` (`npm run carga`). Cada una de las 400 conexiones repite sin pausa el
+recorrido de un estudiante: `GET /levels` → `GET /profile/summary` → `GET /lessons/:id/content` →
+`POST /exercise/answer`. Una persona real hace una petición cada varios segundos, así que 400 conexiones sin pausa
+representan una carga mucho mayor que 400 estudiantes reales (≈ 80 peticiones/s).
+
+**Entorno de la medición (15/11/2026):** contenedor con 2 vCPU compartidos entre el generador de carga, la API y la base
+de datos; MariaDB 10.11 (compatible con MySQL 8); Node.js 22; contenido sembrado con `npm run seed`
+(5 niveles, 15 lecciones, 69 ejercicios). Un servidor dedicado rinde igual o mejor. **Debe repetirse en el equipo del
+proyecto con MySQL 8 para registrar la evidencia oficial.**
+
+| Configuración | Peticiones/s | Latencia prom. (ms) | p97.5 (ms) | p99 (ms) | Errores |
+|---|---|---|---|---|---|
+| Base (pool de 10 conexiones, consulta de sesión en cada petición) | 662 | 598 | 888 | 972 | 0 |
+| + pool de 30 y caché de sesión de 15 s | 783 | 507 | 963 | 1143 | 0 |
+| + 2 procesos (`npm run start:cluster`), corrida 1 | 969 | 406 | 729 | 1699 | 13 timeouts de 29 062 |
+| + 2 procesos, corrida 2 | 1038 | 383 | 705 | 784 | 0 |
+
+Criterio de aceptación: p95 ≤ 1000 ms y sin errores 5xx ni de conexión. Con una sola instancia el sistema
+lo cumple con 400 conexiones simultáneas; con varios procesos hay más margen, pero conviene repetir la medición
+porque una de las dos corridas tuvo 13 timeouts (0,04 %).
+
+## Cómo reproducirla
+```
+cd src/backend
+npm run seed        # contenido de prueba
+npm start           # o: npm run start:cluster
+npm run carga       # 400 usuarios, 30 s. Variables: USUARIOS, SEGUNDOS, BASE
+```
+
+## Límites conocidos
+- La medición no cubre 5 000 usuarios (objetivo original del RNF-04): para superar unos 1 000 usuarios activos habría
+  que desplegar varias instancias detrás de un balanceador y una base de datos con réplica de lectura.
+- El ranking semanal escribe en la BD cada vez que se consulta; con miles de usuarios convendría calcularlo con una tarea programada.

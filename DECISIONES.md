@@ -110,3 +110,24 @@ La auditoría de calidad (Bloque 3, preguntas 3 y 6) detectó que Express respon
 - RNF-03 y RNF-06 (docs/analisis/01), E11 (DDL), Ficha de Auditoría Bloque 3, `tests/errores.test.js`.
 
 **¿Usé IA?** Sí — Claude (Anthropic) propuso e implementó el cambio; lo verifiqué con la suite de pruebas (49 en verde).
+
+---
+
+## Decisión #08
+
+**¿Qué decidí?**  
+Fijar como meta de capacidad del MVP **400 usuarios concurrentes** (RNF-04) en lugar de 5 000, y reforzar el backend para cumplirla: pool de conexiones configurable (30 por defecto), caché de 15 s para el estado de sesión (se invalida al instante cuando el administrador desactiva una cuenta, RF-20) y arranque multiproceso opcional (`npm run start:cluster`).
+
+**¿Por qué?**  
+5 000 usuarios exigirían varias instancias, balanceador y réplicas de la base de datos, un costo que el proyecto no puede asumir ahora. Con 400 usuarios el backend actual cumple el umbral de 1 segundo del RNF-02. Se midió con `npm run carga`: 400 conexiones simultáneas, p95 entre 705 y 963 ms y sin errores 5xx (ver `docs/pruebas/resultados-carga.md`).
+
+**¿Qué artefacto respalda esta decisión?**  
+- RNF-02 y RNF-04, `scripts/carga.js`, `src/cluster.js`, `middleware/auth.middleware.js`, pruebas de caché de sesión en `tests/auth-notif.test.js`.
+
+**¿Qué problema encontré?**  
+El pool de 10 conexiones y la consulta a la BD en cada petición limitaban el rendimiento; el arranque con dos procesos tuvo 13 timeouts en una de dos corridas.
+
+**¿Cómo lo resolví?**  
+Subí el pool a 30, agregué la caché de sesión y dejé el modo multiproceso como opción, con el arranque de un solo proceso como predeterminado.
+
+**¿Usé IA?** Sí — Claude (Anthropic) implementó los cambios y ejecutó las mediciones; los resultados deben repetirse en el equipo del proyecto.

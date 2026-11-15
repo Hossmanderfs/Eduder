@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const M = require('../src/models');
 const Auth = require('../src/services/auth.service');
 const Notif = require('../src/services/notification.service');
-const { verifyToken } = require('../src/middleware/auth.middleware');
+const { verifyToken, invalidarSesion, limpiarCacheSesiones } = require('../src/middleware/auth.middleware');
 const jwt = require('jsonwebtoken');
 
 describe('política de contraseña (RF-02)', () => {
@@ -47,6 +47,7 @@ describe('resetPassword (RF-19)', () => {
 
 describe('verifyToken (RF-20)', () => {
   process.env.JWT_SECRET = 'test';
+  beforeEach(() => { limpiarCacheSesiones(); M.Usuario.findByPk.mockClear(); });
   const run = async (estado) => {
     M.Usuario.findByPk.mockResolvedValue(estado ? { estado, rol: 'estudiante' } : null);
     const token = jwt.sign({ id_usuario: 'u1', rol: 'admin' }, 'test');
@@ -69,6 +70,19 @@ describe('verifyToken (RF-20)', () => {
   test('usuario inexistente → 401', async () => {
     const { res } = await run(null);
     expect(res.status).toHaveBeenCalledWith(401);
+  });
+  test('la segunda petición usa la caché y no consulta la BD (RNF-04)', async () => {
+    await run('activo');
+    await run('activo');
+    expect(M.Usuario.findByPk).toHaveBeenCalledTimes(1);
+  });
+  test('al invalidar la sesión (admin desactiva la cuenta) la siguiente petición consulta la BD y se rechaza (RF-20)', async () => {
+    await run('activo');
+    invalidarSesion('u1');
+    const { res, next } = await run('inactivo');
+    expect(M.Usuario.findByPk).toHaveBeenCalledTimes(2);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(next).not.toHaveBeenCalled();
   });
 });
 

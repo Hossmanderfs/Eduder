@@ -24,4 +24,8 @@ Material para ejecutar las pruebas y obtener las capturas de evidencia.
 4. Para el RNF-02 use *Run collection* sobre la petición *CP-04 / API-05* con **30 iteraciones**; Postman muestra promedio y tiempos.
 5. `rnf06_integridad.sql` en MySQL Workbench.
 
-Las pruebas automáticas del backend (`npm test`, 49 pruebas con Jest) se ejecutan sin base de datos.
+Las pruebas automáticas del backend (`npm test`, 51 pruebas con Jest) se ejecutan sin base de datos.
+
+## Prueba de carga (RNF-04)
+
+`cd src/backend && npm run carga` simula 400 usuarios concurrentes y comprueba p95 ≤ 1000 ms sin errores 5xx. Resultados de referencia en `resultados-carga.md`.

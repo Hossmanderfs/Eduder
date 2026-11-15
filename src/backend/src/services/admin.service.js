@@ -1,5 +1,6 @@
 // src/services/admin.service.js
 const { fn, col, Op } = require('sequelize');
+const { invalidarSesion } = require('../middleware/auth.middleware');
 const {
   Usuario,
   PerfilEstudiante,
@@ -68,6 +69,7 @@ async function updateUser(id, body) {
   }
 
   await usuario.update(camposPermitidos);
+  invalidarSesion(id); // RF-20: el cambio de estado o rol rige de inmediato (caché de sesión)
   return usuario;
 }
 

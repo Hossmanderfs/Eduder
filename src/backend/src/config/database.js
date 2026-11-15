@@ -14,7 +14,7 @@ const sequelize = new Sequelize(
     dialect: 'mysql',
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
-      max: 10,
+      max: parseInt(process.env.DB_POOL_MAX || '30', 10), // RNF-04: 400 usuarios concurrentes
       min: 0,
       acquire: 30000,
       idle: 10000,
