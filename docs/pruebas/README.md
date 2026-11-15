@@ -35,7 +35,7 @@ Las pruebas automáticas del backend (`npm test`, 51 pruebas con Jest) se ejecut
 |---|---|---|
 | `resultados-api.md` | Códigos HTTP y tiempos por endpoint (Bloque 3; RNF-02 ≤ 1 s) | `npm run test:integracion` (la regenera) |
 | `resultados-carga.md` | 400 usuarios simultáneos (RNF-04) | `npm run carga` |
-| `resultados-rnf06.md` | Integridad referencial (RNF-06) | `mysql … < rnf06_integridad.sql` |
+| `resultados-rnf06.md` | Integridad referencial (RNF-06) | `mysql --force … < rnf06_integridad.sql` |
 | `BITACORA-DEFECTOS.md` | Defectos, commit de corrección y re-test (Bloque 4) | — |
 | Cobertura (RNF-07) | 81,7 % de sentencias en `services/` | `npm run cobertura` |
 Los resultados incluidos se obtuvieron en un contenedor Linux con MariaDB 10.11; repita las ejecuciones en su equipo con MySQL 8 y anexe sus capturas.
