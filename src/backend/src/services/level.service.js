@@ -50,7 +50,25 @@ async function createLevel(body) {
     err.status = 400;
     throw err;
   }
+  // id_nivel es TINYINT UNSIGNED sin AUTO_INCREMENT en el DDL v1.2: se asigna el siguiente libre.
+  if (!Number.isInteger(orden) || orden < 1 || orden > 255) {
+    const err = new Error('orden debe ser un entero entre 1 y 255');
+    err.status = 400;
+    throw err;
+  }
+  if (await Nivel.findOne({ where: { orden } })) {
+    const err = new Error('Ya existe un nivel con ese orden');
+    err.status = 409;
+    throw err;
+  }
+  const maxId = (await Nivel.max('id_nivel')) || 0;
+  if (maxId >= 255) {
+    const err = new Error('No hay identificadores de nivel disponibles');
+    err.status = 409;
+    throw err;
+  }
   const nivel = await Nivel.create({
+    id_nivel: maxId + 1,
     nombre,
     descripcion: descripcion || null,
     orden,
