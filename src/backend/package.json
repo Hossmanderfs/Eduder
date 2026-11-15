@@ -11,7 +11,8 @@
     "carga": "node scripts/carga.js",
     "start:cluster": "node src/cluster.js",
     "test:integracion": "node scripts/integracion.js",
-    "cobertura": "node scripts/integracion.js --coverage"
+    "cobertura": "node scripts/integracion.js --coverage",
+    "auditoria-ddl": "node scripts/auditoria-ddl.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
