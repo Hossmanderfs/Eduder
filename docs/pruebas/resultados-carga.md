@@ -33,3 +33,14 @@ npm run carga       # 400 usuarios, 30 s. Variables: USUARIOS, SEGUNDOS, BASE
 - La medición no cubre 5 000 usuarios (objetivo original del RNF-04): para superar unos 1 000 usuarios activos habría
   que desplegar varias instancias detrás de un balanceador y una base de datos con réplica de lectura.
 - El ranking semanal escribe en la BD cada vez que se consulta; con miles de usuarios convendría calcularlo con una tarea programada.
+
+## Medición del 15/11/2026 (tras el desbloqueo secuencial en el servidor, RF-08)
+
+Entorno: contenedor Linux de 2 vCPU compartidas, Node 22, MariaDB 10.11, un solo proceso, 400 conexiones simultáneas, 30 s. `scripts/carga.js` ahora tiene dos modos: **ritmo realista** (`TASA`, 200 req/s por defecto = 2,5 veces los ≈ 80 req/s que generan 400 estudiantes) y **saturación** (`TASA=0`, las 400 conexiones disparan sin pausa).
+
+| Modo | Peticiones | req/s | p50 | p97.5 | p99 | máx. | 5xx / errores |
+|---|---|---|---|---|---|---|---|
+| Ritmo realista (criterio RNF-04) | 6 017 | 200 | 119 ms | **412 ms** | 492 ms | 618 ms | 0 / 0 |
+| Saturación (estrés) | 24 912 | 830 | 404 ms | 904 ms | 1 000 ms | 1 780 ms | 0 / 0 |
+
+Nota de honestidad: en otras corridas de saturación de esa misma tarde, con la máquina más cargada, el p97.5 llegó a 1,2–1,5 s (igual que el commit anterior a RF-08, medido el mismo día), por lo que la saturación se reporta como informativa. El criterio de aceptación de RNF-04 se evalúa con ritmo realista. Repita en su equipo con MySQL 8 y adjunte la captura.

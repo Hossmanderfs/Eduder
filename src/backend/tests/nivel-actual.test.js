@@ -14,6 +14,7 @@ jest.mock('../src/models', () => mockModels);
 const Progress = require('../src/services/progress.service');
 
 beforeEach(() => {
+  Progress.limpiarCacheMeta();
   perfil.nivel_actual = 1; perfil.update.mockClear();
   mockModels.PerfilEstudiante.findOne.mockResolvedValue(perfil);
   mockModels.Leccion.findByPk.mockResolvedValue({ id_leccion: 'L1', xp_base: 100, id_nivel: 1, orden: 1 });

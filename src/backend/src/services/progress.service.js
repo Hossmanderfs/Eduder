@@ -77,20 +77,37 @@ async function updateProgress(id_leccion, body, id_usuario) {
 // Acceso secuencial en el servidor (no solo en la app): el nivel de la lección debe estar
 // alcanzado (RN-07) y la lección anterior del mismo nivel debe estar completada (RN-09/RN-10).
 // Lanza 403 si el estudiante intenta saltarse el orden.
-async function validarAcceso(id_usuario, id_leccion) {
+const TTL_META_MS = parseInt(process.env.CACHE_CONTENIDO_MS || '15000', 10);
+const cacheMeta = new Map(); // id_leccion → { exp, leccion, nivelOrden, anterior }
+function limpiarCacheMeta() { cacheMeta.clear(); }
+
+// Metadatos de la lección (nivel, orden y lección anterior): cambian solo cuando el administrador edita el
+// contenido, por eso se cachean unos segundos para sostener la carga concurrente (RNF-04).
+async function metaLeccion(id_leccion) {
+  const hit = cacheMeta.get(id_leccion);
+  if (hit && hit.exp > Date.now()) return hit;
   const leccion = await Leccion.findByPk(id_leccion, { attributes: ['id_leccion', 'id_nivel', 'orden'] });
-  if (!leccion) { const err = new Error('Lección no encontrada'); err.status = 404; throw err; }
+  if (!leccion) return null;
   const nivel = await Nivel.findByPk(leccion.id_nivel, { attributes: ['id_nivel', 'orden'] });
-  const actual = await calcularNivelActual(id_usuario);
-  if (nivel && nivel.orden > actual) {
-    const err = new Error('Nivel bloqueado: completa el nivel anterior con el promedio mínimo'); err.status = 403; throw err;
-  }
   const anterior = await Leccion.findOne({
     where: { id_nivel: leccion.id_nivel, estado: 'activo', orden: { [Op.lt]: leccion.orden } },
     order: [['orden', 'DESC']], attributes: ['id_leccion'],
   });
-  if (anterior) {
-    const hecha = await ProgresoLeccion.findOne({ where: { id_usuario, id_leccion: anterior.id_leccion, estado: 'completada' } });
+  const meta = { exp: Date.now() + TTL_META_MS, leccion, nivelOrden: nivel ? nivel.orden : 1, anterior: anterior ? anterior.id_leccion : null };
+  cacheMeta.set(id_leccion, meta);
+  return meta;
+}
+
+async function validarAcceso(id_usuario, id_leccion) {
+  const meta = await metaLeccion(id_leccion);
+  if (!meta) { const err = new Error('Lección no encontrada'); err.status = 404; throw err; }
+  // El primer nivel siempre está disponible: se evita el cálculo completo (costoso) en el caso más frecuente.
+  const actual = meta.nivelOrden > 1 ? await calcularNivelActual(id_usuario) : 1;
+  if (meta.nivelOrden > actual) {
+    const err = new Error('Nivel bloqueado: completa el nivel anterior con el promedio mínimo'); err.status = 403; throw err;
+  }
+  if (meta.anterior) {
+    const hecha = await ProgresoLeccion.findOne({ where: { id_usuario, id_leccion: meta.anterior, estado: 'completada' } });
     if (!hecha) { const err = new Error('Lección bloqueada: completa la lección anterior'); err.status = 403; throw err; }
   }
 }
@@ -264,4 +281,4 @@ function diffDias(fecha1, fecha2) {
   return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
 }
 
-module.exports = { updateProgress, getSummary, evaluarMedallas, validarAcceso };
+module.exports = { updateProgress, getSummary, evaluarMedallas, validarAcceso, limpiarCacheMeta };

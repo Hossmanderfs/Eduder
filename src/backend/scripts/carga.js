@@ -12,6 +12,9 @@ const autocannon = require('autocannon');
 const BASE = process.env.BASE || 'http://localhost:3000';
 const USUARIOS = parseInt(process.env.USUARIOS || '400', 10);
 const SEGUNDOS = parseInt(process.env.SEGUNDOS || '30', 10);
+// TASA = peticiones/s totales. Un estudiante hace ~1 petición cada 5 s → 400 usuarios ≈ 80 req/s; se prueba a 200 req/s (2,5× de margen).
+// TASA=0 → modo saturación (las 400 conexiones disparan sin pausa; prueba de estrés, informativa).
+const TASA = parseInt(process.env.TASA || '200', 10);
 const LOTE = 20; // registros en paralelo (bcrypt es costoso: evita saturar al preparar los datos)
 
 async function http(method, path, body, token) {
@@ -44,7 +47,8 @@ async function main() {
   }
   // Datos reales para las peticiones (lección y ejercicio del contenido sembrado)
   const niveles = (await http('GET', '/levels', null, tokens[0])).json;
-  const leccion = niveles.flatMap((n) => n.lecciones).find((l) => l.tipo !== 'teoria') || niveles[0].lecciones[0];
+  // Un estudiante nuevo solo puede abrir la primera lección del nivel 1 (RF-08, RN-09)
+  const leccion = niveles[0].lecciones.slice().sort((a, b) => a.orden - b.orden)[0];
   const cont = (await http('GET', `/lessons/${leccion.id_leccion}/content`, null, tokens[0])).json;
   const ej = (cont.ejercicios || [])[0];
   if (!ej) throw new Error('El contenido sembrado no tiene ejercicios: ejecute npm run seed');
@@ -55,6 +59,7 @@ async function main() {
     url: BASE,
     connections: USUARIOS,
     duration: SEGUNDOS,
+    ...(TASA > 0 ? { overallRate: TASA } : {}),
     requests: [
       { method: 'GET', path: '/levels', setupRequest: (req, ctx) => conToken(req, ctx) },
       { method: 'GET', path: '/profile/summary', setupRequest: (req, ctx) => conToken(req, ctx) },
@@ -72,12 +77,13 @@ async function main() {
   const l = resultado.latency;
   const r = resultado;
   console.log('\n===== RESULTADO =====');
-  console.log(`Usuarios concurrentes: ${USUARIOS} · duración: ${SEGUNDOS} s`);
+  console.log(`Usuarios concurrentes: ${USUARIOS} · duración: ${SEGUNDOS} s · ${TASA > 0 ? `ritmo realista ${TASA} req/s` : 'modo saturación (sin pausa)'}`);
   console.log(`Peticiones totales: ${r.requests.total} · promedio ${r.requests.average} req/s`);
   console.log(`Latencia (ms): promedio ${l.average} · p50 ${l.p50} · p97.5 ${l.p97_5} · p99 ${l.p99} · máx. ${l.max}`);
   console.log(`2xx: ${r['2xx']} · 4xx: ${r['4xx']} · 5xx: ${r['5xx']} · errores de conexión: ${r.errors} · timeouts: ${r.timeouts}`);
-  const ok = l.p97_5 <= 1000 && r['5xx'] === 0 && r.errors === 0 && r.timeouts === 0;
-  console.log(ok ? 'CUMPLE el criterio (p95 ≤ 1000 ms, sin errores 5xx ni de conexión).' : 'NO CUMPLE el criterio.');
+  const ok = (TASA === 0 || l.p97_5 <= 1000) && r['5xx'] === 0 && r.errors === 0 && r.timeouts === 0;
+  console.log(TASA === 0 ? (ok ? 'Saturación: sin errores 5xx ni de conexión (latencia informativa).' : 'Saturación: hubo errores.')
+    : (ok ? 'CUMPLE el criterio (p97.5 ≤ 1000 ms, sin errores 5xx ni de conexión).' : 'NO CUMPLE el criterio.'));
   process.exit(ok ? 0 : 1);
 }
 main().catch((e) => { console.error(e); process.exit(2); });
