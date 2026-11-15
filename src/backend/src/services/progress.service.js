@@ -100,11 +100,10 @@ async function actualizarPerfil(id_usuario, xp_ganado, leccion, ahora, puntaje) 
     streak_dias:      nuevaRacha,
   });
 
-  // RF-18: mantener PERFIL_ESTUDIANTE.nivel_actual = niveles completados + 1 (tope: nº de niveles activos)
-  const completados  = await contarNivelesCompletados(id_usuario);
-  const totalNiveles = await Nivel.count({ where: { estado: 'activo' } });
-  const nivelNuevo   = Math.min(completados + 1, Math.max(totalNiveles, 1));
-  if (nivelNuevo !== perfil.nivel_actual) await perfil.update({ nivel_actual: nivelNuevo });
+  // RN-06 / RN-07 / RF-18: nivel_actual avanza solo si el nivel anterior está aprobado
+  // (todas sus lecciones completadas y promedio >= umbral_aprobacion). Nunca retrocede.
+  const nivelCalculado = await calcularNivelActual(id_usuario);
+  if (nivelCalculado > perfil.nivel_actual) await perfil.update({ nivel_actual: nivelCalculado });
 
   // RF-14, RF-15: evaluar medallas automáticamente al finalizar la lección
   const nuevas_medallas = await evaluarMedallas(id_usuario, {
@@ -198,6 +197,29 @@ async function evaluarMedallas(id_usuario, perfil, ctx = {}) {
 // Número de lecciones completadas con puntaje 100.
 async function contarPerfectas(id_usuario) {
   return ProgresoLeccion.count({ where: { id_usuario, estado: 'completada', puntaje: 100 } });
+}
+
+// Nivel alcanzado: el último nivel desbloqueado (el primero siempre; los demás si el anterior está aprobado).
+async function calcularNivelActual(id_usuario) {
+  const niveles = await Nivel.findAll({ where: { estado: 'activo' }, order: [['orden', 'ASC']], raw: true });
+  const lecciones = await Leccion.findAll({ where: { estado: 'activo' }, attributes: ['id_leccion', 'id_nivel'], raw: true });
+  const hechas = await ProgresoLeccion.findAll({
+    where: { id_usuario, estado: 'completada' }, attributes: ['id_leccion', 'puntaje'], raw: true,
+  });
+  const puntajes = new Map(hechas.map(h => [h.id_leccion, Number(h.puntaje) || 0]));
+  let actual = 1;
+  let anteriorAprobado = true;
+  niveles.forEach((n, i) => {
+    if (i === 0 || anteriorAprobado) actual = n.orden;
+    const delNivel = lecciones.filter(l => l.id_nivel === n.id_nivel);
+    const completas = delNivel.filter(l => puntajes.has(l.id_leccion));
+    const promedio = completas.length
+      ? completas.reduce((acc, l) => acc + puntajes.get(l.id_leccion), 0) / completas.length
+      : 0;
+    const umbral = Number(n.umbral_aprobacion) || 70;
+    anteriorAprobado = delNivel.length > 0 && completas.length === delNivel.length && promedio >= umbral;
+  });
+  return actual;
 }
 
 // Niveles activos cuyas lecciones activas están TODAS completadas por el usuario.
