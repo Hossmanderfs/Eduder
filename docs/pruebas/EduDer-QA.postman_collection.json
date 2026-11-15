@@ -1,0 +1,593 @@
+{
+  "info": {
+    "name": "EduDer-QA",
+    "description": "Colección de pruebas del Bloque 2 y 3 de la Ficha de Plan y Registro de Ejecución de Pruebas. Ver docs/pruebas/README.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Preparación",
+      "item": [
+        {
+          "name": "Registrar usuario de prueba (CP-01 / API-02)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/register",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo_institucional\": \"{{correo}}\",\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Pérez\",\n  \"contrasena\": \"{{clave}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('correo')) pm.collectionVariables.set('correo', 'prueba.' + Date.now() + '@miremington.edu.co');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));",
+                  "const j = pm.response.json();",
+                  "pm.test('Devuelve token y usuario sin hash', () => { pm.expect(j.token).to.be.a('string'); pm.expect(j.usuario).to.not.have.property('contrasena_hash'); });",
+                  "pm.collectionVariables.set('token', j.token);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1. Casos funcionales (Bloque 2)",
+      "item": [
+        {
+          "name": "CP-02 · Registro con dominio no institucional (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/register",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo_institucional\": \"ana.qa@gmail.com\",\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Pérez\",\n  \"contrasena\": \"Clave1234\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));",
+                  "pm.test('Mensaje de dominio institucional', () => pm.expect(pm.response.json().message).to.include('institucional'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-03 · Bloqueo: intento fallido (repetir 5 veces → 401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo_institucional\": \"{{correo_bloqueo}}\",\n  \"contrasena\": \"IncorrectaSiempre1\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Credenciales incorrectas (401) o cuenta bloqueada (429)', () => pm.expect([401,429]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-03 · Bloqueo: sexto intento con contraseña correcta (429)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo_institucional\": \"{{correo_bloqueo}}\",\n  \"contrasena\": \"{{clave}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 429', () => pm.response.to.have.status(429));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));",
+                  "pm.test('Mensaje de cuenta bloqueada', () => pm.expect(pm.response.json().message).to.include('bloqueada'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-04 / API-05 · Evaluar ejercicio (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/exercise/answer",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "exercise",
+                "answer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ejercicio\": \"{{id_ejercicio}}\",\n  \"respuesta\": \"{{respuesta_correcta}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));",
+                  "pm.test('correcto = true', () => pm.expect(pm.response.json().correcto).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-05 · Completar lección, 1.ª vez (suma XP)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/progress/{{id_leccion}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "progress",
+                "{{id_leccion}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"completada\",\n  \"puntaje\": 100\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));",
+                  "pm.test('Suma XP', () => pm.expect(pm.response.json().resumen.xp_ganado).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-05 · Completar lección, 2.ª vez (no suma XP)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/progress/{{id_leccion}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "progress",
+                "{{id_leccion}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"completada\",\n  \"puntaje\": 100\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));",
+                  "pm.test('No vuelve a sumar XP (RN-04)', () => pm.expect(pm.response.json().resumen.xp_ganado).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CP-06 · Login válido y vigencia del JWT (200, 24 h)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo_institucional\": \"{{correo}}\",\n  \"contrasena\": \"{{clave}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));",
+                  "const tk = pm.response.json().token; const p = JSON.parse(atob(tk.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));",
+                  "pm.test('exp - iat = 86400 s (24 h, RF-03)', () => pm.expect(p.exp - p.iat).to.eql(86400));",
+                  "pm.collectionVariables.set('token', tk);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Verificación de API (Bloque 3)",
+      "item": [
+        {
+          "name": "API-01 · GET /levels (200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/levels",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "levels"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-02 · POST /auth/register válido (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/register",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo_institucional\": \"api.{{$timestamp}}@miremington.edu.co\",\n  \"nombre\": \"Luis\",\n  \"apellido\": \"Gómez\",\n  \"contrasena\": \"Clave1234\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-03 · POST /auth/register con campos inválidos (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/register",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo_institucional\": \"correo-invalido\",\n  \"nombre\": \"\",\n  \"apellido\": \"Gómez\",\n  \"contrasena\": \"abc\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-04 · GET /levels/9999 inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/levels/9999",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "levels",
+                "9999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-06 · GET /levels sin token (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/levels",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "levels"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-07 · Ruta inexistente responde JSON (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/ruta-que-no-existe",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "ruta-que-no-existe"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));",
+                  "pm.test('Cuerpo JSON con message, sin HTML ni traza', () => { const j = pm.response.json(); pm.expect(j.message).to.be.a('string'); pm.expect(pm.response.text()).to.not.include('<'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "clave",
+      "value": "Clave1234"
+    },
+    {
+      "key": "correo",
+      "value": ""
+    },
+    {
+      "key": "correo_bloqueo",
+      "value": "bloqueo.qa@miremington.edu.co"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "id_ejercicio",
+      "value": "PEGAR_ID"
+    },
+    {
+      "key": "respuesta_correcta",
+      "value": "PEGAR_RESPUESTA"
+    },
+    {
+      "key": "id_leccion",
+      "value": "PEGAR_ID"
+    }
+  ]
+}
