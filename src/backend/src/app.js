@@ -7,6 +7,17 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 const app  = express();
 
 // ── Middleware ──────────────────────────────
+// RNF-03: cabeceras de seguridad (sin dependencias extra). HSTS solo se envía si la petición llegó por HTTPS (proxy/TLS en producción).
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+    res.setHeader('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+  }
+  next();
+});
 app.use(cors());
 app.use(express.json());
 
