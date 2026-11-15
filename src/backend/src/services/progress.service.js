@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const {
   ProgresoLeccion,
   Leccion,
+  Nivel,
   PerfilEstudiante,
   MedallaCatalogo,
   MedallaUsuario,
@@ -99,6 +100,12 @@ async function actualizarPerfil(id_usuario, xp_ganado, leccion, ahora, puntaje) 
     streak_dias:      nuevaRacha,
   });
 
+  // RF-18: mantener PERFIL_ESTUDIANTE.nivel_actual = niveles completados + 1 (tope: nº de niveles activos)
+  const completados  = await contarNivelesCompletados(id_usuario);
+  const totalNiveles = await Nivel.count({ where: { estado: 'activo' } });
+  const nivelNuevo   = Math.min(completados + 1, Math.max(totalNiveles, 1));
+  if (nivelNuevo !== perfil.nivel_actual) await perfil.update({ nivel_actual: nivelNuevo });
+
   // RF-14, RF-15: evaluar medallas automáticamente al finalizar la lección
   const nuevas_medallas = await evaluarMedallas(id_usuario, {
     ...perfil.dataValues,
@@ -106,7 +113,7 @@ async function actualizarPerfil(id_usuario, xp_ganado, leccion, ahora, puntaje) 
     streak_dias: nuevaRacha,
   }, { puntaje });
 
-  return { xp_ganado, streak_dias: nuevaRacha, xp_total: perfil.xp_total, nuevas_medallas };
+  return { xp_ganado, streak_dias: nuevaRacha, xp_total: perfil.xp_total, nivel_actual: perfil.nivel_actual, nuevas_medallas };
 }
 
 // ── CU-04 | RF-18 | E12 - obtenerResumen() ───────────────────────────────────
