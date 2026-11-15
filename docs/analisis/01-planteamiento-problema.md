@@ -8,7 +8,7 @@ Las plataformas existentes (Duolingo, Khan Academy) no cubren el nicho específi
 
 ## Pregunta de Investigación
 
-> ¿Cómo diseñar e implementar una aplicación móvil gamificada que permita a los estudiantes de la Corporación Universitaria Remington fortalecer sus competencias en lógica matemática mediante microlearning, feedback inmediato y mecánicas de juego, reduciendo la tasa de deserción en materias cuantitativas durante los primeros semestres?
+> ¿De qué manera una aplicación móvil gamificada puede permitir a los estudiantes de la Corporación Universitaria Remington fortalecer sus competencias en lógica matemática mediante microlearning, feedback inmediato y mecánicas de juego, reduciendo la tasa de deserción en materias cuantitativas durante los primeros semestres?
 
 ## Requisitos Funcionales y No Funcionales
 

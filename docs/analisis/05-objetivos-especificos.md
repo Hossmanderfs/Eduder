@@ -14,4 +14,4 @@
 
 7. Construir el panel de administración web que permita gestionar usuarios, visualizar métricas de uso y exportar KPIs en formato CSV.
 
-8. Implementar el sistema de notificaciones push y backup automático diario para garantizar la disponibilidad y continuidad del servicio.
+8. Implementar el centro de notificaciones con recordatorio diario de racha y el backup automático diario para garantizar la disponibilidad y continuidad del servicio (push externo por FCM/APNs queda como trabajo futuro, RF-24).
