@@ -86,3 +86,15 @@ describe('notificaciones (RF-16)', () => {
     await expect(Notif.markRead('u1', 'x')).rejects.toMatchObject({ status: 404 });
   });
 });
+
+describe('longitudes y tipos en register (columnas de USUARIO)', () => {
+  const ok = { correo_institucional: 'a@miremington.edu.co', nombre: 'Ana', apellido: 'Pérez', contrasena: 'Clave1234' };
+  test.each([
+    [{ ...ok, nombre: 'x'.repeat(81) }],
+    [{ ...ok, apellido: 'x'.repeat(81) }],
+    [{ ...ok, correo_institucional: 'x'.repeat(140) + '@miremington.edu.co' }],
+    [{ ...ok, nombre: 123 }],
+  ])('rechaza con 400: %#', async (body) => {
+    await expect(Auth.register(body)).rejects.toMatchObject({ status: 400 });
+  });
+});

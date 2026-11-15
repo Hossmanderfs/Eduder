@@ -1,5 +1,6 @@
 // src/routes/lesson.routes.js
 const router        = require('express').Router();
+const { responderError } = require('../middleware/errorHandler');
 const LessonService = require('../services/lesson.service');
 const { verifyToken, requireAdmin } = require('../middleware/auth.middleware');
 
@@ -9,7 +10,7 @@ router.get('/by-level/:id_nivel', verifyToken, requireAdmin, async (req, res) =>
     const lecciones = await LessonService.getLessonsByLevel(req.params.id_nivel);
     res.json(lecciones);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -21,7 +22,7 @@ router.get('/all', verifyToken, requireAdmin, async (req, res) => {
     const lecciones = await LessonService.getAllLessons();
     res.json(lecciones);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -31,7 +32,7 @@ router.get('/:id', verifyToken, async (req, res) => {
     const leccion = await LessonService.getLessonById(req.params.id);
     res.json(leccion);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -41,7 +42,7 @@ router.get('/:id/content', verifyToken, async (req, res) => {
     const contenido = await LessonService.getLessonContent(req.params.id);
     res.json(contenido);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -51,7 +52,7 @@ router.post('/', verifyToken, requireAdmin, async (req, res) => {
     const leccion = await LessonService.createLesson(req.body);
     res.status(201).json(leccion);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -61,7 +62,7 @@ router.put('/:id', verifyToken, requireAdmin, async (req, res) => {
     const leccion = await LessonService.updateLesson(req.params.id, req.body);
     res.json(leccion);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -71,7 +72,7 @@ router.delete('/:id', verifyToken, requireAdmin, async (req, res) => {
     const result = await LessonService.deleteLesson(req.params.id);
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 

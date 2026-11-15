@@ -1,5 +1,6 @@
 // src/routes/admin.routes.js
 const router        = require('express').Router();
+const { responderError } = require('../middleware/errorHandler');
 const AdminService  = require('../services/admin.service');
 const { verifyToken, requireAdmin } = require('../middleware/auth.middleware');
 
@@ -12,7 +13,7 @@ router.get('/users', async (req, res) => {
     const usuarios = await AdminService.getUsers(req.query);
     res.json(usuarios);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -22,7 +23,7 @@ router.patch('/users/:id', async (req, res) => {
     const usuario = await AdminService.updateUser(req.params.id, req.body);
     res.json(usuario);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -32,7 +33,7 @@ router.get('/metrics', async (req, res) => {
     const metrics = await AdminService.getMetrics(req.query);
     res.json(metrics);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -44,7 +45,7 @@ router.get('/metrics/export', async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename="kpis_eduder.csv"');
     res.send(csv);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 

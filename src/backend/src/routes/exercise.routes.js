@@ -1,5 +1,6 @@
 // src/routes/exercise.routes.js
 const router          = require('express').Router();
+const { responderError } = require('../middleware/errorHandler');
 const ExerciseService = require('../services/exercise.service');
 const { verifyToken, requireAdmin } = require('../middleware/auth.middleware');
 
@@ -8,7 +9,7 @@ const handle = (fn) => async (req, res) => {
     const r = await fn(req);
     res.status(r && r.__status ? r.__status : 200).json(r && r.__status ? r.body : r);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 };
 
@@ -18,7 +19,7 @@ router.post('/answer', verifyToken, async (req, res) => {
     const resultado = await ExerciseService.evaluate(req.body);
     res.json(resultado);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -28,7 +29,7 @@ router.get('/:id/hint', verifyToken, async (req, res) => {
     const pista = await ExerciseService.getHint(req.params.id, req.query.numero || 1);
     res.json(pista);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 

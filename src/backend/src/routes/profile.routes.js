@@ -1,5 +1,6 @@
 // src/routes/profile.routes.js
 const router         = require('express').Router();
+const { responderError } = require('../middleware/errorHandler');
 const ProfileService = require('../services/profile.service');
 const ProgressService = require('../services/progress.service');
 const { verifyToken } = require('../middleware/auth.middleware');
@@ -10,7 +11,7 @@ router.get('/summary', verifyToken, async (req, res) => {
     const perfil = await ProfileService.getSummary(req.usuario.id_usuario);
     res.json(perfil);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -20,7 +21,7 @@ router.get('/progress', verifyToken, async (req, res) => {
     const resumen = await ProgressService.getSummary(req.usuario.id_usuario);
     res.json(resumen);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 

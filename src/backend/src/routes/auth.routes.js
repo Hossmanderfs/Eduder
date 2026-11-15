@@ -1,5 +1,6 @@
 // src/routes/auth.routes.js
 const router      = require('express').Router();
+const { responderError } = require('../middleware/errorHandler');
 const AuthService = require('../services/auth.service');
 const { verifyToken } = require('../middleware/auth.middleware');
 
@@ -9,7 +10,7 @@ router.post('/register', async (req, res) => {
     const result = await AuthService.register(req.body);
     res.status(201).json(result);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -19,7 +20,7 @@ router.post('/login', async (req, res) => {
     const result = await AuthService.login(req.body);
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -29,7 +30,7 @@ router.post('/recover', async (req, res) => {
     const result = await AuthService.recover(req.body);
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -39,7 +40,7 @@ router.post('/reset-password', async (req, res) => {
     const result = await AuthService.resetPassword(req.body);
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -49,7 +50,7 @@ router.delete('/session', verifyToken, async (req, res) => {
     const result = await AuthService.logout();
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 

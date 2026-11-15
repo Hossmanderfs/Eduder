@@ -1,5 +1,6 @@
 // src/routes/gamification.routes.js
 const router               = require('express').Router();
+const { responderError } = require('../middleware/errorHandler');
 const GamificationService  = require('../services/gamification.service');
 const { verifyToken, requireAdmin } = require('../middleware/auth.middleware');
 
@@ -8,7 +9,7 @@ const handle = (fn) => async (req, res) => {
     const r = await fn(req);
     res.status(r && r.__status ? r.__status : 200).json(r && r.__status ? r.body : r);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 };
 
@@ -18,7 +19,7 @@ router.get('/medals', verifyToken, async (req, res) => {
     const medallas = await GamificationService.getMedals(req.usuario.id_usuario);
     res.json(medallas);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 
@@ -28,7 +29,7 @@ router.get('/ranking/:nivel', verifyToken, async (req, res) => {
     const ranking = await GamificationService.getRanking(req.params.nivel, req.usuario.id_usuario);
     res.json(ranking);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 });
 

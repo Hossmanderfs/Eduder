@@ -1,5 +1,6 @@
 // src/routes/notification.routes.js
 const router = require('express').Router();
+const { responderError } = require('../middleware/errorHandler');
 const NotificationService = require('../services/notification.service');
 const { verifyToken } = require('../middleware/auth.middleware');
 
@@ -7,7 +8,7 @@ const handle = (fn) => async (req, res) => {
   try {
     res.json(await fn(req));
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    responderError(res, err);
   }
 };
 

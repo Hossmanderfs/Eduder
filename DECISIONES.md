@@ -101,7 +101,7 @@ El prototipo ya implementa los 16 wireframes con las reglas del documento (pista
 ## Decisión #07
 
 **¿Qué decidí?**  
-Agregar un manejador global de errores (`src/backend/src/middleware/errorHandler.js`) que responde siempre JSON `{ "error": "mensaje" }`, y declarar `onDelete: 'RESTRICT'` en las asociaciones Sequelize que el DDL aprobado deja con la regla por defecto. `PERFIL_ESTUDIANTE.nivel_actual` se mantiene como número de nivel sin clave foránea, igual que en el DDL (Línea Base 1), y ahora `progress.service.js` lo actualiza al completar lecciones (niveles completados + 1, con tope en los niveles activos).
+Agregar un manejador global de errores y la función `responderError()` (`src/backend/src/middleware/errorHandler.js`), usada por las 31 rutas, que responde siempre JSON `{ "message": "mensaje" }` (un fallo inesperado devuelve 500 genérico sin detalle SQL), validar tipos y longitudes máximas en `register()` según las columnas de USUARIO, y declarar `onDelete: 'RESTRICT'` en las asociaciones Sequelize que el DDL aprobado deja con la regla por defecto. `PERFIL_ESTUDIANTE.nivel_actual` se mantiene como número de nivel sin clave foránea, igual que en el DDL (Línea Base 1), y ahora `progress.service.js` lo actualiza al completar lecciones (niveles completados + 1, con tope en los niveles activos).
 
 **¿Por qué?**  
 La auditoría de calidad (Bloque 3, preguntas 3 y 6) detectó que Express respondía HTML con traza técnica ante rutas inexistentes o errores no controlados, y que algunas asociaciones no declaraban su regla de borrado. No se agregó FK a `nivel_actual` porque cambiaría el DDL aprobado y exigiría un CRF.
@@ -109,4 +109,4 @@ La auditoría de calidad (Bloque 3, preguntas 3 y 6) detectó que Express respon
 **¿Qué artefacto respalda esta decisión?**  
 - RNF-03 y RNF-06 (docs/analisis/01), E11 (DDL), Ficha de Auditoría Bloque 3, `tests/errores.test.js`.
 
-**¿Usé IA?** Sí — Claude (Anthropic) propuso e implementó el cambio; lo verifiqué con la suite de pruebas (42 en verde).
+**¿Usé IA?** Sí — Claude (Anthropic) propuso e implementó el cambio; lo verifiqué con la suite de pruebas (48 en verde).

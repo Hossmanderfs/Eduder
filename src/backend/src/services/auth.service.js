@@ -57,6 +57,17 @@ async function register(body) {
     throw err;
   }
 
+  // Tipos y longitudes iguales a las columnas de USUARIO (E11): correo 150, nombre 80, apellido 80
+  const limites = { correo_institucional: 150, nombre: 80, apellido: 80 };
+  for (const [campo, max] of Object.entries(limites)) {
+    const v = body[campo];
+    if (typeof v !== 'string' || v.trim() === '' || v.length > max) {
+      const err = new Error(`${campo} debe ser texto de 1 a ${max} caracteres`);
+      err.status = 400;
+      throw err;
+    }
+  }
+
   validarContrasena(contrasena);
 
   // RF-01: validar dominio institucional
