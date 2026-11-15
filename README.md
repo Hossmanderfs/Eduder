@@ -40,14 +40,30 @@ eduder/
 
 ##  Alcance del MVP
 
-- 5 niveles de lógica matemática secuenciales
-- 8–12 lecciones por nivel con ejercicios interactivos
-- Sistema de gamificación: XP, streaks, medallas y ranking semanal
-- Autenticación restringida a correos institucionales: estudiantes `@miremington.edu.co` y administración `@uniremington.edu.co` (configurable con `DOMINIOS_PERMITIDOS`)
-- Roles: Estudiante y Administrador
-- Panel de administración web
-- Notificaciones push diarias
-- Compatible con Android 8.0+ y iOS 13+
+**Incluido en esta entrega**
+- 5 niveles de lógica matemática secuenciales (RN-06: se avanza solo con el nivel anterior aprobado, promedio ≥ 70)
+- 3 lecciones por nivel, cada una con teoría breve previa y ejercicios interactivos (el catálogo es ampliable desde el panel, RF-25 a RF-28)
+- Gamificación: XP, rachas, medallas y ranking semanal
+- Acceso restringido a correo institucional: estudiantes `@miremington.edu.co`; docentes y administración `@uniremington.edu.co` (RN-01, configurable con `DOMINIOS_PERMITIDOS`)
+- Roles: Estudiante y Administrador/Docente; panel web de administración
+- Notificaciones dentro de la app (RF-16)
+- Capacidad objetivo: **400 usuarios simultáneos** (RNF-04), verificada con `npm run carga` (ver `docs/pruebas/resultados-carga.md`)
+- Diseñada primero para celular (la mayoría de estudiantes dispone antes de un teléfono que de un computador); Android 8.0+ y iOS 13+
+
+**Fuera de alcance (trabajo futuro)**
+- Notificaciones push por FCM/APNs y publicación en Google Play / App Store (RF-24)
+- Más de 400 usuarios simultáneos (requeriría balanceador y réplicas de base de datos)
+- Funcionamiento sin conexión
+
+**Arquitectura MVC**
+| Capa | Backend (`src/backend/src`) | Móvil (`src/mobile/src`) |
+|---|---|---|
+| Modelo | `models/` (13 entidades Sequelize) | — |
+| Controlador | `routes/` (recibe, valida y delega) + `middleware/` | `hooks/`, `navigation/` |
+| Lógica de negocio | `services/` (reglas RN-xx) | `services/`, `utils/` |
+| Vista | JSON de la API; panel `src/admin/` | `screens/`, `ui/` |
+
+Trazabilidad requisito → código → pantalla: `docs/trazabilidad/M14-RF-codigo-pantalla.md`. Cambios controlados: `docs/gestion-cambio/`.
 
 ---
 
