@@ -1,4 +1,4 @@
-// src/routes/auth.routes.js
+// src/controllers/auth.controller.js
 const router      = require('express').Router();
 const { responderError } = require('../middleware/errorHandler');
 const AuthService = require('../services/auth.service');

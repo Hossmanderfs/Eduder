@@ -1,6 +1,6 @@
 # API REST — EduDer
 
-Generado a partir de `src/backend/src/routes`. Autenticación: `Authorization: Bearer <JWT>`. `admin` = requiere rol administrador.
+Generado a partir de `src/backend/src/controllers`. Autenticación: `Authorization: Bearer <JWT>`. `admin` = requiere rol administrador.
 
 | Método | Ruta | Acceso |
 |---|---|---|

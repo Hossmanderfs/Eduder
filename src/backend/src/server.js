@@ -17,15 +17,15 @@ app.use(express.json());
 app.use('/panel', express.static(require('path').join(__dirname, '../../admin')));
 
 // ── Rutas ───────────────────────────────────
-app.use('/auth',         require('./routes/auth.routes'));
-app.use('/levels',       require('./routes/level.routes'));
-app.use('/lessons',      require('./routes/lesson.routes'));
-app.use('/exercise',     require('./routes/exercise.routes'));
-app.use('/progress',     require('./routes/progress.routes'));
-app.use('/profile',      require('./routes/profile.routes'));
-app.use('/gamification', require('./routes/gamification.routes'));
-app.use('/admin',        require('./routes/admin.routes'));
-app.use('/notifications', require('./routes/notification.routes'));
+app.use('/auth',         require('./controllers/auth.controller'));
+app.use('/levels',       require('./controllers/level.controller'));
+app.use('/lessons',      require('./controllers/lesson.controller'));
+app.use('/exercise',     require('./controllers/exercise.controller'));
+app.use('/progress',     require('./controllers/progress.controller'));
+app.use('/profile',      require('./controllers/profile.controller'));
+app.use('/gamification', require('./controllers/gamification.controller'));
+app.use('/admin',        require('./controllers/admin.controller'));
+app.use('/notifications', require('./controllers/notification.controller'));
 
 // ── Health check ────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', project: 'EduDer' }));

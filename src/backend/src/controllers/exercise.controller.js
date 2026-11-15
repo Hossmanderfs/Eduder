@@ -1,4 +1,4 @@
-// src/routes/exercise.routes.js
+// src/controllers/exercise.controller.js
 const router          = require('express').Router();
 const { responderError } = require('../middleware/errorHandler');
 const ExerciseService = require('../services/exercise.service');

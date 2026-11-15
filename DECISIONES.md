@@ -131,3 +131,6 @@ El pool de 10 conexiones y la consulta a la BD en cada petición limitaban el re
 Subí el pool a 30, agregué la caché de sesión y dejé el modo multiproceso como opción, con el arranque de un solo proceso como predeterminado.
 
 **¿Usé IA?** Sí — Claude (Anthropic) implementó los cambios y ejecutó las mediciones; los resultados deben repetirse en el equipo del proyecto.
+
+## Decisión #09 — Carpeta `routes/` renombrada a `controllers/` (CRF-004)
+Se renombra la capa Controlador para que la estructura de carpetas refleje exactamente MVC: `models/` (Modelo), `controllers/` (Controlador: recibe, valida y delega), `services/` (lógica de negocio, RN-xx) y, como Vista, `src/mobile/src/screens` y `src/admin`. Sin cambio de comportamiento; 51 pruebas en verde.

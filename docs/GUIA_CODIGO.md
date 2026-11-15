@@ -70,21 +70,21 @@ En `src/backend/src/middleware/auth.middleware.js`:
 
 ### 3.3 Rutas HTTP
 
-Los archivos de `src/backend/src/routes/` traducen las solicitudes HTTP a
+Los archivos de `src/backend/src/controllers/` traducen las solicitudes HTTP a
 llamadas de servicios. Validan permisos, envían el resultado JSON y convierten
 los errores de negocio en respuestas HTTP.
 
 | Archivo | Funciones expuestas |
 |---|---|
-| `auth.routes.js` | Registro, inicio de sesión, solicitud y cambio de contraseña, y cierre de sesión. Registro/login/recuperación son públicos; el cierre exige token. |
-| `level.routes.js` | Consulta de niveles para usuarios autenticados y creación, edición o eliminación para administradores. |
-| `lesson.routes.js` | Consulta de lección y contenido; listado y operaciones CRUD administrativas de lecciones. |
-| `exercise.routes.js` | Envío de respuestas y consulta de pistas para usuarios autenticados; CRUD administrativo de ejercicios. `handle(fn)` adapta operaciones administrativas al formato HTTP común y conserva estados/códigos de error. |
-| `progress.routes.js` | Actualiza el progreso de una lección para el usuario autenticado. |
-| `profile.routes.js` | Devuelve el resumen del perfil y el progreso del usuario autenticado. |
-| `gamification.routes.js` | Consulta de medallas y ranking; gestión administrativa del catálogo de medallas. `handle(fn)` centraliza el envío de resultados y errores en las rutas CRUD de medallas. |
-| `admin.routes.js` | Lista/actualiza usuarios, presenta métricas y exporta los indicadores como CSV; todas sus rutas requieren rol administrador. |
-| `notification.routes.js` | Lista notificaciones, marca una como leída o marca todas como leídas. `handle(fn)` comparte el manejo de respuesta y errores. |
+| `auth.controller.js` | Registro, inicio de sesión, solicitud y cambio de contraseña, y cierre de sesión. Registro/login/recuperación son públicos; el cierre exige token. |
+| `level.controller.js` | Consulta de niveles para usuarios autenticados y creación, edición o eliminación para administradores. |
+| `lesson.controller.js` | Consulta de lección y contenido; listado y operaciones CRUD administrativas de lecciones. |
+| `exercise.controller.js` | Envío de respuestas y consulta de pistas para usuarios autenticados; CRUD administrativo de ejercicios. `handle(fn)` adapta operaciones administrativas al formato HTTP común y conserva estados/códigos de error. |
+| `progress.controller.js` | Actualiza el progreso de una lección para el usuario autenticado. |
+| `profile.controller.js` | Devuelve el resumen del perfil y el progreso del usuario autenticado. |
+| `gamification.controller.js` | Consulta de medallas y ranking; gestión administrativa del catálogo de medallas. `handle(fn)` centraliza el envío de resultados y errores en las rutas CRUD de medallas. |
+| `admin.controller.js` | Lista/actualiza usuarios, presenta métricas y exporta los indicadores como CSV; todas sus rutas requieren rol administrador. |
+| `notification.controller.js` | Lista notificaciones, marca una como leída o marca todas como leídas. `handle(fn)` comparte el manejo de respuesta y errores. |
 
 Los manejadores declarados directamente dentro de `router.get/post/put/patch`
 son funciones anónimas de transporte: toman parámetros de `req`, invocan el

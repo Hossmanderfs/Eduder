@@ -1,4 +1,4 @@
-// src/routes/lesson.routes.js
+// src/controllers/lesson.controller.js
 const router        = require('express').Router();
 const { responderError } = require('../middleware/errorHandler');
 const LessonService = require('../services/lesson.service');

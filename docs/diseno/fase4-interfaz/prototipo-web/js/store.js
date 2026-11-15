@@ -2,7 +2,7 @@
  * EduDer — Backend simulado (modo 'mock')
  * ---------------------------------------------------------------
  * Implementa en el navegador los mismos contratos que el backend Express
- * del repositorio (src/backend/src/routes/*.js), con las reglas de negocio
+ * del repositorio (src/backend/src/controllers/*.js), con las reglas de negocio
  * del documento: RF-01…RF-22. Los datos se guardan en localStorage.
  *
  * Solo para demostración y pruebas: el "hash" de contraseña de este archivo

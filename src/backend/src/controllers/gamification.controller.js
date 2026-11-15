@@ -1,4 +1,4 @@
-// src/routes/gamification.routes.js
+// src/controllers/gamification.controller.js
 const router               = require('express').Router();
 const { responderError } = require('../middleware/errorHandler');
 const GamificationService  = require('../services/gamification.service');

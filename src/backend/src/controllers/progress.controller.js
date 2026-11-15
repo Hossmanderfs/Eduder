@@ -1,4 +1,4 @@
-// src/routes/progress.routes.js
+// src/controllers/progress.controller.js
 const router          = require('express').Router();
 const { responderError } = require('../middleware/errorHandler');
 const ProgressService = require('../services/progress.service');

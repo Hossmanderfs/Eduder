@@ -1,4 +1,4 @@
-// src/routes/admin.routes.js
+// src/controllers/admin.controller.js
 const router        = require('express').Router();
 const { responderError } = require('../middleware/errorHandler');
 const AdminService  = require('../services/admin.service');

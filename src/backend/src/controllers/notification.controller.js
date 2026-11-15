@@ -1,4 +1,4 @@
-// src/routes/notification.routes.js
+// src/controllers/notification.controller.js
 const router = require('express').Router();
 const { responderError } = require('../middleware/errorHandler');
 const NotificationService = require('../services/notification.service');

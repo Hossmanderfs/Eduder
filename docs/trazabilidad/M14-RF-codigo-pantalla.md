@@ -1,6 +1,6 @@
 # M14 — Trazabilidad RF → HU → Clase/Método → Endpoint → Pantalla (código real)
 
-Generada a partir del repositorio (encabezados `// CU-XX | RF-XX | E12` de `src/backend/src/services/`, rutas de `src/backend/src/routes/`, llamadas a la API en `src/mobile/src/` y el panel `src/admin/index.html`) y de las tablas de HU y CU del documento. Complementa las matrices M1–M13, que llegan hasta el diseño.
+Generada a partir del repositorio (encabezados `// CU-XX | RF-XX | E12` de `src/backend/src/services/`, rutas de `src/backend/src/controllers/`, llamadas a la API en `src/mobile/src/` y el panel `src/admin/index.html`) y de las tablas de HU y CU del documento. Complementa las matrices M1–M13, que llegan hasta el diseño.
 
 | RF | Requisito | HU | CU | Clase / método (backend) | Endpoint | Pantalla / archivo (cliente) | Estado |
 |---|---|---|---|---|---|---|---|

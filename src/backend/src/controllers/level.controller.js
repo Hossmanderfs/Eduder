@@ -1,4 +1,4 @@
-// src/routes/level.routes.js
+// src/controllers/level.controller.js
 const router       = require('express').Router();
 const { responderError } = require('../middleware/errorHandler');
 const LevelService = require('../services/level.service');

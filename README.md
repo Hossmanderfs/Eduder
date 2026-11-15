@@ -59,7 +59,7 @@ eduder/
 | Capa | Backend (`src/backend/src`) | Móvil (`src/mobile/src`) |
 |---|---|---|
 | Modelo | `models/` (13 entidades Sequelize) | — |
-| Controlador | `routes/` (recibe, valida y delega) + `middleware/` | `hooks/`, `navigation/` |
+| Controlador | `controllers/` (recibe, valida y delega) + `middleware/` | `hooks/`, `navigation/` |
 | Lógica de negocio | `services/` (reglas RN-xx) | `services/`, `utils/` |
 | Vista | JSON de la API; panel `src/admin/` | `screens/`, `ui/` |
 
@@ -132,7 +132,7 @@ src/
 │   │   ├── server.js           ← Entrada del servidor Express
 │   │   ├── config/database.js  ← Conexión Sequelize → MySQL
 │   │   ├── models/             ← 13 entidades (rol, tipo y estado son ENUM)
-│   │   ├── routes/             ← auth, levels, lessons, exercise, progress, profile, gamification, admin, notifications
+│   │   ├── controllers/            ← auth, levels, lessons, exercise, progress, profile, gamification, admin, notifications
 │   │   ├── services/           ← Lógica de negocio por servicio
 │   │   ├── middleware/         ← JWT (verifyToken valida cuenta activa) y requireAdmin
 │   │   └── jobs/               ← scheduler (node-cron) y backup

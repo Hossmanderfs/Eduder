@@ -17,7 +17,7 @@ Al crear el repositorio decidí optar por separar la documentación al main y el
 Al definir la estructura de carpetas del backend surgió una duda: si separar los controladores de los servicios o manejar toda la lógica directamente en las rutas.
 
 **¿Cómo lo resolví?**  
-Revisé el E5 (Diagrama de Componentes) y el E6 (Despliegue), que muestran una arquitectura de servicios desacoplados (RNF-07). Decidí mantener la separación `routes → services`, donde las rutas solo delegan al servicio. Esto también facilita las pruebas unitarias requeridas por RNF-07.
+Revisé el E5 (Diagrama de Componentes) y el E6 (Despliegue), que muestran una arquitectura de servicios desacoplados (RNF-07). Decidí mantener la separación `controllers → services`, donde los controladores solo delegan al servicio. Esto también facilita las pruebas unitarias requeridas por RNF-07.
 
 **¿Usé IA?** Sí — Usé IA para generar la estructura inicial de carpetas. Ajusté los nombres de los directorios para que coincidieran exactamente con los artefactos del diseño (E5) y agregué el `.env.example` con las variables reales del proyecto.
 

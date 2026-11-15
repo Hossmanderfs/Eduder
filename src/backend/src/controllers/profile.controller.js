@@ -1,4 +1,4 @@
-// src/routes/profile.routes.js
+// src/controllers/profile.controller.js
 const router         = require('express').Router();
 const { responderError } = require('../middleware/errorHandler');
 const ProfileService = require('../services/profile.service');
