@@ -150,6 +150,6 @@
 | id_notificacion | CHAR(36) | PK, NOT NULL | UUID v4 |
 | id_usuario | CHAR(36) | FK USUARIOS, NOT NULL | Destinatario |
 | tipo | ENUM | NOT NULL | racha \| logro \| sistema |
-| mensaje | VARCHAR(255) | NOT NULL | Texto enviado vía FCM/APNs |
+| mensaje | VARCHAR(255) | NOT NULL | Texto mostrado en el centro de notificaciones de la app |
 | leida | BOOLEAN | NOT NULL DEFAULT FALSE | TRUE cuando el usuario la abre |
 | fecha_envio | DATETIME | NOT NULL DEFAULT NOW() | Timestamp de envío |

@@ -1,5 +1,7 @@
 # E3 — Diagrama de Contexto Arquitectónico (DCA)
 
+> Nota (CRF-004): FCM/APNs aparecen como servicios externos de diseño; su integración queda fuera del alcance de esta entrega (RF-24). Hoy las notificaciones se guardan en la tabla NOTIFICACIONES y se muestran en la app.
+
 EduDer como caja negra e interacciones con actores y sistemas externos.
 
 | Entidad Externa | Tipo | Interacción con EduDer |

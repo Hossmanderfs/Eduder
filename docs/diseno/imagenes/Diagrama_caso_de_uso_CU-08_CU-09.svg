@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="360" viewBox="0 0 760 360" font-family="Helvetica,Arial,sans-serif" font-size="13">
+<rect x="0" y="0" width="760" height="360" fill="#ffffff"/>
+<rect x="190" y="20" width="380" height="320" rx="8" fill="#f7f9fc" stroke="#1f3a5f" stroke-width="1.5"/>
+<text x="380" y="42" text-anchor="middle" font-weight="bold" fill="#1f3a5f">Sistema EduDer</text>
+<ellipse cx="380" cy="110" rx="150" ry="38" fill="#e8f0fb" stroke="#1f3a5f"/>
+<text x="380" y="100" text-anchor="middle">CU-08 Ejecutar tareas programadas</text>
+<text x="380" y="118" text-anchor="middle" font-size="11" fill="#444">backup 02:00 · racha 18:00 · ranking lunes</text>
+<ellipse cx="380" cy="260" rx="150" ry="38" fill="#e8f0fb" stroke="#1f3a5f"/>
+<text x="380" y="256" text-anchor="middle">CU-09 Instalar y abrir la aplicación</text>
+<text x="380" y="274" text-anchor="middle" font-size="11" fill="#444">precondición de CU-01 y CU-02</text>
+<!-- actor Sistema (cron) -->
+<circle cx="80" cy="95" r="12" fill="none" stroke="#1f3a5f" stroke-width="1.5"/><line x1="80" y1="107" x2="80" y2="140" stroke="#1f3a5f" stroke-width="1.5"/><line x1="60" y1="120" x2="100" y2="120" stroke="#1f3a5f" stroke-width="1.5"/><line x1="80" y1="140" x2="62" y2="165" stroke="#1f3a5f" stroke-width="1.5"/><line x1="80" y1="140" x2="98" y2="165" stroke="#1f3a5f" stroke-width="1.5"/>
+<text x="80" y="185" text-anchor="middle">Sistema (cron)</text>
+<line x1="100" y1="120" x2="232" y2="108" stroke="#1f3a5f"/>
+<!-- actor Estudiante -->
+<circle cx="680" cy="245" r="12" fill="none" stroke="#1f3a5f" stroke-width="1.5"/><line x1="680" y1="257" x2="680" y2="290" stroke="#1f3a5f" stroke-width="1.5"/><line x1="660" y1="270" x2="700" y2="270" stroke="#1f3a5f" stroke-width="1.5"/><line x1="680" y1="290" x2="662" y2="315" stroke="#1f3a5f" stroke-width="1.5"/><line x1="680" y1="290" x2="698" y2="315" stroke="#1f3a5f" stroke-width="1.5"/>
+<text x="680" y="335" text-anchor="middle">Estudiante</text>
+<line x1="660" y1="270" x2="530" y2="262" stroke="#1f3a5f"/>
+<text x="380" y="330" text-anchor="middle" font-size="11" fill="#555">RF-16, RF-17, RF-23 (CU-08) · RF-24 (CU-09)</text>
+</svg>

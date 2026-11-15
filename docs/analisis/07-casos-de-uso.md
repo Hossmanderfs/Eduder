@@ -98,3 +98,30 @@
 | Flujo Alternativo A | 3a/4a. Datos incompletos o inválidos → el sistema muestra un mensaje de validación y no guarda el cambio. |
 | Flujo Alternativo B | 5a. El registro a eliminar tiene dependencias activas (lecciones de un nivel, progreso de estudiantes o medallas ya otorgadas) → el sistema bloquea la eliminación física y ofrece marcar el registro como inactivo/archivado, conforme a RN-20, RN-21 y RN-22. |
 | Excepción | Error de conexión a BD → el sistema muestra un mensaje de error genérico, no aplica cambios parciales y sugiere reintentar. |
+
+## CU-08: Ejecutar Tareas Programadas (Sistema)
+
+| ID | CU-08 |
+|---|---|
+| Nombre | Ejecutar tareas programadas: backup diario, recordatorio de racha y reinicio semanal del ranking |
+| Actor Principal | Sistema (cron) |
+| Historias de Usuario | HU-10, HU-11, HU-17 |
+| Requisitos | RF-16, RF-17, RF-23 |
+| Precondición | El servidor está en ejecución con las tareas programadas activas (jobs/scheduler.js). |
+| Postcondición | Existe un snapshot nuevo con su registro en el log; los estudiantes inactivos del día tienen una notificación de racha; el lunes el xp_semana queda en 0. |
+| Flujo Normal | 1. A las 02:00 se ejecuta runBackup() (mysqldump, retención y log). 2. A las 18:00 sendStreakReminders() crea una notificación tipo «racha» por cada estudiante que no estudió ese día. 3. Los lunes a las 00:00 resetWeeklyXP() reinicia xp_semana_actual. |
+| Flujo Alternativo A | 2a. El estudiante ya recibió el aviso del día → no se duplica. |
+| Excepción | Falla de mysqldump o de BD → se registra el error en el log y el servidor continúa en ejecución. |
+
+## CU-09: Instalar y Abrir la Aplicación (Estudiante)
+
+| ID | CU-09 |
+|---|---|
+| Nombre | Instalar y abrir la aplicación móvil |
+| Actor Principal | Estudiante |
+| Historias de Usuario | HU-22 |
+| Requisitos | RF-24 |
+| Precondición | El estudiante dispone de un celular con Android 8.0+ o iOS 13+ y del build de Expo. |
+| Postcondición | La app queda instalada y muestra el Splash y luego el Login (precondición de CU-01 y CU-02). |
+| Flujo Normal | 1. El estudiante instala el build. 2. Abre la aplicación. 3. El sistema muestra el Splash y la pantalla de Login. |
+| Excepción | Versión de sistema operativo no soportada → la instalación no es posible. |

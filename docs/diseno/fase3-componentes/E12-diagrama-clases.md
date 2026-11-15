@@ -14,6 +14,9 @@
 | ContenidoLeccion | - id_bloque: String; - tipo_bloque: Enum {texto, imagen, video, animacion}; - contenido: String; - orden: int | +renderizar(): Bloque | N—1 Leccion |
 | Pista | - id_pista: String; - numero_pista: int; - texto_pista: String | +mostrar(): String | N—1 Ejercicio (composición, máx. 2) |
 | MedallaUsuario | - id_med_usuario: String; - fecha_obtencion: DateTime | +otorgar(idUsuario: String, idMedalla: String): void | N—1 Usuario; N—1 MedallaCatalogo |
-| Notificacion | - id_notificacion: String; - tipo: Enum {racha, logro, sistema}; - mensaje: String; - leida: boolean; - fecha_envio: DateTime | +marcarLeida(): void; +enviarPush(): void | N—1 Usuario |
+| Notificacion | - id_notificacion: String; - tipo: Enum {racha, logro, sistema}; - mensaje: String; - leida: boolean; - fecha_envio: DateTime | +marcarLeida(): void; +generarRecordatorio(): void | N—1 Usuario |
 
 > 📎 Ver diagrama UML en `imagenes/E12-clases.png`
+| TareaProgramada (CU-08) | - expresionCron: String; - zonaHoraria: String | +respaldarBD(): void (RF-23); +recordarRacha(): void (RF-16); +reiniciarRanking(): void (RF-17) | dependencia «usa» → Notificacion, RankingSemanal; implementada en `jobs/scheduler.js` y `jobs/backup.js` |
+
+> Correspondencia con el código (CRF-004): `Nivel.estaDesbloqueado()` → `progress.service.js → validarAcceso()` y `calcularNivelActual()` (RN-06, RN-07, RN-09, RN-10).

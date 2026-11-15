@@ -170,7 +170,7 @@
 <text text-anchor="start" x="20" y="-634.8" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; leida: boolean</text>
 <text text-anchor="start" x="20" y="-621.8" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; fecha_envio: DateTime</text>
 <text text-anchor="start" x="20" y="-608.8" font-family="Helvetica,sans-Serif" font-size="10.00">+ marcarLeida(): void</text>
-<text text-anchor="start" x="20" y="-595.8" font-family="Helvetica,sans-Serif" font-size="10.00">+ enviarPush(): void</text>
+<text text-anchor="start" x="20" y="-595.8" font-family="Helvetica,sans-Serif" font-size="10.00">+ generarRecordatorio(): void</text>
 <polygon fill="black" stroke="black" points="18,-682.8 18,-682.8 200,-682.8 200,-682.8 18,-682.8"/>
 <polygon fill="black" stroke="black" points="18,-617.8 18,-617.8 200,-617.8 200,-617.8 18,-617.8"/>
 <polygon fill="none" stroke="black" points="18,-590.8 18,-696.8 200,-696.8 200,-590.8 18,-590.8"/>

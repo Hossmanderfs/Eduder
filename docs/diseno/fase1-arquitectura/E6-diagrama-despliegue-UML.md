@@ -1,5 +1,7 @@
 # E6 — Diagrama de Despliegue UML
 
+> Nota (CRF-004): FCM/APNs aparecen como servicios externos de diseño; su integración queda fuera del alcance de esta entrega (RF-24). Hoy las notificaciones se guardan en la tabla NOTIFICACIONES y se muestran en la app.
+
 | Nodo | Artefactos Desplegados | Tecnología / Protocolo |
 |---|---|---|
 | Dispositivo Móvil (Android/iOS) | App EduDer (React Native) | Android 8+ / iOS 13+; HTTPS |

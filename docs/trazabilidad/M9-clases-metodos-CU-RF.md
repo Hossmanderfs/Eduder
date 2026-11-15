@@ -38,5 +38,8 @@
 | RankingSemanal | reiniciarSemanal():void | — (tarea programada) | RF-17 |
 | TokenRecuperacion | invalidar():void | CU-05 | RF-19 |
 | TokenRecuperacion | generar(idUsuario):String | CU-05 | RF-19 |
-| Notificacion | marcarLeida():void | — (sin CU; WF-16) | RF-16 |
-| Notificacion | enviarPush():void | — (tarea programada) | RF-16 |
+| Notificacion | marcarLeida():void | CU-04 | RF-16 |
+| Notificacion | generarRecordatorio():void | CU-08 (tarea programada) | RF-16 |
+| TareaProgramada | respaldarBD():void | CU-08 | RF-23 |
+| TareaProgramada | recordarRacha():void | CU-08 | RF-16 |
+| TareaProgramada | reiniciarRanking():void | CU-08 | RF-17 |

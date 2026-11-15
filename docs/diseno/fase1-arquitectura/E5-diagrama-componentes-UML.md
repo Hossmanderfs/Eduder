@@ -1,5 +1,7 @@
 # E5 — Diagrama de Componentes UML
 
+> Nota (CRF-004): FCM/APNs aparecen como servicios externos de diseño; su integración queda fuera del alcance de esta entrega (RF-24). Hoy las notificaciones se guardan en la tabla NOTIFICACIONES y se muestran en la app.
+
 | Capa / Componente | Interfaces Provistas | Dependencias (usa) |
 |---|---|---|
 | «Componente» App Móvil (React Native) | IU Estudiante: Splash, Registro, Login, Menú, Lección, Perfil, Ranking | API Gateway (HTTPS); FCM SDK; APNs SDK |

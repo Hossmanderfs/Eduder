@@ -4,7 +4,7 @@
 
 2. Diseñar la arquitectura del sistema definiendo los componentes, interacciones y nodos de despliegue que soporten los requisitos de disponibilidad, rendimiento y seguridad.
 
-3. Modelar la base de datos hasta la Tercera Forma Normal (3FN), asegurando la integridad referencial y la escalabilidad para 5 000 usuarios concurrentes.
+3. Modelar la base de datos hasta la Tercera Forma Normal (3FN), asegurando la integridad referencial y una capacidad verificada de 400 usuarios simultáneos.
 
 4. Desarrollar el motor de ejercicios interactivos con capacidad de evaluar respuestas y entregar feedback contextualizado en menos de 1 segundo.
 
