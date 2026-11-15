@@ -39,6 +39,7 @@ router.get('/:id', verifyToken, async (req, res) => {
 // GET /lessons/:id/content — CU-03 | RF-08, RF-10, RF-11
 router.get('/:id/content', verifyToken, async (req, res) => {
   try {
+    if (req.usuario.rol !== 'admin') await require('../services/progress.service').validarAcceso(req.usuario.id_usuario, req.params.id);
     const contenido = await LessonService.getLessonContent(req.params.id);
     res.json(contenido);
   } catch (err) {

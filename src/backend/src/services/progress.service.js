@@ -39,6 +39,7 @@ async function updateProgress(id_leccion, body, id_usuario) {
     throw err;
   }
 
+  await validarAcceso(id_usuario, id_leccion); // RF-08: RN-07, RN-09, RN-10
   let progreso = await ProgresoLeccion.findOne({ where: { id_usuario, id_leccion } });
   const yaCompletada = progreso?.estado === 'completada';
 
@@ -70,6 +71,28 @@ async function updateProgress(id_leccion, body, id_usuario) {
   }
 
   return { ...progreso.toJSON(), resumen };
+}
+
+// ── CU-03 | RF-08 | RN-07, RN-09, RN-10 | E12 - estaDesbloqueado() ──────────────
+// Acceso secuencial en el servidor (no solo en la app): el nivel de la lección debe estar
+// alcanzado (RN-07) y la lección anterior del mismo nivel debe estar completada (RN-09/RN-10).
+// Lanza 403 si el estudiante intenta saltarse el orden.
+async function validarAcceso(id_usuario, id_leccion) {
+  const leccion = await Leccion.findByPk(id_leccion, { attributes: ['id_leccion', 'id_nivel', 'orden'] });
+  if (!leccion) { const err = new Error('Lección no encontrada'); err.status = 404; throw err; }
+  const nivel = await Nivel.findByPk(leccion.id_nivel, { attributes: ['id_nivel', 'orden'] });
+  const actual = await calcularNivelActual(id_usuario);
+  if (nivel && nivel.orden > actual) {
+    const err = new Error('Nivel bloqueado: completa el nivel anterior con el promedio mínimo'); err.status = 403; throw err;
+  }
+  const anterior = await Leccion.findOne({
+    where: { id_nivel: leccion.id_nivel, estado: 'activo', orden: { [Op.lt]: leccion.orden } },
+    order: [['orden', 'DESC']], attributes: ['id_leccion'],
+  });
+  if (anterior) {
+    const hecha = await ProgresoLeccion.findOne({ where: { id_usuario, id_leccion: anterior.id_leccion, estado: 'completada' } });
+    if (!hecha) { const err = new Error('Lección bloqueada: completa la lección anterior'); err.status = 403; throw err; }
+  }
 }
 
 // ── CU-03 | RF-12, RF-13 | E12 - sumarXP() / calcularStreak() ───────────────
@@ -241,4 +264,4 @@ function diffDias(fecha1, fecha2) {
   return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
 }
 
-module.exports = { updateProgress, getSummary, evaluarMedallas };
+module.exports = { updateProgress, getSummary, evaluarMedallas, validarAcceso };
