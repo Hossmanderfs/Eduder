@@ -44,6 +44,10 @@ Generado a partir de `src/backend/src/routes`. Autenticación: `Authorization: B
 | GET | `/profile/summary` | token |
 | PUT | `/progress/:id` | token |
 
+## Formato de errores
+
+Todo error llega como JSON `{ "error": "mensaje" }` con el código HTTP correspondiente: 400 datos inválidos o JSON mal formado, 401 sin sesión o credenciales incorrectas, 403 sin permisos, 404 recurso o ruta inexistente, 409 conflicto con una regla de negocio, 429 cuenta bloqueada. Un fallo inesperado responde 500 con `Error interno del servidor`, sin traza técnica.
+
 ## Reglas de borrado (RN-20/21/22)
 | Recurso | Regla | Respuesta |
 |---|---|---|

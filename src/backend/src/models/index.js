@@ -50,19 +50,23 @@ Ejercicio.belongsTo(Leccion, { foreignKey: 'id_leccion', as: 'leccion' });
 Ejercicio.hasMany(Pista, { foreignKey: 'id_ejercicio', as: 'pistas', onDelete: 'CASCADE' });
 Pista.belongsTo(Ejercicio, { foreignKey: 'id_ejercicio', as: 'ejercicio' });
 
+// Nota: PERFIL_ESTUDIANTE.nivel_actual es el N.º de nivel (TINYINT, 1..N), no una FK a NIVEL.id_nivel;
+// por eso el DDL aprobado (Línea Base 1) no declara clave foránea y no se asocia aquí.
+// Las FK sin cláusula en el DDL usan RESTRICT; se declara igual en Sequelize.
+
 // Usuario (1) ——— (N) ProgresoLeccion
-Usuario.hasMany(ProgresoLeccion, { foreignKey: 'id_usuario', as: 'progresos' });
+Usuario.hasMany(ProgresoLeccion, { foreignKey: 'id_usuario', as: 'progresos', onDelete: 'RESTRICT' });
 ProgresoLeccion.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 
 // Leccion (1) ——— (N) ProgresoLeccion
-Leccion.hasMany(ProgresoLeccion, { foreignKey: 'id_leccion', as: 'progresos' });
+Leccion.hasMany(ProgresoLeccion, { foreignKey: 'id_leccion', as: 'progresos', onDelete: 'RESTRICT' });
 ProgresoLeccion.belongsTo(Leccion, { foreignKey: 'id_leccion', as: 'leccion' });
 
 // MedallaCatalogo (1) ——— (N) MedallaUsuario  [N:M con tabla intermedia]
-MedallaCatalogo.hasMany(MedallaUsuario, { foreignKey: 'id_medalla', as: 'otorgadas' });
+MedallaCatalogo.hasMany(MedallaUsuario, { foreignKey: 'id_medalla', as: 'otorgadas', onDelete: 'RESTRICT' });
 MedallaUsuario.belongsTo(MedallaCatalogo, { foreignKey: 'id_medalla', as: 'medalla' });
 
-Usuario.hasMany(MedallaUsuario, { foreignKey: 'id_usuario', as: 'medallas' });
+Usuario.hasMany(MedallaUsuario, { foreignKey: 'id_usuario', as: 'medallas', onDelete: 'RESTRICT' });
 MedallaUsuario.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 
 // Relación N:M directa (alias para consultas)
@@ -80,15 +84,15 @@ MedallaCatalogo.belongsToMany(Usuario, {
 });
 
 // Usuario (1) ——— (N) Notificacion
-Usuario.hasMany(Notificacion, { foreignKey: 'id_usuario', as: 'notificaciones' });
+Usuario.hasMany(Notificacion, { foreignKey: 'id_usuario', as: 'notificaciones', onDelete: 'RESTRICT' });
 Notificacion.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 
 // Usuario (1) ——— (N) RankingSemanal
-Usuario.hasMany(RankingSemanal, { foreignKey: 'id_usuario', as: 'rankings' });
+Usuario.hasMany(RankingSemanal, { foreignKey: 'id_usuario', as: 'rankings', onDelete: 'RESTRICT' });
 RankingSemanal.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 
 // Nivel (1) ——— (N) RankingSemanal
-Nivel.hasMany(RankingSemanal, { foreignKey: 'id_nivel', as: 'rankings' });
+Nivel.hasMany(RankingSemanal, { foreignKey: 'id_nivel', as: 'rankings', onDelete: 'RESTRICT' });
 RankingSemanal.belongsTo(Nivel, { foreignKey: 'id_nivel', as: 'nivel' });
 
 // -----------------------------------------------

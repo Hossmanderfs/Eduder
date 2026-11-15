@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
 const { sequelize } = require('./models');
+const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -28,6 +29,10 @@ app.use('/notifications', require('./routes/notification.routes'));
 
 // ── Health check ────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', project: 'EduDer' }));
+
+// ── Errores: 404 y manejador global (siempre al final de las rutas) ──
+app.use(notFound);
+app.use(errorHandler);
 
 // ── Arranque ─────────────────────────────────
 sequelize.authenticate()
