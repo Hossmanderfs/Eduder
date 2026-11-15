@@ -11,6 +11,7 @@ function httpError(status, message) {
 
 // Lista las notificaciones del usuario (más recientes primero).
 // ?solo_no_leidas=true filtra las pendientes; limit máx. 100.
+// ── CU-03 | RF-16 | E12 - list() ─────────────────────────────────────────────
 async function list(id_usuario, query = {}) {
   const where = { id_usuario };
   if (query.solo_no_leidas === 'true') where.leida = false;
@@ -20,6 +21,7 @@ async function list(id_usuario, query = {}) {
   return { no_leidas, items };
 }
 
+// ── CU-03 | RF-16 | E12 - markRead() ─────────────────────────────────────────
 async function markRead(id_usuario, id_notificacion) {
   const n = await Notificacion.findOne({ where: { id_notificacion, id_usuario } });
   if (!n) throw httpError(404, 'Notificación no encontrada');
@@ -27,12 +29,14 @@ async function markRead(id_usuario, id_notificacion) {
   return n;
 }
 
+// ── CU-03 | RF-16 | E12 - markAllRead() ──────────────────────────────────────
 async function markAllRead(id_usuario) {
   const [actualizadas] = await Notificacion.update({ leida: true }, { where: { id_usuario, leida: false } });
   return { actualizadas };
 }
 
 // Crea una notificación (uso interno de otros servicios y jobs).
+// ── RF-16 | E12 - create() ───────────────────────────────────────────────────
 async function create(id_usuario, tipo, mensaje) {
   return Notificacion.create({ id_notificacion: uuidv4(), id_usuario, tipo, mensaje });
 }
@@ -40,6 +44,7 @@ async function create(id_usuario, tipo, mensaje) {
 // ── RF-16 | job diario: recordatorio de racha ────────────────────────────────
 // Avisa a los estudiantes activos con racha > 0 que no han tenido actividad hoy.
 // No duplica el aviso si ya se envió uno de tipo 'racha' hoy.
+// ── RF-16 | E12 - sendStreakReminders() (tarea programada) ───────────────────
 async function sendStreakReminders(ahora = new Date()) {
   const hoy = ahora.toISOString().split('T')[0];
   const inicioDia = new Date(`${hoy}T00:00:00.000Z`);

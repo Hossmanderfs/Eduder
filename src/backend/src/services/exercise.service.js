@@ -16,6 +16,7 @@ function httpError(status, message) {
 // Normaliza ambos strings (trim + lowercase + espacios) antes de comparar.
 // Devuelve feedback inmediato: correcto/incorrecto + explicación (RF-10).
 // El resultado se usa en progress.service para calcular el puntaje final (RF-12).
+// ── CU-03 | RF-10 | E12 - evaluate() ─────────────────────────────────────────
 async function evaluate(body) {
   const { id_ejercicio, respuesta } = body;
 
@@ -97,6 +98,7 @@ function normalizarPistas(pistas) {
 }
 
 // Lista los ejercicios de una lección con respuesta correcta y pistas (solo admin).
+// ── RF-27 | E12 - listByLesson() ─────────────────────────────────────────────
 async function listByLesson(id_leccion) {
   return Ejercicio.findAll({
     where: { id_leccion },
@@ -106,6 +108,7 @@ async function listByLesson(id_leccion) {
 }
 
 // Crea un ejercicio asociado a una lección, con hasta 2 pistas.
+// ── RF-27 | E12 - createExercise() ───────────────────────────────────────────
 async function createExercise(body) {
   const { id_leccion, enunciado, tipo_interaccion, orden, respuesta_correcta, explicacion } = body;
   if (!id_leccion || !enunciado || !tipo_interaccion || !orden || !respuesta_correcta || !explicacion) {
@@ -128,6 +131,7 @@ async function createExercise(body) {
 }
 
 // Actualiza un ejercicio; si se envía `pistas` se reemplazan las existentes.
+// ── RF-27 | E12 - updateExercise() ───────────────────────────────────────────
 async function updateExercise(id, body) {
   const ejercicio = await Ejercicio.findByPk(id);
   if (!ejercicio) throw httpError(404, 'Ejercicio no encontrado');
@@ -155,6 +159,7 @@ async function updateExercise(id, body) {
 }
 
 // Elimina un ejercicio y sus pistas (ON DELETE CASCADE).
+// ── RF-27 | E12 - deleteExercise() ───────────────────────────────────
 async function deleteExercise(id) {
   const ejercicio = await Ejercicio.findByPk(id);
   if (!ejercicio) throw httpError(404, 'Ejercicio no encontrado');

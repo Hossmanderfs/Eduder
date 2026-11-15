@@ -30,6 +30,7 @@ async function getMedals(id_usuario) {
 // Si el usuario autenticado no aparece en el top 20, se agrega al final.
 // El ranking se reinicia cada lunes a las 00:00 mediante cron job (RF-17).
 // Solo posición y XP son visibles para otros usuarios — privacidad (RNF-09).
+// ── RF-17 | E12 - getRanking() ───────────────────────────────────────────────
 async function getRanking(id_nivel, id_usuario) {
   const semana = inicioSemana();
 
@@ -127,6 +128,7 @@ function validarMedalla(b, parcial) {
 }
 
 // Lista todo el catálogo (activas e inactivas) con el número de veces otorgada.
+// ── RF-28 | E12 - listCatalog() ──────────────────────────────────────────────
 async function listCatalog() {
   const catalogo = await MedallaCatalogo.findAll({ order: [['condicion_valor', 'ASC']] });
   const otorgadas = await MedallaUsuario.findAll({ attributes: ['id_medalla'], raw: true });
@@ -135,6 +137,7 @@ async function listCatalog() {
   return catalogo.map(m => ({ ...m.toJSON(), veces_otorgada: conteo[m.id_medalla] || 0 }));
 }
 
+// ── RF-28 | E12 - createMedal() ──────────────────────────────────────────────
 async function createMedal(body) {
   validarMedalla(body, false);
   return MedallaCatalogo.create({
@@ -148,6 +151,7 @@ async function createMedal(body) {
   });
 }
 
+// ── RF-28 | E12 - updateMedal() ──────────────────────────────────────────────
 async function updateMedal(id, body) {
   const medalla = await MedallaCatalogo.findByPk(id);
   if (!medalla) throw httpError(404, 'Medalla no encontrada');
@@ -162,6 +166,7 @@ async function updateMedal(id, body) {
 }
 
 // RN-22: una medalla ya otorgada no se elimina; se marca inactiva en el catálogo.
+// ── RF-28 | E12 - deleteMedal() ──────────────────────────────────────────────
 async function deleteMedal(id) {
   const medalla = await MedallaCatalogo.findByPk(id);
   if (!medalla) throw httpError(404, 'Medalla no encontrada');

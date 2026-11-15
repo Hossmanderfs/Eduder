@@ -26,7 +26,7 @@ Revisé el E5 (Diagrama de Componentes) y el E6 (Despliegue), que muestran una a
 ## Entrada #segunda semana
 
 **¿Qué hice?**  
-Creé los 15 modelos Sequelize en `src/backend/src/models/` mapeando cada entidad del Modelo Relacional (E9) y el DDL (E11): `Rol`, `Usuario`, `PerfilEstudiante`, `TokenRecuperacion`, `Nivel`, `TipoLeccion`, `Leccion`, `ContenidoLeccion`, `Ejercicio`, `Pista`, `ProgresoLeccion`, `MedallaCatalogo`, `MedallaUsuario`, `Notificacion`, `RankingSemanal`. Definí todas las relaciones en `models/index.js` (1:1, 1:N, N:M). Creé las pantallas stub de React Native y las rutas base del backend para todos los módulos.
+Creé los 13 modelos Sequelize en `src/backend/src/models/` mapeando cada entidad del Modelo Relacional (E9) y el DDL (E11): `Usuario`, `PerfilEstudiante`, `TokenRecuperacion`, `Nivel`, `Leccion`, `ContenidoLeccion`, `Ejercicio`, `Pista`, `ProgresoLeccion`, `MedallaCatalogo`, `MedallaUsuario`, `Notificacion`, `RankingSemanal`. Definí todas las relaciones en `models/index.js` (1:1, 1:N, N:M). Creé las pantallas stub de React Native y las rutas base del backend para todos los módulos.
 
 **¿Qué problema encontré?**  
 El tipo de columna `id_rol` en la tabla `usuarios` debía ser `CHAR(10)` para coincidir exactamente con la PK de la tabla `rol`. Sequelize infería el tipo como `STRING` genérico y generaba errores de FK al sincronizar.

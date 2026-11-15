@@ -105,6 +105,7 @@ async function register(body) {
 const MAX_INTENTOS    = 5;
 const BLOQUEO_MINUTOS = 15;
 
+// ── CU-02 | RF-03, RF-05, RF-06 | E12 - login() ──────────────────────────────
 async function login(body) {
   const { correo_institucional, contrasena } = body;
 
