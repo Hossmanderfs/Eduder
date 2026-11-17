@@ -4,7 +4,7 @@
     "slug": "eduder",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "android": {
       "package": "co.edu.remington.eduder",
       "versionCode": 1
