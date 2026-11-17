@@ -39,3 +39,11 @@ Las pruebas automáticas del backend (`npm test`, 51 pruebas con Jest) se ejecut
 | `BITACORA-DEFECTOS.md` | Defectos, commit de corrección y re-test (Bloque 4) | — |
 | Cobertura (RNF-07) | 81,7 % de sentencias en `services/` | `npm run cobertura` |
 Los resultados incluidos se obtuvieron en un contenedor Linux con MariaDB 10.11; repita las ejecuciones en su equipo con MySQL 8 y anexe sus capturas.
+
+## Ejecutar la colección sin Postman (Newman)
+```
+npm install -g newman newman-reporter-htmlextra
+cd docs/pruebas
+newman run EduDer-QA.postman_collection.json --env-var "id_ejercicio=<ID>" --env-var "respuesta_correcta=<RESPUESTA>" --env-var "id_leccion=<ID_LECCION>" -r cli,htmlextra --reporter-htmlextra-export resultado-newman.html
+```
+Los tres valores salen de las consultas SQL de la preparación (no dejar los marcadores `ID_AQUI`). El intento fallido de CP-03 se repite solo 5 veces. `JWT_EXPIRES_IN` del `.env` debe ser `24h` (RF-03): con otro valor falla CP-06.

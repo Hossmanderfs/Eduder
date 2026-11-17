@@ -133,7 +133,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Credenciales incorrectas (401) o cuenta bloqueada (429)', () => pm.expect([401,429]).to.include(pm.response.code));"
+                  "pm.test('Credenciales incorrectas (401) o cuenta bloqueada (429)', () => pm.expect([401,429]).to.include(pm.response.code));",
+                  "// Runner/Newman: repite esta petición hasta completar 5 intentos fallidos (RF-05)",
+                  "const n = Number(pm.collectionVariables.get('intentos_fallidos') || 0) + 1; pm.collectionVariables.set('intentos_fallidos', n);",
+                  "if (n < 5) { postman.setNextRequest(pm.info.requestName); } else { pm.collectionVariables.set('intentos_fallidos', 0); }"
                 ]
               }
             }
@@ -340,7 +343,7 @@
                 "exec": [
                   "pm.test('Código 200', () => pm.response.to.have.status(200));",
                   "pm.test('Tiempo <= 1000 ms (umbral RNF-02)', () => pm.expect(pm.response.responseTime).to.be.below(1001));",
-                  "const tk = pm.response.json().token; const p = JSON.parse(atob(tk.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));",
+                  "const tk = pm.response.json().token; const p = JSON.parse(CryptoJS.enc.Base64.parse(tk.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')).toString(CryptoJS.enc.Utf8));",
                   "pm.test('exp - iat = 86400 s (24 h, RF-03)', () => pm.expect(p.exp - p.iat).to.eql(86400));",
                   "pm.collectionVariables.set('token', tk);"
                 ]
