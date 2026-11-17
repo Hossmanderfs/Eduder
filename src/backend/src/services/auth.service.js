@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const crypto     = require('crypto');
 const { esCorreoInstitucional, DOMINIOS } = require('../config/dominios');
 const nodemailer = require('nodemailer');
+const dns        = require('dns').promises;
 
 const {
   Usuario,
@@ -211,14 +212,22 @@ async function recover(body) {
     // RF-19: el envío NO bloquea la respuesta (un servidor de correo lento haría vencer el tiempo de espera
     // de la app) y un fallo no cambia la respuesta ni devuelve 500 (evita revelar si el correo existe).
     // El error se registra en el servidor con el prefijo [RF-19].
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-      connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000,
-    });
+    // Se resuelve el host con el DNS del sistema operativo (dns.lookup, IPv4): el resolvedor propio de
+    // Node (c-ares) falla con algunos routers (DNS IPv6 link-local) y da "queryA ETIMEOUT".
+    const smtpHost = process.env.SMTP_HOST;
+    const crearTransporte = async () => {
+      let host = smtpHost;
+      try { host = (await dns.lookup(smtpHost, { family: 4 })).address; } catch (_) { /* usa el nombre */ }
+      return nodemailer.createTransport({
+        host,
+        port: Number(process.env.SMTP_PORT) || 587,
+        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        tls: { servername: smtpHost },
+        connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000,
+      });
+    };
     const link = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${rawToken}&uid=${usuario.id_usuario}`;
-    transporter.sendMail({
+    crearTransporte().then(t => t.sendMail({
       from: process.env.SMTP_USER,
       to:   correo_institucional,
       subject: 'EduDer — Recuperación de contraseña',
@@ -226,7 +235,7 @@ async function recover(body) {
              <p>Usa este código en la app para restablecer tu contraseña (válido 30 minutos):</p>
              <p><b>${rawToken}</b></p>
              <p>O abre este enlace: <a href="${link}">${link}</a></p>`,
-    }).then(() => console.log('[RF-19] Correo de recuperación enviado'))
+    })).then(() => console.log('[RF-19] Correo de recuperación enviado'))
       .catch((e) => console.error('[RF-19] No se pudo enviar el correo de recuperación:', e.message));
   }
 
