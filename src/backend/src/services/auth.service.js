@@ -208,29 +208,26 @@ async function recover(body) {
   });
 
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    // RF-19: un fallo del servidor de correo no debe cambiar la respuesta (evita revelar si el correo existe)
-    // ni devolver 500; el error se registra en el servidor.
-    try {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT) || 587,
-        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-      });
-
-      const link = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${rawToken}&uid=${usuario.id_usuario}`;
-
-      await transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to:   correo_institucional,
-        subject: 'EduDer — Recuperación de contraseña',
-        html: `<p>Hola ${usuario.nombre},</p>
-               <p>Usa este código en la app para restablecer tu contraseña (válido 30 minutos):</p>
-               <p><b>${rawToken}</b></p>
-               <p>O abre este enlace: <a href="${link}">${link}</a></p>`,
-      });
-    } catch (e) {
-      console.error('[RF-19] No se pudo enviar el correo de recuperación:', e.message);
-    }
+    // RF-19: el envío NO bloquea la respuesta (un servidor de correo lento haría vencer el tiempo de espera
+    // de la app) y un fallo no cambia la respuesta ni devuelve 500 (evita revelar si el correo existe).
+    // El error se registra en el servidor con el prefijo [RF-19].
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000,
+    });
+    const link = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${rawToken}&uid=${usuario.id_usuario}`;
+    transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to:   correo_institucional,
+      subject: 'EduDer — Recuperación de contraseña',
+      html: `<p>Hola ${usuario.nombre},</p>
+             <p>Usa este código en la app para restablecer tu contraseña (válido 30 minutos):</p>
+             <p><b>${rawToken}</b></p>
+             <p>O abre este enlace: <a href="${link}">${link}</a></p>`,
+    }).then(() => console.log('[RF-19] Correo de recuperación enviado'))
+      .catch((e) => console.error('[RF-19] No se pudo enviar el correo de recuperación:', e.message));
   }
 
   return { message: 'Si el correo existe, recibirás un enlace de recuperación' };
