@@ -34,7 +34,7 @@ export function Screen({ children, scroll = true, bar, header, footer, edges, on
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: header ? c.carne : c.surface }} edges={edges || top}>
       <StatusBar barStyle={header || c.dark ? 'light-content' : 'dark-content'} backgroundColor={header ? c.carne : c.surface} />
-      {header}
+      {header ? <View style={{ backgroundColor: c.carne, paddingTop: insets.top }}>{header}</View> : null}
       {bar}
       {/* El teclado empuja el contenido y el pie hacia arriba para no tapar lo que se escribe (Android e iOS). */}
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">

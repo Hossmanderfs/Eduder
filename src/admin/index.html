@@ -30,12 +30,19 @@
     --font:       'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --indigo:#2F6CD8; --indigo-l:#16264A; --indigo-d:#4A80E4;
       --surface:#111A2B; --bg:#070B14; --border:#26324C; --text:#E9EDF6; --muted:#B2BBCF;
       --success:#74D6A4; --success-l:#0F3020; --danger:#FF9890; --danger-l:#3A1614;
       --warning:#F6CD70; --warning-l:#33270E; --brand-red:#E1384F; --line-soft:#5A2A27;
     }
+  }
+  /* Tema forzado por la app móvil (WebView): data-theme="dark" */
+  :root[data-theme="dark"] {
+    --indigo:#2F6CD8; --indigo-l:#16264A; --indigo-d:#4A80E4;
+    --surface:#111A2B; --bg:#070B14; --border:#26324C; --text:#E9EDF6; --muted:#B2BBCF;
+    --success:#74D6A4; --success-l:#0F3020; --danger:#FF9890; --danger-l:#3A1614;
+    --warning:#F6CD70; --warning-l:#33270E; --brand-red:#E1384F; --line-soft:#5A2A27;
   }
 
   @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap');

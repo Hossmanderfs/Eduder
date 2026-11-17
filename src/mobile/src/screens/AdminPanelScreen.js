@@ -10,7 +10,7 @@ import { Screen, AppBar, IconBtn, Txt, ErrorState } from '../ui';
 import { useTheme } from '../theme';
 
 export default function AdminPanelScreen({ navigation }) {
-  const { c } = useTheme();
+  const { c, modo } = useTheme();
   const web = useRef(null);
   const [sesion, setSesion] = useState(null);
   const [error, setError] = useState('');
@@ -32,10 +32,13 @@ export default function AdminPanelScreen({ navigation }) {
   }
 
   // El panel web guarda su sesión en localStorage: se inyecta antes de cargar la página.
+  // El tema del panel sigue al de la app (claro/oscuro) mediante el atributo data-theme.
+  const aplicarTema = `try{document.documentElement.setAttribute('data-theme','${modo}');}catch(e){} true;`;
   const inyectar = sesion
     ? `try{localStorage.setItem('eduder_admin_token',${JSON.stringify(sesion.token)});` +
-      `localStorage.setItem('eduder_admin_user',${JSON.stringify(sesion.user)});}catch(e){} true;`
-    : 'true;';
+      `localStorage.setItem('eduder_admin_user',${JSON.stringify(sesion.user)});}catch(e){}` + aplicarTema
+    : aplicarTema;
+  useEffect(() => { web.current?.injectJavaScript(aplicarTema); }, [modo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const barra = (
     <AppBar onBlue title="Panel de administración" right={
@@ -54,7 +57,7 @@ export default function AdminPanelScreen({ navigation }) {
         <ErrorState message={`${error}\nDirección: ${API_BASE_URL}/panel/`} onRetry={() => { setError(''); web.current?.reload(); }} />
       ) : (
         <WebView
-          ref={web} source={{ uri: `${API_BASE_URL}/panel/` }} injectedJavaScriptBeforeContentLoaded={inyectar}
+          ref={web} source={{ uri: `${API_BASE_URL}/panel/` }} injectedJavaScriptBeforeContentLoaded={inyectar} injectedJavaScript={aplicarTema}
           javaScriptEnabled domStorageEnabled startInLoadingState style={{ backgroundColor: c.surface }}
           renderLoading={() => <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator size="large" color={c.blue} /></View>}
           onError={(e) => setError(e.nativeEvent?.description || 'Error de red')}
