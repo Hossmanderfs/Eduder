@@ -5,7 +5,22 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "android": { "package": "co.edu.remington.eduder" },
-    "ios": { "bundleIdentifier": "co.edu.remington.eduder" }
+    "android": {
+      "package": "co.edu.remington.eduder",
+      "versionCode": 1
+    },
+    "ios": {
+      "bundleIdentifier": "co.edu.remington.eduder"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ]
   }
 }
