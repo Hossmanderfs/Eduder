@@ -44,3 +44,12 @@ Entorno: contenedor Linux de 2 vCPU compartidas, Node 22, MariaDB 10.11, un solo
 | Saturación (estrés) | 24 912 | 830 | 404 ms | 904 ms | 1 000 ms | 1 780 ms | 0 / 0 |
 
 Nota de honestidad: en otras corridas de saturación de esa misma tarde, con la máquina más cargada, el p97.5 llegó a 1,2–1,5 s (igual que el commit anterior a RF-08, medido el mismo día), por lo que la saturación se reporta como informativa. El criterio de aceptación de RNF-04 se evalúa con ritmo realista. Repita en su equipo con MySQL 8 y adjunte la captura.
+
+## Medición en el equipo del grupo — MySQL 8.0.43 (17/11/2026)
+Entorno: Windows, Node.js v24.15, MySQL 8.0.43 local, `npm run carga` (400 usuarios, 30 s, ritmo realista de 200 peticiones/s), contenido sembrado con `npm run seed`.
+
+| Peticiones | Req/s | Latencia prom. | p50 | p97.5 | p99 | Máx. | 2xx | 4xx/5xx | Errores de conexión | Timeouts |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 6 001 | 200,04 | 149,66 ms | 124 ms | **416 ms** | 467 ms | 589 ms | 6 001 | 0 | 0 | 0 |
+
+Resultado del script: «CUMPLE el criterio (p97.5 ≤ 1000 ms, sin errores 5xx ni de conexión)». Con esto queda cerrada la repetición en MySQL 8 que pedían las notas anteriores. La captura está en las evidencias de la Ficha de Plan y Registro de Ejecución de Pruebas.

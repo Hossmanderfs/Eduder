@@ -22,3 +22,13 @@ Límite: solo se auditó la pantalla de acceso del panel; la app móvil (React N
 | Cabeceras: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, sin `X-Powered-By` | Añadidas en `app.js` (antes ausentes) |
 | HSTS | Se envía solo si la petición llega por HTTPS (`X-Forwarded-Proto`); verificado |
 | TLS/HTTPS | **No se termina TLS en la API de desarrollo**: se exige un proxy inverso (Nginx/Render/Railway) con certificado en producción. No medido aquí. |
+
+## Verificación en el equipo del grupo (17/11/2026)
+| Verificación | Resultado |
+|---|---|
+| Lighthouse (Chrome DevTools) sobre `/panel/`, tema oscuro | Rendimiento 100 · Accesibilidad 96 · Prácticas recomendadas 96 · SEO 90 |
+| Hashes en `usuarios.contrasena_hash` (MySQL 8.0.43) | Prefijo `$2a$10$`, longitud 60 en todas las filas consultadas (RN-02) |
+| `GET /profile/summary` sin token en el navegador | `{"message":"Token requerido"}` (401) |
+| `rnf06_integridad.sql` en MySQL Shell (MySQL 8.0.43) | 13 relaciones con 0 huérfanos; ERROR 1451 al borrar un nivel con lecciones y una lección con progreso |
+
+Pendiente: revisar la app móvil con TalkBack y llevar la accesibilidad del panel de 96 a 100.

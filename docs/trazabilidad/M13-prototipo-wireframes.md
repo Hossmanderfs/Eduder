@@ -22,4 +22,4 @@
 | Medallas | WF-13 | Visualiza medallas obtenidas y pendientes | Perfil del Estudiante |
 | Notificaciones | WF-16 | Pulsa 'Marcar todo como leído' | Menú Principal |
 
-> Los wireframes WF-01 a WF-05 están descritos en E16. Los restantes están pendientes de diseño visual en Figma (E17).
+> Los wireframes WF-01 a WF-05 están descritos en E16. Los restantes se describen en E16 y se implementaron en el prototipo web y en la app móvil (E17).

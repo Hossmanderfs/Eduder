@@ -1,4 +1,4 @@
-# E17 — Prototipo Interactivo (Alta Fidelidad)
+# E17 — Prototipo Interactivo
 
 El prototipo interactivo existe en dos formas ejecutables, ambas basadas en los wireframes de E16:
 
@@ -7,10 +7,7 @@ El prototipo interactivo existe en dos formas ejecutables, ambas basadas en los 
 | **Prototipo web** (HTML/CSS/JS, sin build) | `docs/diseno/fase4-interfaz/prototipo-web/` | Abrir `index.html` con doble clic. Modo demostración con datos locales; cambia a la API real con `localStorage.setItem('eduder_mode','api')`. |
 | **App móvil** (React Native + Expo) | `src/mobile/` | `npm install --legacy-peer-deps && npm start` y escanear el QR con Expo Go. |
 
-> ⚠️ **Enlace Figma pendiente.** Si se entrega también un archivo Figma, compartirlo con permiso
-> "Anyone with the link → can view" y registrar aquí la URL.
->
-> 🔗 **Figma — EduDer Prototipo:** *(pendiente de publicar)*
+> **Nota:** no se elaboró un archivo en Figma. El prototipo interactivo se entrega como prototipo web (HTML/CSS/JS) y como aplicación móvil, ambos ejecutables y descritos arriba.
 
 ---
 

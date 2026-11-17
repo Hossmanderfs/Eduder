@@ -10,7 +10,7 @@
 
 5. Implementar el sistema de gamificación (XP, streaks, medallas, ranking semanal) para incrementar la motivación y la constancia en el estudio.
 
-6. Diseñar la interfaz de usuario bajo principios de usabilidad y accesibilidad (WCAG 2.1 AA), con wireframes y prototipo interactivo en Figma.
+6. Diseñar la interfaz de usuario bajo principios de usabilidad y accesibilidad (WCAG 2.1 AA), con wireframes y un prototipo interactivo web.
 
 7. Construir el panel de administración web que permita gestionar usuarios, visualizar métricas de uso y exportar KPIs en formato CSV.
 
