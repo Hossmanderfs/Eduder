@@ -1,4 +1,5 @@
 // src/screens/LoginScreen.js — WF-05 · Iniciar sesión · CU-02 | RF-03, RF-04, RF-05, RF-06, RF-20
+import { API_BASE_URL } from '../config';
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { login } from '../services/auth.service';
@@ -25,7 +26,7 @@ export default function LoginScreen({ navigation }) {
       const st = err?.response?.status;
       const msg = err?.response?.data?.message;
       setClave('');
-      if (!err?.response) setError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo y que el celular esté en la misma red Wi-Fi.');
+      if (!err?.response) setError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo y que el celular esté en la misma red Wi-Fi. (Servidor: ' + API_BASE_URL + ')');
       else if (st === 403) setError('Tu cuenta está desactivada. Contacta al administrador.');
       else setError(msg || 'Credenciales incorrectas.'); // 401 y 429 (bloqueo 15 min, RF-05)
     } finally {

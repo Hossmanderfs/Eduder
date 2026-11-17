@@ -1,5 +1,6 @@
 // src/screens/RegisterScreen.js — WF-04 · Registro · CU-01 | RF-01, RF-02 | HU-01
 // Validación en línea; el botón se activa solo cuando el formulario es válido.
+import { API_BASE_URL } from '../config';
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { register } from '../services/auth.service';
@@ -38,7 +39,7 @@ export default function RegisterScreen({ navigation }) {
       await register({ nombre: f.nombre.trim(), apellido: f.apellido.trim(), correo_institucional: f.correo.trim().toLowerCase(), contrasena: f.clave });
       await irAMain(navigation); // CU-01 paso 7: inicia sesión y lanza el tutorial
     } catch (err) {
-      if (!err?.response) setError('No se pudo conectar con el servidor. Verifica tu red.');
+      if (!err?.response) setError('No se pudo conectar con el servidor. Verifica tu red. (Servidor: ' + API_BASE_URL + ')');
       else setError(err.response.data?.message || 'No se pudo crear la cuenta.');
     } finally {
       setCargando(false);
