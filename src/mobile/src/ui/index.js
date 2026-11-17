@@ -3,7 +3,7 @@
 // frontend de referencia): appbar, carné, botones, tarjetas, chips, barras, campos…
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, Pressable, ActivityIndicator, ScrollView, StyleSheet,
+  View, Text, TextInput, Pressable, ActivityIndicator, ScrollView, StyleSheet, KeyboardAvoidingView, Keyboard,
   StatusBar, Platform, RefreshControl,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,23 +27,31 @@ export function Txt({ style, w = 'regular', size = 15, color, children, ...rest 
 // ── Pantalla ─────────────────────────────────────────────────────────────────
 export function Screen({ children, scroll = true, bar, header, footer, edges, onRefresh, refreshing, contentStyle }) {
   const { c } = useTheme();
+  const insets = useSafeAreaInsets();
   const top = header ? ['left', 'right'] : ['top', 'left', 'right'];
+  // Sin pie fijo, el contenido debe quedar por encima de la barra de navegación del sistema.
+  const extraAbajo = footer ? 0 : insets.bottom;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: header ? c.carne : c.surface }} edges={edges || top}>
       <StatusBar barStyle={header || c.dark ? 'light-content' : 'dark-content'} backgroundColor={header ? c.carne : c.surface} />
       {header}
       {bar}
-      {scroll ? (
-        <ScrollView
-          style={{ flex: 1, backgroundColor: c.surface }}
-          contentContainerStyle={[{ padding: 16, paddingBottom: 28, gap: 20 }, contentStyle]}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={onRefresh ? <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={c.blue} colors={[c.blue]} /> : undefined}
-        >{children}</ScrollView>
-      ) : (
-        <View style={[{ flex: 1, backgroundColor: c.surface, padding: 16, gap: 20 }, contentStyle]}>{children}</View>
-      )}
-      {footer}
+      {/* El teclado empuja el contenido y el pie hacia arriba para no tapar lo que se escribe (Android e iOS). */}
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        {scroll ? (
+          <ScrollView
+            style={{ flex: 1, backgroundColor: c.surface }}
+            contentContainerStyle={[{ padding: 16, paddingBottom: 28 + extraAbajo, gap: 20 }, contentStyle]}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            automaticallyAdjustKeyboardInsets
+            refreshControl={onRefresh ? <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={c.blue} colors={[c.blue]} /> : undefined}
+          >{children}</ScrollView>
+        ) : (
+          <View style={[{ flex: 1, backgroundColor: c.surface, padding: 16, paddingBottom: 16 + extraAbajo, gap: 20 }, contentStyle]}>{children}</View>
+        )}
+        {footer}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -51,8 +59,14 @@ export function Screen({ children, scroll = true, bar, header, footer, edges, on
 export function BottomBar({ children }) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
+  const [tecladoAbierto, setTecladoAbierto] = React.useState(false);
+  React.useEffect(() => {
+    const a = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setTecladoAbierto(true));
+    const b = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setTecladoAbierto(false));
+    return () => { a.remove(); b.remove(); };
+  }, []);
   return (
-    <View style={{ padding: 12, paddingBottom: 12 + Math.min(insets.bottom, 8), backgroundColor: c.surface, borderTopWidth: 1, borderTopColor: c.line, gap: 8 }}>
+    <View style={{ padding: 12, paddingBottom: 12 + (tecladoAbierto ? 0 : insets.bottom), backgroundColor: c.surface, borderTopWidth: 1, borderTopColor: c.line, gap: 8 }}>
       {children}
     </View>
   );

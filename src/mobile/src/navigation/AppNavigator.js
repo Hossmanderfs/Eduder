@@ -48,7 +48,7 @@ function MainTabs() {
         tabBarActiveTintColor: c.blueText,
         tabBarInactiveTintColor: c.text3,
         tabBarLabelStyle: { fontFamily: FONT.medium, fontSize: 12 },
-        tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.line, height: 58 + insets.bottom, paddingTop: 6 },
+        tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.line, height: 58 + insets.bottom, paddingTop: 6, paddingBottom: insets.bottom + 4 },
       })}
     >
       <Tab.Screen name="Menu" component={MenuScreen} options={{ title: 'Inicio' }} />
